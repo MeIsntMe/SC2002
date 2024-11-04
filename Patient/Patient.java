@@ -1,7 +1,8 @@
 package Patient;
 import User.User;
 import MedicalRecord.*;
-import Appoinment.*;
+import Appointment.*;
+import Doctor.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
