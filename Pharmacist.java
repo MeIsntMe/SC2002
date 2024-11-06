@@ -1,4 +1,4 @@
-public class Pharmacist extends Staff {
+public class Pharmacist extends User {
     // Fields
     private List<Prescription> prescriptions; // List of prescriptions to manage
     private Inventory inventory; // Access to medication inventory
