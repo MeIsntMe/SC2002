@@ -1,39 +1,22 @@
-package User;
-import java.util.Scanner;
-import javax.naming.AuthenticationException;
-import Patient.Patient;
+package hospitalsystem.model;
 
 public abstract class User {
-    static private String hospitalID;
-    static private String password;
+    private static String userID;
+    private static String password;
+    private static String name; 
+    private static String gender; 
 
-    static final public User login(Scanner scanner) throws AuthenticationException{
-        System.err.print("Please input your ID:");
-        hospitalID = scanner.nextLine();
-        if (!checkExists(hospitalID)){
-            throw new AuthenticationException("No such user exists");
-        }
-        System.err.print("Please input your password:");
-        password = scanner.nextLine();
-        if (!(password.equals(getPassword(hospitalID)))){
-            throw new AuthenticationException("Wrong password");
-        }
-        return createUser(hospitalID);
+    User(String userID, String name, String gender, String password) {
+        this.userID = userID;
+        this.name = name; 
+        this.gender = gender; 
+        this.password = password;
     }
 
-    static private boolean checkExists(String hospitalID){
-        //retrieve from csv file
-        boolean exists = true;
-        return exists;
-    }
+    public String getID() {return userID;}
+    public String getPassword() {return password;}    
+    public String getName() {return name;}   
+    public String getGender() {return gender;}
 
-    static private String getPassword(String hospitalID){
-        //retrieve from csv if exists, else return default password
-        return "password";
-    }
-    
-    static private User createUser(String hospitalID, String name, String contactInfo){
-        //retrieve role
-        return new User();
-    }
+    //do the set stuff also
 }
