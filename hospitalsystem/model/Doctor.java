@@ -1,5 +1,5 @@
-package Doctor;
+package hospitalsystem.model;
 
-public class Doctor {
+public class Doctor extends User {
     
 }

@@ -1,4 +1,4 @@
-
+package hospitalsystem;
 // Provides login and redirects users to respective menus
 
 import java.io.File;
@@ -16,6 +16,7 @@ import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
+import hospitalsystem.controllers.AdminControl;
 import hospitalsystem.enums.UserType;
 
 public class MainSystem {
@@ -68,18 +69,18 @@ public class MainSystem {
                             else 
                                 AdminControl.displayMenu();
                         } 
-                        break; 
+                        continue;
                     case 2: 
                         role = getRoleInput(scanner);
                         newUserLogin(role, scanner);
-                        break;
+                        continue;
                     case 3:
                         scanner.close();
                         return;
                     default:
                         System.out.println("=========================================");
                         System.out.println("Invalid choice, try again");
-                        break; 
+                        continue; 
                 } 
             } catch (Exception e) {
                     System.out.println("=====================================");
@@ -195,5 +196,7 @@ public class MainSystem {
             System.out.println("An error has occurred\n" + e.getMessage());
         }
     }
+
+    
 }
  
