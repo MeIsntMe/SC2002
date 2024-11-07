@@ -1,8 +1,4 @@
-package Patient;
-import User.User;
-import MedicalRecord.*;
-import Appointment.*;
-import Doctor.*;
+package hospitalsystem.model;
 import java.util.ArrayList;
 import java.util.Scanner;
 
