@@ -3,20 +3,18 @@ package hospitalsystem.model;
 import java.util.ArrayList;
 import java.util.List;
 import hospitalsystem.controllers.DoctorControl;
-import hospitalsystem.enums.Specialization;
 import hospitalsystem.enums.AppointmentStatus;
+import hospitalsystem.model.Appointment.AppointmentSlot;
 import hospitalsystem.model.Patient;
 
 public class Doctor extends User {
     private String doctorID;
-    private Specialization specialization;
-    private List<AppointmentSlot> availableSlots;
+    private List<Appointment.AppointmentSlot> availableSlots;
     private List<Appointment> upcomingAppointments;
 
-    public Doctor(String doctorID, String name, String gender, String password, Specialization specialization) {
+    public Doctor(String doctorID, String name, String gender, String password) {
         super(doctorID, name, gender, password);
         this.doctorID = doctorID;
-        this.specialization = specialization;
         this.availableSlots = new ArrayList<>();
         this.upcomingAppointments = new ArrayList<>();
     }
@@ -26,19 +24,11 @@ public class Doctor extends User {
         return doctorID;
     }
 
-    public Specialization getSpecialization() {
-        return specialization;
-    }
-
-    public void setSpecialization(Specialization specialization) {
-        this.specialization = specialization;
-    }
-
-    public List<AppointmentSlot> getAvailableSlots() {
+    public List<Appointment.AppointmentSlot> getAvailableSlots() {
         return availableSlots;
     }
 
-    public void setAvailableSlots(List<AppointmentSlot> availableSlots) {
+    public void setAvailableSlots(List<Appointment.AppointmentSlot> availableSlots) {
         this.availableSlots = availableSlots;
     }
 
@@ -54,7 +44,6 @@ public class Doctor extends User {
         this.upcomingAppointments.remove(appointment);
     }
 
-    @Override
     public void displayMenu() {
         DoctorControl.displayMenu();
     }

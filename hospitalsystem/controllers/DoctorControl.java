@@ -5,14 +5,14 @@ import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Patient;
 import hospitalsystem.model.MedicalRecord;
 import hospitalsystem.model.Appointment;
+
 import hospitalsystem.enums.AppointmentStatus;
-import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class DoctorControl {
-    private Doctor doctor;
+    private Doctor doctor; // Removed specialization field as per the update
 
     public DoctorControl(Doctor doctor) {
         this.doctor = doctor;
@@ -29,7 +29,7 @@ public class DoctorControl {
         return true;
     }
 
-    public boolean setAvailability(List<AppointmentSlot> slots) {
+    public boolean setAvailability(List<Appointment.AppointmentSlot> slots) {
         doctor.setAvailableSlots(slots);
         System.out.println("Availability updated successfully.");
         return true;
@@ -69,6 +69,10 @@ public class DoctorControl {
 
     public boolean recordAppointmentOutcome(Appointment appointment, String outcome) {
         if (doctor.getUpcomingAppointments().contains(appointment)) {
+            if (outcome == null || outcome.trim().isEmpty()) {
+                System.out.println("Invalid outcome. Please provide a valid outcome description.");
+                return false;
+            }
             appointment.setOutcome(outcome);
             appointment.setStatus(AppointmentStatus.COMPLETED);
             System.out.println("Appointment outcome recorded for patient " + appointment.getPatient().getName());
@@ -91,8 +95,8 @@ public class DoctorControl {
             System.out.print("Enter choice: ");
 
             try {
-                int choice = scanner.nextInt();
-                scanner.nextLine(); // Consume newline
+                String input = scanner.nextLine();
+                int choice = Integer.parseInt(input);
                 switch (choice) {
                     case 1:
                         // View Patient MR
@@ -116,6 +120,8 @@ public class DoctorControl {
                     default:
                         System.out.println("Invalid choice, try again.");
                 }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid number.");
             } catch (Exception e) {
                 System.out.println("An error has occurred: " + e.getMessage());
                 scanner.nextLine(); // Clear the invalid input
