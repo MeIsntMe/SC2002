@@ -6,6 +6,7 @@ import hospitalsystem.model.Patient;
 import hospitalsystem.model.MedicalRecord;
 import hospitalsystem.model.Appointment;
 import hospitalsystem.enums.AppointmentStatus;
+import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -36,7 +37,11 @@ public class DoctorControl {
 
     public boolean acceptAppointment(Appointment appointment) {
         if (appointment.getStatus() == AppointmentStatus.PENDING) {
-            appointment.setStatus(AppointmentStatus.ACCEPTED);
+            if (doctor.getUpcomingAppointments().contains(appointment)) {
+                System.out.println("Appointment is already in the doctor's schedule.");
+                return false;
+            }
+            appointment.setStatus(AppointmentStatus.BOOKED);
             doctor.addAppointment(appointment);
             System.out.println("Appointment accepted for patient " + appointment.getPatient().getName());
             return true;
@@ -46,7 +51,7 @@ public class DoctorControl {
 
     public boolean declineAppointment(Appointment appointment) {
         if (appointment.getStatus() == AppointmentStatus.PENDING) {
-            appointment.setStatus(AppointmentStatus.DECLINED);
+            appointment.setStatus(AppointmentStatus.CANCELLED);
             System.out.println("Appointment declined for patient " + appointment.getPatient().getName());
             return true;
         }
@@ -57,7 +62,7 @@ public class DoctorControl {
         List<Appointment> appointments = doctor.getUpcomingAppointments();
         System.out.println("Upcoming Appointments:");
         for (Appointment appointment : appointments) {
-            System.out.println("- Patient: " + appointment.getPatient().getName() + ", Date: " + appointment.getDate() + ", Time: " + appointment.getTime());
+            System.out.println("- Patient: " + appointment.getPatient().getName() + ", Date: " + appointment.getSlot().getDay() + ", Time: " + appointment.getSlot().getTime());
         }
         return appointments;
     }
