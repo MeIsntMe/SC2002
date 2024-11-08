@@ -20,12 +20,12 @@ public class DoctorControl {
 
     public void viewPatientMedicalRecord(Patient patient) {
         MedicalRecord record = patient.getMedicalRecord();
-        System.out.println("Medical Record for " + patient.getName() + ":\n" + record.getRecordDetails());
+        System.out.println("Medical Record for " + patient + ":\n" + record.getRecordDetails());
     }
 
     public boolean updatePatientMedicalRecord(Patient patient, MedicalRecord record) {
         patient.setMedicalRecord(record);
-        System.out.println("Medical record updated successfully for patient " + patient.getName());
+        System.out.println("Medical record updated successfully for patient " + patient);
         return true;
     }
 
@@ -43,7 +43,7 @@ public class DoctorControl {
             }
             appointment.setStatus(AppointmentStatus.BOOKED);
             doctor.addAppointment(appointment);
-            System.out.println("Appointment accepted for patient " + appointment.getPatient().getName());
+            System.out.println("Appointment accepted for patient " + appointment.getPatient());
             return true;
         }
         return false;
@@ -52,7 +52,7 @@ public class DoctorControl {
     public boolean declineAppointment(Appointment appointment) {
         if (appointment.getStatus() == AppointmentStatus.PENDING) {
             appointment.setStatus(AppointmentStatus.CANCELLED);
-            System.out.println("Appointment declined for patient " + appointment.getPatient().getName());
+            System.out.println("Appointment declined for patient " + appointment.getPatient());
             return true;
         }
         return false;
@@ -62,7 +62,7 @@ public class DoctorControl {
         List<Appointment> appointments = doctor.getUpcomingAppointments();
         System.out.println("Upcoming Appointments:");
         for (Appointment appointment : appointments) {
-            System.out.println("- Patient: " + appointment.getPatient().getName() + ", Date: " + appointment.getSlot().getDay() + ", Time: " + appointment.getSlot().getTime());
+            System.out.println("- Patient: " + appointment.getPatient() + ", Date: " + appointment.getSlot().getDay() + ", Time: " + appointment.getSlot().getTime());
         }
         return appointments;
     }
@@ -75,7 +75,7 @@ public class DoctorControl {
             }
             appointment.setOutcome(outcome);
             appointment.setStatus(AppointmentStatus.COMPLETED);
-            System.out.println("Appointment outcome recorded for patient " + appointment.getPatient().getName());
+            System.out.println("Appointment outcome recorded for patient " + appointment.getPatient());
             return true;
         }
         return false;
