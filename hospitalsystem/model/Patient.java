@@ -14,19 +14,15 @@ public class Patient {
         MedicalRecord medicalRecord = new MedicalRecord(this.patientID);
     }
 
-    public MedicalRecord viewMedicalRecord(){
+    public MedicalRecord getMedicalRecord(){
         return this.medicalRecord;
     }
 
-    public void updatePhoneNumber(String newContactInfo){
-        //update medicalRecord
+    public String getID(){
+        return this.patientID;
     }
 
-    public void updateEmail(String newContactInfo){
-        //update medicalRecord
-    }
-
-    public ArrayList<Appointment> viewAppointmentOutcomeRecords(){
+    public ArrayList<Appointment> getAppointments(){
         return this.appointments;
         /*for (Appoinment appnt:appointments){
             //print appointment details + outcome
