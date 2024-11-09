@@ -1,6 +1,7 @@
 package hospitalsystem.controllers;
 
 import hospitalsystem.MainSystem;
+import hospitalsystem.enums.PrescriptionStatus;
 import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Patient;
 import hospitalsystem.model.MedicalRecord;
@@ -8,6 +9,7 @@ import hospitalsystem.model.Appointment;
 
 import hospitalsystem.enums.AppointmentStatus;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 
@@ -18,13 +20,43 @@ public class DoctorControl {
         this.doctor = doctor;
     }
 
-    public void viewPatientMedicalRecord(Patient patient) {
-        MedicalRecord record = patient.getMedicalRecord();
-        System.out.println("Medical Record for " + patient + ":\n" + record.getRecordDetails());
+    public static void viewPatientMedicalRecord(Patient patient) {
+        MedicalRecord mr = patient.getMedicalRecord();
+        System.out.println("=====================================");
+        System.out.println("           Medical Record");
+        System.out.println("=====================================");
+        System.out.println("Patient ID: " + mr.getId());
+        System.out.println("Name: " + mr.getName());
+        System.out.println("Date of Birth: " + mr.getDOB());
+        System.out.println("Gender: " + mr.getGender());
+        if (!mr.getPhoneNumber().isEmpty()) {
+            System.out.println("Phone Number: " + mr.getPhoneNumber());
+        }
+        if (!mr.getEmailAddress().isEmpty()) {
+            System.out.println("Email Address: " + mr.getEmailAddress());
+        }
+        System.out.println("Blood Type: " + mr.getBloodType());
+        System.out.println("List of Appointment Outcomes:");
+        for (Appointment.AppointmentOutcome outcome : mr.getAppointmentOutcomes()) {
+            System.out.println("-----");
+            System.out.println("Appointment Date: " + outcome.getAppointmentDate());
+            System.out.println("Service Type: " + outcome.getServiceType());
+
+            System.out.println("Prescriptions:");
+            Hashtable<String, PrescriptionStatus> prescriptions = outcome.getPrescriptions();
+            for (String prescriptionName : prescriptions.keySet()) {
+                System.out.println(" - " + prescriptionName + ": " + prescriptions.get(prescriptionName));
+            }
+
+            System.out.println("Consultation Notes: ");
+            System.out.println(outcome.getConsultationNotes());
+            System.out.println("-----");
+        }
+        System.out.println("=====================================");
     }
 
     public boolean updatePatientMedicalRecord(Patient patient, MedicalRecord record) {
-        patient.setMedicalRecord(record);
+        // Placeholder for updating medical record logic - actual implementation needed
         System.out.println("Medical record updated successfully for patient " + patient);
         return true;
     }
@@ -81,6 +113,15 @@ public class DoctorControl {
         return false;
     }
 
+    private static Patient findPatientById(String patientId) {
+        for (Patient p : MainSystem.patients) {
+            if (p.getID().equals(patientId)) {
+                return p;
+            }
+        }
+        return null;
+    }
+
     public static void displayMenu() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -97,12 +138,30 @@ public class DoctorControl {
             try {
                 String input = scanner.nextLine();
                 int choice = Integer.parseInt(input);
+                String patientId = null;
+                Patient patient = null;
                 switch (choice) {
                     case 1:
-                        // View Patient MR
+                        System.out.print("Enter Patient ID: ");
+                        patientId = scanner.nextLine();
+                        patient = findPatientById(patientId);
+                        if (patient != null) {
+                            viewPatientMedicalRecord(patient);
+                        } else {
+                            System.out.println("Patient not found.");
+                        }
                         break;
                     case 2:
-                        // Update Patient MR
+                        System.out.print("Enter Patient ID: ");
+                        patientId = scanner.nextLine();
+                        patient = findPatientById(patientId);
+                        if (patient != null) {
+                            // Assuming we have a method to create a new medical record object or get details for update
+                            //MedicalRecord updatedRecord = new MedicalRecord updatedRecord = new MedicalRecord(patient); // Create a new medical record from the patient data
+                            //updatePatientMedicalRecord(patient, updatedRecord);
+                        } else {
+                            System.out.println("Patient not found.");
+                        }
                         break;
                     case 3:
                         // Set Availability
