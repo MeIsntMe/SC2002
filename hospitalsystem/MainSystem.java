@@ -16,7 +16,7 @@ import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
-import hospitalsystem.controllers.AdminControl;
+import hospitalsystem.controllers.*;
 import hospitalsystem.enums.UserType;
 
 public class MainSystem {
@@ -59,6 +59,7 @@ public class MainSystem {
                 switch (choice) {
                     case 1: 
                         role = getRoleInput(scanner);
+                        //going to need to initialise and call, not static
                         if (login(role, scanner)) {
                             if (currentUser instanceof Patient) 
                                 PatientControl.displayMenu();

@@ -1,11 +1,15 @@
 package hospitalsystem.model;
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Scanner;
+
+import hospitalsystem.model.Appointment.AppointmentSlot;
 
 public class Patient {
     private final String patientID;
     private Scanner sc;
     private MedicalRecord medicalRecord;
+    //Requires deletion upon finishing appointment
     private ArrayList<Appointment> appointments;
 
     public Patient(String HospitalID, Scanner scanner){
@@ -24,9 +28,10 @@ public class Patient {
 
     public ArrayList<Appointment> getAppointments(){
         return this.appointments;
-        /*for (Appoinment appnt:appointments){
-            //print appointment details + outcome
-        }*/
+    }
+
+    public void setAppointments(ArrayList<Appointment> newAppointments){
+        this.appointments = newAppointments;
     }
 
     public int viewScheduledAppointments(){

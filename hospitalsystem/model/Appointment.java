@@ -1,34 +1,12 @@
 package hospitalsystem.model;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Hashtable;
 import hospitalsystem.enums.*;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 
 
-public class Appointment {
-    public class AppointmentOutcome {
-        private String appointmentDate; 
-        private String serviceType;
-        private Hashtable<String, PrescriptionStatus> prescriptions;
-        private String consultationNotes;
-
-        public String getAppointmentDate() {
-            return appointmentDate;
-        }
-        
-        public String getServiceType() {
-            return serviceType;
-        }
-        
-        public Hashtable<String, PrescriptionStatus> getPrescriptions() {
-            return prescriptions;
-        }
-        
-        public String getConsultationNotes() {
-            return consultationNotes;
-        }
-    }
+public class Appointment implements Comparable<Appointment>{
+    
     
     private String appointmentID;
     private Patient patient;
@@ -38,8 +16,13 @@ public class Appointment {
     private boolean isAvailable;
     private AppointmentOutcome outcome;
     
+    @Override
+    public int compareTo(Appointment appointment){
+        return this.slot.getDateTime().compareTo(appointment.slot.getDateTime());
+    }
     
-
+    //Does appointment need to initialise with outcome?
+    //Also, serviceType is what again? Isit enum?
     public Appointment(String appointmentID, Patient patient, Doctor doctor, AppointmentSlot slot, String serviceType) {
         this.appointmentID = appointmentID;
         this.patient = patient;
@@ -47,9 +30,9 @@ public class Appointment {
         this.slot = slot;
         this.status = AppointmentStatus.PENDING;
         this.isAvailable = true;
-        this.serviceType = serviceType;
-        this.prescriptions = null;
-        this.consultationNotes = "";
+        this.outcome.serviceType = serviceType;
+        this.outcome.prescriptions = null;
+        this.outcome.consultationNotes = ""; 
     }
 
     // Getter and Setter methods
@@ -85,7 +68,7 @@ public class Appointment {
         return outcome;
     }
 
-    public void setOutcome(String outcome) {
+    public void setOutcome(AppointmentOutcome outcome) {
         this.outcome = outcome;
     }
 
@@ -98,46 +81,88 @@ public class Appointment {
     }
 
     public String getServiceType() {
-        return serviceType;
+        return this.outcome.serviceType;
     }
 
-    public List<Prescription> getPrescriptions() {
-        return prescriptions;
+    public HashMap<String, PrescriptionStatus> getPrescriptions() {
+        return this.outcome.prescriptions;
     }
 
-    public void setPrescriptions(List<Prescription> prescriptions) {
-        this.prescriptions = prescriptions;
+    public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
+        this.outcome.setPrescriptions(prescriptions);
     }
 
     public String getConsultationNotes() {
-        return consultationNotes;
+        return this.outcome.consultationNotes;
     }
 
     public void setConsultationNotes(String consultationNotes) {
-        this.consultationNotes = consultationNotes;
+        this.outcome.setConsultationNotes(consultationNotes);
     }
 
     // Static nested class representing appointment slots
     public static class AppointmentSlot {
-        private String day;
-        private String time;
+        private final LocalDateTime dateTime;
 
-        public AppointmentSlot(String day, String time) {
-            this.day = day;
-            this.time = time;
+        public AppointmentSlot(int year, int month, int day, int hour, int minute) {
+            this.dateTime = LocalDateTime.of(year, month, day, hour, minute);
         }
 
-        public String getDay() {
-            return day;
+        public LocalDateTime getDateTime(){
+            return this.dateTime;
+        }
+
+        public String getDate() {
+            return dateTime.toString().split("T")[0];
         }
 
         public String getTime() {
-            return time;
+            return dateTime.toString().split("T")[1];
         }
 
         @Override
         public String toString() {
-            return day + " " + time;
+            return getDate() + ' ' + getTime();
+        }
+    }
+
+    //Non-static inner class
+    public class AppointmentOutcome {
+        private String appointmentDate; 
+        private String serviceType;
+        private HashMap<String, PrescriptionStatus> prescriptions;
+        private String consultationNotes;
+
+        public String getAppointmentDate() {
+            return appointmentDate;
+        }
+        
+        public String getServiceType() {
+            return serviceType;
+        }
+        
+        public HashMap<String, PrescriptionStatus> getPrescriptions() {
+            return prescriptions;
+        }
+        
+        public String getConsultationNotes() {
+            return consultationNotes;
+        }
+
+        public void setAppointmentDate(String appointmentDate) {
+            this.appointmentDate = appointmentDate;
+        }
+        
+        public void setServiceType(String serviceType) {
+            this.serviceType = serviceType;
+        }
+        
+        public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
+            this.prescriptions = prescriptions;
+        }
+        
+        public void setConsultationNotes(String consultationNotes) {
+            this.consultationNotes = consultationNotes;
         }
     }
 }

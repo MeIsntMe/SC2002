@@ -1,5 +1,6 @@
 package hospitalsystem.model;
 
+import hospitalsystem.enums.*;
 import hospitalsystem.model.Appointment.AppointmentOutcome;
 import java.util.ArrayList;
 
@@ -11,13 +12,16 @@ public class MedicalRecord {
     private String phoneNumber;
     private String emailAdress;
     private String bloodType;
-    private ArrayList<AppointmentOutcome> appointments;
+    private ArrayList<AppointmentOutcome> appointmentOutcomes;
 
+    //Requires update when appointment is finished
     public MedicalRecord(Patient patient){
         this.id = patient.getID();
         ArrayList<Appointment> appointmentList = patient.getAppointments();
         for (Appointment appointment: appointmentList){
-            this.appointments.add(appointment.getAppointmentOutcome());
+            if (appointment.getStatus() == AppointmentStatus.COMPLETED){
+                this.appointmentOutcomes.add(appointment.getAppointmentOutcome());
+            }
         }
     }
 
@@ -50,7 +54,7 @@ public class MedicalRecord {
     }
     
     public ArrayList<AppointmentOutcome> getAppointmentOutcomes() {
-        return appointments;
+        return appointmentOutcomes;
     }
 
     public void setName(String name) {
@@ -75,4 +79,10 @@ public class MedicalRecord {
     
     public void setBloodType(String bloodType) {
         this.bloodType = bloodType;
+    }
+
+    public void setAppointmentOutcomes(ArrayList<AppointmentOutcome> newAppointmentOutcomes) {
+        this.appointmentOutcomes = newAppointmentOutcomes;
+    }
+
 }
