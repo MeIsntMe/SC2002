@@ -1,21 +1,44 @@
 package hospitalsystem.model;
 
-import hospitalsystem.enums.AppointmentStatus;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import hospitalsystem.enums.*;
 
 
 public class Appointment {
+    public class AppointmentOutcome {
+        private String appointmentDate; 
+        private String serviceType;
+        private Hashtable<String, PrescriptionStatus> prescriptions;
+        private String consultationNotes;
+
+        public String getAppointmentDate() {
+            return appointmentDate;
+        }
+        
+        public String getServiceType() {
+            return serviceType;
+        }
+        
+        public Hashtable<String, PrescriptionStatus> getPrescriptions() {
+            return prescriptions;
+        }
+        
+        public String getConsultationNotes() {
+            return consultationNotes;
+        }
+    }
+    
     private String appointmentID;
     private Patient patient;
     private Doctor doctor;
     private AppointmentSlot slot;
     private AppointmentStatus status;
-    private String outcome;
     private boolean isAvailable;
-    private String serviceType;
-    private List<Prescription> prescriptions;
-    private String consultationNotes;
+    private AppointmentOutcome outcome;
+    
+    
 
     public Appointment(String appointmentID, Patient patient, Doctor doctor, AppointmentSlot slot, String serviceType) {
         this.appointmentID = appointmentID;
@@ -58,7 +81,7 @@ public class Appointment {
         this.status = status;
     }
 
-    public String getOutcome() {
+    public AppointmentOutcome getAppointmentOutcome() {
         return outcome;
     }
 
