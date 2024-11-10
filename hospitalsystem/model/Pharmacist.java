@@ -1,5 +1,9 @@
 package hospitalsystem.model;
 import java.util.List;
+import hospital.models.Prescription;
+import hospital.models.PrescriptionStatus;
+import hospital.controls.InventoryControl;
+import hospital.models.User;
 
 public class Pharmacist extends User {
     // Fields
