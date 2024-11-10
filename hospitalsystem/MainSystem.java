@@ -16,181 +16,157 @@ import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
+import hospitalsystem.model.Inventory;
 import hospitalsystem.controllers.*;
 import hospitalsystem.enums.UserType;
 
 public class MainSystem {
 
-    // Declare hashsets that hold instances of classes of each role
-    public static HashSet <Patient> patients = new HashSet<Patient>();
-    public static HashSet <Doctor> doctors = new HashSet<Doctor>(); 
-    public static HashSet <Administrator> admins = new HashSet<Administrator>(); 
-    public static HashSet <Pharmacist> pharms = new HashSet<Pharmacist>();
-
-    private static final Map<Integer, HashSet<? extends User>> userRoleMap = new HashMap<>();
-    static {
-        userRoleMap.put(1, patients);   // 1 for Patient
-        userRoleMap.put(2, doctors);    // 2 for Doctor
-        userRoleMap.put(3, admins);     // 3 for Administrator
-        userRoleMap.put(4, pharms);     // 4 for Pharmacist
-    }
     public static User currentUser;
 
-    //TO DO: make collection for medical supplies
+    // HashMap to store each role
+    public static Map<String, User> patientsMap = new HashMap<>();
+    public static Map<String, User> doctorsMap = new HashMap<>();
+    public static Map<String, User> adminsMap = new HashMap<>();
+    public static Map<String, User> pharmsMap = new HashMap<>();
+
+    // HashMap to store inventory 
+    public static Map<String, Inventory> inventoryMap = new HashMap<>();
 
     public static void main(String[] args) {
 
-        // Add users into hashsets 
-        // TO DO: replace with actual filepaths
-        addPatient("patientFilePath.csv"); 
-        addStaff("staffFilePath.csv"); 
+        loadPatientfromCSV("patientFilePath.csv");
+        loadStaffFromCSV("staffFilePath.csv"); 
+        loadInventoryFromCSV("inventoryFilePath.csv");
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("=========================================");
             System.out.println("Welcome to the Hospital Management System");
             System.out.println("1. Login");
-            System.out.println("2. Register (New User Login)");
-            System.out.println("3. Close application");
+            System.out.println("2. Close application");
             System.out.print("Enter choice: ");
             try{
                 int choice = scanner.nextInt();
-                int role; 
+                UserType role; 
                 switch (choice) {
                     case 1: 
-                        role = getRoleInput(scanner);
                         //going to need to initialise and call, not static
-                        if (login(role, scanner)) {
-                            if (currentUser instanceof Patient) 
-                                PatientControl.displayMenu();
-                            else if (currentUser instanceof Doctor) 
-                                DoctorControl.displayMenu();
-                            else if (currentUser instanceof Pharmacist) 
-                                PharmacistControl.displayMenu();
-                            else 
-                                AdminControl.displayMenu();
-                        } 
-                        continue;
-                    case 2: 
-                        role = getRoleInput(scanner);
-                        newUserLogin(role, scanner);
-                        continue;
-                    case 3:
+                        role = login(scanner); 
+                        switch (role) {
+                            case PATIENT -> PatientControl.displayMenu();
+                            case DOCTOR -> DoctorControl.displayMenu();
+                            case PHARMACIST -> PharmacistControl.displayMenu();
+                            case ADMINISTRATOR -> AdminControl.displayMenu();
+                            default -> {continue;}
+                        }
+                    case 2:
                         scanner.close();
                         return;
                     default:
-                        System.out.println("=========================================");
-                        System.out.println("Invalid choice, try again");
-                        continue; 
+                        System.out.println("Invalid choice. Please input either 1 or 2.");
                 } 
             } catch (Exception e) {
-                    System.out.println("=====================================");
-                    System.out.println("An error has occurred: " + e);
+                    System.out.println("Invalid input. Please input either 1 or 2.");
             }
         }
     }
 
-    public static boolean login(int role, Scanner scanner) {
-        HashSet<? extends User> users = userRoleMap.get(role);
-
-        System.out.print("Enter user ID: ");
-        String inputID = scanner.nextLine();
-        System.out.print("Enter password: ");
-        String inputPassword = scanner.nextLine();
-
-        for (User user : users) {
-            if (user.getID().equals(inputID) && user.getPassword().equalsIgnoreCase(inputPassword)) {
-                System.out.println("Login successful!");
-                currentUser = user;
-                return true;
-            }
-        }
-        System.out.println("Wrong ID or password!");
-        return false; 
-    }
-
-    public static void newUserLogin(int role, Scanner scanner) {
-        HashSet<? extends User> users = userRoleMap.get(Integer.valueOf(role));
-
-        System.out.print("Enter user ID: ");
-        String inputID = scanner.nextLine();
-
-        //check if userID already exists
-        for (User user : users) {
-            if (user.getID().equals(inputID)) {
-                System.out.println("User already exists. Please log in.");
-                return; 
-            }
-        }
-
-        //create new user
-        System.out.print("Enter name: ");
-        String name = scanner.nextLine();
-        switch (role) {
-            case 1 -> patients.add(new Patient(inputID, name, "", "", "", "", "password"));
-            case 2 -> doctors.add(new Doctor(inputID, name, "", 0, "password"));
-            case 3 -> pharms.add(new Pharmacist(inputID, name, "", 0, "password"));
-            case 4 -> admins.add(new Administrator(inputID, name, "", 0, "password"));
-            default -> System.out.println("Invalid role.");
-        }
-
-        System.out.println("New user created. Please log in using default password: 'password'.");
-        return;
-    }
-
-    public static int getRoleInput(Scanner scanner) {
-        System.out.println("Select role: 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
+    // LOGIN: returns role type if login successful, else returns null 
+    public static UserType login(Scanner sc) {
         
-        int role; 
-        try {
-            role = scanner.nextInt(); 
-            if (!userRoleMap.containsKey(role)) 
-                throw new IllegalArgumentException("Invalid role number specified. Please enter a number between 1 and 4.");
-        } catch (Exception e) {
-            System.out.println("Invalid input. Please enter a number between 1 and 4.");
-            return getRoleInput(scanner);
+        UserType role = getRoleInput(sc); // Get role
+
+        System.out.print("Enter user ID: ");
+        String inputID = sc.nextLine();
+        System.out.print("Enter password: ");
+        String inputPassword = sc.nextLine();
+
+        // Determine correct map based on role and retrieve user by ID
+        User user = null;
+        switch (role) {
+            case UserType.PATIENT -> user = patientsMap.get(inputID);
+            case UserType.DOCTOR -> user = doctorsMap.get(inputID);
+            case UserType.PHARMACIST -> user = pharmsMap.get(inputID);
+            case UserType.ADMINISTRATOR -> user = adminsMap.get(inputID);
         }
-        return role;
+        // Validate credentials
+        if (user != null && user.getPassword().equals(inputPassword)) {
+            System.out.printf("Login successful. Welcome %s!", currentUser.getName());
+            currentUser = user;
+            return role;
+        } else {
+            System.out.println("Invalid ID or password.");
+            return null;
+        }
     }
 
-    // addPatient(): Reads and adds patients from a file to the system.
-    public static void addPatient(String filePath) {
+    // SUPPORTING FUNC: returns role type
+    public static UserType getRoleInput(Scanner scanner) {
+        while (true) {
+            System.out.println("Select role: 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
+            int role;
+            try {
+                role = scanner.nextInt(); 
+                switch (role) {
+                    case 1 -> {return UserType.PATIENT;}
+                    case 2 -> {return UserType.DOCTOR;}
+                    case 3 -> {return UserType.PHARMACIST;}
+                    case 4 -> {return UserType.ADMINISTRATOR;}
+                    default -> System.out.println("Invalid role number specified. Please enter a number between 1 and 4.");
+                }
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please enter a number between 1 and 4.");
+            }
+        }
+    }
+
+    public static void loadPatientfromCSV (String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the first line
             while (scanner.hasNextLine()) {
-                String userInformation[] = scanner.nextLine().split(",");
-                String patientID = userInformation[0].trim();
-                String name = userInformation[1].trim();
-                String DOB = userInformation[2].trim();
-                String gender = userInformation[3].trim().toLowerCase();
-                String bloodType = userInformation[4].trim();
-                String userEmail = userInformation[5].trim();
-                String password = userInformation.length > 6 ? userInformation[6].trim() : "password"; 
+                String patientData[] = scanner.nextLine().split(",");
+                String patientID = patientData[0].trim();
+                String name = patientData[1].trim();
+                String DOB = patientData[2].trim();
+                String gender = patientData[3].trim().toLowerCase();
+                String bloodType = patientData[4].trim();
+                String userEmail = patientData[5].trim();
+                String password = patientData.length > 6 ? patientData[6].trim() : "password"; 
                 
-                patients.add(new Patient(patientID, name, DOB, gender, bloodType, userEmail, password)); //instantiate patients 
+                Patient patient = new Patient(patientID, name, DOB, gender, bloodType, userEmail, password); 
+                patientsMap.put(patientID, patient);
             }
         } catch (FileNotFoundException e) {
             System.out.println("An error has occurred\n" + e.getMessage());
         }
     }
 
-    // addStaff(): Reads and adds staff from a file to the system based on user type 
-    public static void addStaff(String filePath) {
+    public static void loadStaffFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the first line
             while (scanner.hasNextLine()) {
-                String userInformation[] = scanner.nextLine().split(",");
-                String staffID = userInformation[0].trim();
-                String name = userInformation[1].trim();
-                UserType role = UserType.valueOf(userInformation[2].trim().toUpperCase());
-                String gender = userInformation[3].trim();
-                int age = Integer.valueOf(userInformation[4].trim());
-                String password = userInformation.length > 5 ? userInformation[5].trim() : "password"; 
+                String staffData[] = scanner.nextLine().split(",");
+                String staffID = staffData[0].trim();
+                String name = staffData[1].trim();
+                UserType role = UserType.valueOf(staffData[2].trim().toUpperCase());
+                String gender = staffData[3].trim();
+                int age = Integer.valueOf(staffData[4].trim());
+                String password = staffData.length > 5 ? staffData[5].trim() : "password"; 
 
                 switch (role) {
-                    case DOCTOR -> doctors.add(new Doctor(staffID, name, gender, age, password));
-                    case ADMINISTRATOR -> admins.add(new Administrator(staffID, name, gender, age, password));
-                    case PHARMACIST -> pharms.add(new Pharmacist(staffID, name, gender, age, password));
+                    case DOCTOR: 
+                        Doctor doc = new Doctor(staffID, name, gender, age, password);
+                        doctorsMap.put(staffID, doc);
+                        break; 
+                    case ADMINISTRATOR: 
+                        Administrator admin = new Administrator(staffID, name, gender, age, password);
+                        adminsMap.put(staffID, admin);
+                        break; 
+                    case PHARMACIST: 
+                        Pharmacist pharm = new Pharmacist(staffID, name, gender, age, password);
+                        pharmsMap.put(staffID, pharm);
+                        break;
                 }
             }
         } catch (FileNotFoundException e) {
@@ -198,6 +174,39 @@ public class MainSystem {
         }
     }
 
-    
+    public static void loadInventoryFromCSV(String filePath) {
+        try (Scanner scanner = new Scanner(new File(filePath))) {
+            scanner.nextLine(); // Skip the header line if there is one
+            while (scanner.hasNextLine()) {
+                String[] inventoryData = scanner.nextLine().split(",");
+                String medicineName = inventoryData[0].trim();
+                int initialStock = Integer.parseInt(inventoryData[1].trim());
+                int lowStockAlert = Integer.parseInt(inventoryData[2].trim());
+
+                Inventory medicine = new Inventory(medicineName, initialStock, lowStockAlert);
+                inventoryMap.put(medicineName, medicine);
+            }
+            System.out.println("Inventory loaded successfully from CSV.");
+        } catch (FileNotFoundException e) {
+            System.out.println("CSV file not found: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Error parsing number from CSV: " + e.getMessage());
+        }
+    }
+
+    // SUPPORTING FUNC: allows users to choose 1 to continue repeat whatever action
+    public static boolean getRepeatChoice(Scanner scanner) {
+        while (true) {
+            System.out.print("Click 1 to continue and 2 to exit: ");
+            String input = scanner.nextLine().trim();
+
+            if (input.equals("1")) {
+                return true;  // User chose to continue
+            } else if (input.equals("2")) {
+                return false; // User chose to exit
+            } else {
+                System.out.println("Invalid input. Please enter 1 to continue or 2 to exit.");
+            }
+        }
+    }
 }
- 
