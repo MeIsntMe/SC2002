@@ -23,6 +23,7 @@ public class Appointment implements Comparable<Appointment>{
     
     //Does appointment need to initialise with outcome?
     //Also, serviceType is what again? Isit enum?
+    //What is appointmentID? Defining it by patientID + totalAppointmentCount
     public Appointment(String appointmentID, Patient patient, Doctor doctor, AppointmentSlot slot, String serviceType) {
         this.appointmentID = appointmentID;
         this.patient = patient;
