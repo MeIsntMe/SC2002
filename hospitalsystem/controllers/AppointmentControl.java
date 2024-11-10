@@ -8,33 +8,43 @@ import hospitalsystem.model.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 import hospitalsystem.enums.PrescriptionStatus;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 
-//central database for appointments
 public class AppointmentControl {
+    private Appointment appointment;
     private static HashMap<String, Appointment> allAppointments = new HashMap<>();
 
-    public static void loadAppointmentsFromFile(String filePath) {
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+    public AppointmentControl(Appointment appointment) {
+        this.appointment = appointment;
+    }
+
+    public static void loadAppointmentsFromCSV(String filePath) {
+        try (BufferedReader br = Files.newBufferedReader(Paths.get(filePath))) {
             String line;
-            br.readLine(); // Skip header row
+            boolean isFirstLine = true;
             while ((line = br.readLine()) != null) {
+                if (isFirstLine) { // Skip header row
+                    isFirstLine = false;
+                    continue;
+                }
                 String[] values = line.split(",");
-                String appointmentID = values[0].trim();
-                String patientID = values[1].trim();
-                String doctorID = values[2].trim();
-                String dateTimeStr = values[3].trim();
-                LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-                String statusStr = values[4].trim();
+                if (values.length < 5) continue;
+
+                String appointmentID = values[0];
+                String patientID = values[1];
+                String doctorID = values[2];
+                LocalDateTime dateTime = LocalDateTime.parse(values[3]);
+                String statusStr = values[4];
 
                 AppointmentStatus status = AppointmentStatus.valueOf(statusStr);
-                Patient patient = AppointmentControl.findPatientById(patientID);
-                Doctor doctor = AppointmentControl.findDoctorById(doctorID);
+                Patient patient = MainSystem.findPatientById(patientID);
+                Doctor doctor = MainSystem.findDoctorById(doctorID);
                 AppointmentSlot slot = new AppointmentSlot(dateTime.getYear(), dateTime.getMonthValue(), dateTime.getDayOfMonth(), dateTime.getHour(), dateTime.getMinute());
 
                 Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
@@ -42,26 +52,8 @@ public class AppointmentControl {
                 allAppointments.put(appointmentID, appointment);
             }
         } catch (IOException e) {
-            System.out.println("Error loading appointments from file: " + e.getMessage());
+            System.out.println("Error loading appointments from CSV file: " + e.getMessage());
         }
-    }
-
-    private static Patient findPatientById(String patientID) {
-        for (Patient patient : MainSystem.patients) {
-            if (patient.getID().equals(patientID)) {
-                return patient;
-            }
-        }
-        return null;
-    }
-
-    private static Doctor findDoctorById(String doctorID) {
-        for (Doctor doctor : MainSystem.doctors) {
-            if (doctor.getID().equals(doctorID)) {
-                return doctor;
-            }
-        }
-        return null;
     }
 
     public boolean bookSlot() {

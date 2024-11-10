@@ -4,8 +4,7 @@ import hospitalsystem.enums.*;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
-
-public class Appointment implements Comparable<Appointment>{
+public class Appointment implements Comparable<Appointment> {
     private String appointmentID;
     private Patient patient;
     private Doctor doctor;
@@ -13,15 +12,12 @@ public class Appointment implements Comparable<Appointment>{
     private AppointmentStatus status;
     private boolean isAvailable;
     private AppointmentOutcome outcome;
-    
+
     @Override
-    public int compareTo(Appointment appointment){
+    public int compareTo(Appointment appointment) {
         return this.slot.getDateTime().compareTo(appointment.slot.getDateTime());
     }
-    
-    //Does appointment need to initialise with outcome?
-    //Also, serviceType is what again? Isit enum? [Removed it, it got mixed up with my sample prj]
-    //What is appointmentID? Defining it by patientID + totalAppointmentCount
+
     public Appointment(String appointmentID, Patient patient, Doctor doctor, AppointmentSlot slot) {
         this.appointmentID = appointmentID;
         this.patient = patient;
@@ -29,7 +25,7 @@ public class Appointment implements Comparable<Appointment>{
         this.slot = slot;
         this.status = AppointmentStatus.PENDING;
         this.isAvailable = true;
-        this.outcome = new AppointmentOutcome("", new HashMap<>());
+        this.outcome = new AppointmentOutcome(this, "", new HashMap<>());
     }
 
     // Getter and Setter methods
@@ -78,7 +74,7 @@ public class Appointment implements Comparable<Appointment>{
     }
 
     public HashMap<String, PrescriptionStatus> getPrescriptions() {
-        return this.outcome.prescriptions;
+        return this.outcome.getPrescriptions();
     }
 
     public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
@@ -86,7 +82,7 @@ public class Appointment implements Comparable<Appointment>{
     }
 
     public String getConsultationNotes() {
-        return this.outcome.consultationNotes;
+        return this.outcome.getConsultationNotes();
     }
 
     public void setConsultationNotes(String consultationNotes) {
@@ -101,7 +97,7 @@ public class Appointment implements Comparable<Appointment>{
             this.dateTime = LocalDateTime.of(year, month, day, hour, minute);
         }
 
-        public LocalDateTime getDateTime(){
+        public LocalDateTime getDateTime() {
             return this.dateTime;
         }
 
@@ -119,13 +115,14 @@ public class Appointment implements Comparable<Appointment>{
         }
     }
 
-    //Non-static inner class
+    // Non-static inner class
     public class AppointmentOutcome {
+        private Appointment appointment;
         private HashMap<String, PrescriptionStatus> prescriptions;
         private String consultationNotes;
 
-        public AppointmentOutcome(String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions) {
-
+        public AppointmentOutcome(Appointment appointment, String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions) {
+            this.appointment = appointment;
             this.consultationNotes = consultationNotes;
             this.prescriptions = prescriptions;
         }
@@ -136,6 +133,10 @@ public class Appointment implements Comparable<Appointment>{
 
         public String getConsultationNotes() {
             return consultationNotes;
+        }
+
+        public Appointment getAppointment() {
+            return appointment;
         }
 
         public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {

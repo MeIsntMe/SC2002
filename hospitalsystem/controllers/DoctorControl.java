@@ -10,7 +10,6 @@ import hospitalsystem.model.Appointment.AppointmentOutcome;
 import hospitalsystem.enums.AppointmentStatus;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
 
@@ -21,10 +20,10 @@ public class DoctorControl {
         this.doctor = doctor;
     }
 
-    public static void viewPatientMedicalRecord(Patient patient) {
+    public void viewPatientMedicalRecord(Patient patient) {
         MedicalRecord mr = patient.getMedicalRecord();
         ArrayList<AppointmentOutcome> appointmentOutcomes = mr.getAppointmentOutcomes();
-        int lastSlot = appointmentOutcomes.size()-1;
+        int lastSlot = appointmentOutcomes.size() - 1;
 
         System.out.println("====================================");
         System.out.println("           Medical Record           ");
@@ -33,28 +32,28 @@ public class DoctorControl {
         System.out.println("Name: " + mr.getName());
         System.out.println("Date of Birth: " + mr.getDOB());
         System.out.println("Gender: " + mr.getGender());
-        if (mr.getPhoneNumber().equals("")){
+        if (!mr.getPhoneNumber().isEmpty()) {
             System.out.println("Phone Number: " + mr.getPhoneNumber());
         }
-        if (mr.getEmailAddress().equals("")){
+        if (!mr.getEmailAddress().isEmpty()) {
             System.out.println("Email Address: " + mr.getEmailAddress());
         }
         System.out.println("Blood Type: " + mr.getBloodType());
         System.out.println("-----");
         System.out.println("List of Past Appointment Outcomes:");
-        for (AppointmentOutcome outcome:appointmentOutcomes){
-            System.out.println("Appointment Date: " + outcome.getAppointmentDate());
-            System.out.println("Service Type: " + outcome.getServiceType());
-            
+        for (AppointmentOutcome outcome : appointmentOutcomes) {
+            System.out.println("Appointment Date: " + outcome.getAppointment().getSlot().getDate());
+            System.out.println("Service Type: N/A");
+
             System.out.println("Prescriptions:");
             HashMap<String, PrescriptionStatus> prescriptions = outcome.getPrescriptions();
             for (String prescriptionName : prescriptions.keySet()) {
                 System.out.println(" - " + prescriptionName + ": " + prescriptions.get(prescriptionName));
             }
-            
+
             System.out.println("Consultation Notes: ");
             System.out.println(outcome.getConsultationNotes());
-            if (outcome != appointmentOutcomes.get(lastSlot)){
+            if (outcome != appointmentOutcomes.get(lastSlot)) {
                 System.out.println("-----");
             }
         }
@@ -63,7 +62,7 @@ public class DoctorControl {
 
     public boolean updatePatientMedicalRecord(Patient patient, MedicalRecord record) {
         // Placeholder for updating medical record logic - actual implementation needed
-        System.out.println("Medical record updated successfully for patient " + patient);
+        System.out.println("Medical record updated successfully for patient " + patient.getMedicalRecord().getName());
         return true;
     }
 
@@ -74,61 +73,51 @@ public class DoctorControl {
     }
 
     public boolean acceptAppointment(Appointment appointment) {
+        AppointmentControl appointmentControl = new AppointmentControl(appointment);
         if (appointment.getStatus() == AppointmentStatus.PENDING) {
             if (doctor.getUpcomingAppointments().contains(appointment)) {
                 System.out.println("Appointment is already in the doctor's schedule.");
                 return false;
             }
-            appointment.setStatus(AppointmentStatus.BOOKED);
-            doctor.addAppointment(appointment);
-            System.out.println("Appointment accepted for patient " + appointment.getPatient());
-            return true;
+            return appointmentControl.bookSlot();
         }
         return false;
     }
 
     public boolean declineAppointment(Appointment appointment) {
+        AppointmentControl appointmentControl = new AppointmentControl(appointment);
         if (appointment.getStatus() == AppointmentStatus.PENDING) {
-            appointment.setStatus(AppointmentStatus.CANCELLED);
-            System.out.println("Appointment declined for patient " + appointment.getPatient());
-            return true;
+            return appointmentControl.cancelSlot();
         }
         return false;
     }
 
-    public List<Appointment> viewUpcomingAppointments() {
+    public void viewUpcomingAppointments() {
         List<Appointment> appointments = doctor.getUpcomingAppointments();
         System.out.println("Upcoming Appointments:");
         for (Appointment appointment : appointments) {
-            System.out.println("- Patient: " + appointment.getPatient() + ", Date: " + appointment.getSlot().getDay() + ", Time: " + appointment.getSlot().getTime());
+            System.out.println("- Patient: " + appointment.getPatient().getMedicalRecord().getName() + ", Date: " + appointment.getSlot().getDate() + ", Time: " + appointment.getSlot().getTime());
         }
-        return appointments;
     }
 
-    public boolean recordAppointmentOutcome(Appointment appointment, String outcome) {
+    public boolean recordAppointmentOutcome(Appointment appointment, String outcome, HashMap<String, PrescriptionStatus> prescriptions) {
+        AppointmentControl appointmentControl = new AppointmentControl(appointment);
         if (doctor.getUpcomingAppointments().contains(appointment)) {
             if (outcome == null || outcome.trim().isEmpty()) {
                 System.out.println("Invalid outcome. Please provide a valid outcome description.");
                 return false;
             }
-            appointment.setOutcome(outcome);
-            appointment.setStatus(AppointmentStatus.COMPLETED);
-            System.out.println("Appointment outcome recorded for patient " + appointment.getPatient());
+            appointmentControl.recordOutcome(outcome, prescriptions);
             return true;
         }
         return false;
     }
 
     private static Patient findPatientById(String patientId) {
-        for (Patient p : MainSystem.patients) {
-            if (p.getID().equals(patientId)) {
-                return p;
-            }
-        }
-        return null;
+        return MainSystem.findPatientById(patientId);
     }
 
-    public static void displayMenu() {
+    public void displayMenu() {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("=========================================");
@@ -173,7 +162,7 @@ public class DoctorControl {
                         // Set Availability
                         break;
                     case 4:
-                        // View upcoming appointments
+                        viewUpcomingAppointments();
                         break;
                     case 5:
                         // Record an appointment outcome
