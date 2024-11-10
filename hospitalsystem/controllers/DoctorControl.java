@@ -6,9 +6,10 @@ import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Patient;
 import hospitalsystem.model.MedicalRecord;
 import hospitalsystem.model.Appointment;
-
+import hospitalsystem.model.Appointment.AppointmentOutcome;
 import hospitalsystem.enums.AppointmentStatus;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Scanner;
@@ -22,35 +23,40 @@ public class DoctorControl {
 
     public static void viewPatientMedicalRecord(Patient patient) {
         MedicalRecord mr = patient.getMedicalRecord();
-        System.out.println("=====================================");
-        System.out.println("           Medical Record");
-        System.out.println("=====================================");
+        ArrayList<AppointmentOutcome> appointmentOutcomes = mr.getAppointmentOutcomes();
+        int lastSlot = appointmentOutcomes.size()-1;
+
+        System.out.println("====================================");
+        System.out.println("           Medical Record           ");
+        System.out.println("====================================");
         System.out.println("Patient ID: " + mr.getId());
         System.out.println("Name: " + mr.getName());
         System.out.println("Date of Birth: " + mr.getDOB());
         System.out.println("Gender: " + mr.getGender());
-        if (!mr.getPhoneNumber().isEmpty()) {
+        if (mr.getPhoneNumber().equals("")){
             System.out.println("Phone Number: " + mr.getPhoneNumber());
         }
-        if (!mr.getEmailAddress().isEmpty()) {
+        if (mr.getEmailAddress().equals("")){
             System.out.println("Email Address: " + mr.getEmailAddress());
         }
         System.out.println("Blood Type: " + mr.getBloodType());
-        System.out.println("List of Appointment Outcomes:");
-        for (Appointment.AppointmentOutcome outcome : mr.getAppointmentOutcomes()) {
-            System.out.println("-----");
+        System.out.println("-----");
+        System.out.println("List of Past Appointment Outcomes:");
+        for (AppointmentOutcome outcome:appointmentOutcomes){
             System.out.println("Appointment Date: " + outcome.getAppointmentDate());
             System.out.println("Service Type: " + outcome.getServiceType());
-
+            
             System.out.println("Prescriptions:");
-            Hashtable<String, PrescriptionStatus> prescriptions = outcome.getPrescriptions();
+            HashMap<String, PrescriptionStatus> prescriptions = outcome.getPrescriptions();
             for (String prescriptionName : prescriptions.keySet()) {
                 System.out.println(" - " + prescriptionName + ": " + prescriptions.get(prescriptionName));
             }
-
+            
             System.out.println("Consultation Notes: ");
             System.out.println(outcome.getConsultationNotes());
-            System.out.println("-----");
+            if (outcome != appointmentOutcomes.get(lastSlot)){
+                System.out.println("-----");
+            }
         }
         System.out.println("=====================================");
     }

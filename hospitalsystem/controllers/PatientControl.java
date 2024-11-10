@@ -1,8 +1,10 @@
 package hospitalsystem.controllers;
 
+import hospitalsystem.MainSystem;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import hospitalsystem.model.Appointment.AppointmentOutcome;
+import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,17 +14,19 @@ public class PatientControl {
     private static List<String> listOfMethods = List.of("test", "test2");
     private static Scanner sc;
     private Patient patient;
-    private int choice, innerChoice;
+    private int choice, innerChoice, tempCount;
+    ArrayList<Doctor> doctors = new ArrayList<>(MainSystem.doctors);
+    Doctor selectedDoctor;
 
     public void displayMenu(){
-        int i = 1;
+        boolean continueFlag = true;
         sc = new Scanner(System.in);
-        System.err.println("Available Options: ");
-            for (String methodString: listOfMethods) {
-                System.err.printf("%d: %s\n", i, methodString);
+        System.out.println("Available Options: ");
+            for (int i = 0; i < listOfMethods.size(); i++) {
+                System.out.printf("%d: %s\n", i, listOfMethods.get(i));
                 i++;
             }
-        while (true){
+        while (continueFlag){
             try {
                 choice = sc.nextInt();
                 if (sc.hasNext()){
@@ -82,40 +86,167 @@ public class PatientControl {
                         }
                         break;
                     case 3:
-                        // View available appointment slots 
-                        System.out.println("View Available Appointment Slots");
-                        //Print list of doctors 
-                        //choose doctor to view 
+                        // View available appointment slots of a specific doctor
+                        System.out.println("Which doctor's availability would you like to view?");
+                        for (int i = 0; i < doctors.size(); i++) {
+                            System.out.printf("%d. %s", i, doctors.get(i).getName());
+                        }
+                        while (true) {
+                            innerChoice = sc.nextInt();
+                            if (sc.hasNext()){
+                                sc.skip(".*");
+                            }
+                            if (innerChoice >= doctors.size()){
+                               System.out.printf("Invalid Choice. Please input integer from 1 to %d", doctors.size()-1); 
+                               continue;
+                            }
+                            tempCount = 1;
+                            selectedDoctor = doctors.get(innerChoice);
+                            System.out.println("Availability of Dr. " + selectedDoctor.getName());
+                            for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
+                                System.out.printf("%d. %s\n", tempCount, slot.toString());
+                                tempCount += 1;
+                            }
+                            break;
+                        }
                         break;
-                
                     case 4:
-                        System.out.println("Schedule an Appointment");
-                        // Add functionality for scheduling an appointment here
+                        //Scheduling an Appointment with a specific doctor
+                        System.out.println("Which doctor would you like to schedule an appointment with?");
+                        for (int i = 0; i < doctors.size(); i++) {
+                            System.out.printf("%d. %s", i, doctors.get(i).getName());
+                        }
+                        while (true) {
+                            innerChoice = sc.nextInt();
+                            if (sc.hasNext()){
+                                sc.skip(".*");
+                            }
+                            if (innerChoice >= doctors.size()){
+                               System.out.printf("Invalid Choice. Please input integer from 1 to %d", doctors.size()-1); 
+                               continue;
+                            }
+                            tempCount = 1;
+                            
+                            System.out.println("Which slot would you like to book?" + selectedDoctor.getName());
+                            for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
+                                System.out.printf("%d. %s\n", tempCount, slot.toString());
+                                tempCount += 1;
+                            }
+                            innerChoice = sc.nextInt();
+                            if (sc.hasNext()){
+                                sc.skip(".*");
+                            }
+                            if (innerChoice > tempCount || innerChoice <= 0){
+                                System.out.println("Invalid Choice. Please try again.");
+                                continue;
+                            }
+                            addAppointment(innerChoice, selectedDoctor);
+                            System.out.println("Appointment Scheduled");
+                            break;
+                        }
                         break;
-                
                     case 5:
-                        System.out.println("Reschedule an Appointment");
-                        // Add functionality for rescheduling an appointment here
-                        break;
-                
+                        //Rescheduling
+                        System.out.println("====================================");
+                        System.out.println("       Scheduled Appointments       ");
+                        System.out.println("====================================");
+                        System.out.println("-----");
+                        System.out.println("Confirmed Appointments:");
+                        System.out.println("-----");
+                        tempCount = displayAppointmentsByType(1, AppointmentStatus.COMPLETED);
+                        System.out.println("-----");
+                        System.out.println("Pending Appointments:");
+                        System.out.println("-----");
+                        displayAppointmentsByType(tempCount, AppointmentStatus.PENDING);
+                        System.out.println("====================================");
+                        while (true){
+                            System.out.println("Which appointment would you like to reschedule?");
+                            System.out.print("Appointment Number: ");
+                            innerChoice = sc.nextInt();
+                            if (sc.hasNext()){
+                                sc.skip(".*");
+                            }
+                            if (getChosenAppointmentIndex(innerChoice)!=-1){
+                                selectedDoctor = patient.getAppointments().get(getChosenAppointmentIndex(innerChoice)).getDoctor();
+                                if (deleteAppointment(getChosenAppointmentIndex(innerChoice))){
+                                    break;
+                                }
+                            }
+                            System.out.println("Unable to find chosen appointment, please try again.");
+                        }
+                        while (true){
+                            System.out.println("Which slot would you like to change to?" + selectedDoctor.getName());
+                            tempCount = 1;
+                            for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
+                                System.out.printf("%d. %s\n", tempCount, slot.toString());
+                                tempCount += 1;
+                            }
+                            innerChoice = sc.nextInt();
+                            if (sc.hasNext()){
+                                sc.skip(".*");
+                            }
+                            if (innerChoice > tempCount || innerChoice <= 0){
+                                System.out.println("Invalid Choice. Please try again.");
+                                continue;
+                            }
+                            addAppointment(innerChoice, selectedDoctor);
+                            System.out.println("Appointment Rescheduled");
+                            break;
+                        }
+                        break;               
                     case 6:
-                        System.out.println("Cancel an Appointment");
-                        // Add functionality for canceling an appointment here
+                        //Cancal appointment
+                        System.out.println("====================================");
+                        System.out.println("       Scheduled Appointments       ");
+                        System.out.println("====================================");
+                        System.out.println("-----");
+                        System.out.println("Confirmed Appointments:");
+                        System.out.println("-----");
+                        tempCount = displayAppointmentsByType(1, AppointmentStatus.COMPLETED);
+                        System.out.println("-----");
+                        System.out.println("Pending Appointments:");
+                        System.out.println("-----");
+                        displayAppointmentsByType(tempCount, AppointmentStatus.PENDING);
+                        System.out.println("====================================");
+                        while (true){
+                            System.out.println("Which appointment would you like to cancel?");
+                            System.out.print("Appointment Number: ");
+                            innerChoice = sc.nextInt();
+                            if (sc.hasNext()){
+                                sc.skip(".*");
+                            }
+                            if (getChosenAppointmentIndex(innerChoice)!=-1){
+                                if (deleteAppointment(getChosenAppointmentIndex(innerChoice))){
+                                    System.out.println("Appointment successfully cancelled.");
+                                    break;
+                                }
+                            }
+                            System.out.println("Unable to find chosen appointment, please try again.");
+                        }
                         break;
                 
                     case 7:
-                        System.out.println("View Scheduled Appointments");
-                        // Add functionality for viewing scheduled appointments here
+                        //View scheduled appointments
+                        System.out.println("====================================");
+                        System.out.println("       Scheduled Appointments       ");
+                        System.out.println("====================================");
+                        System.out.println("-----");
+                        System.out.println("Confirmed Appointments:");
+                        System.out.println("-----");
+                        tempCount = displayAppointmentsByType(1, AppointmentStatus.BOOKED);
+                        System.out.println("-----");
+                        System.out.println("Pending Appointments:");
+                        System.out.println("-----");
+                        displayAppointmentsByType(tempCount, AppointmentStatus.PENDING);
                         break;
                 
                     case 8:
-                        System.out.println("View Past Appointment Outcome Records");
-                        // Add functionality for viewing past appointment outcomes here
+                        displayPastAppointmentOutcomes();
                         break;
                 
                     case 9:
-                        System.out.println("Logout");
-                        // Add functionality for logout here
+                        continueFlag = false;
+                        System.out.println("You have successfully logged out.");
                         break;
                 
                     default:
@@ -195,38 +326,52 @@ public class PatientControl {
         System.out.println("=====================================");
     }
 
-    public void displayConfirmedAppointments(){
+    public int displayAppointmentsByType(AppointmentStatus status){
         ArrayList<Appointment> appointments = patient.getAppointments();
-        int lastSlot = appointments.size()-1;
-        System.out.println("====================================");
-        System.err.println("       Confirmed Appointments       ");
-        System.out.println("====================================");
+        int appointmentCount = 0;
         for (Appointment appointment:appointments){
-            if (appointment.getStatus() == AppointmentStatus.COMPLETED){
+            if (appointment.getStatus() == status){
                 System.out.println("Time: " + appointment.getSlot().toString());
                 System.out.println("Doctor: " + appointment.getDoctor());
-                if (appointment != appointments.get(lastSlot)){
-                    System.out.println("-----");
-                }
+                appointmentCount += 1;
             }
         }
+        return appointmentCount;
     }
 
-    public void displayPendingAppointments(){
+    public static String buildSpaceString(int number) {
+        int digitCount = Integer.toString(Math.abs(number)).length();
+        return " ".repeat(digitCount);
+    }
+
+    public int displayAppointmentsByType(int initialIndex, AppointmentStatus status){
         ArrayList<Appointment> appointments = patient.getAppointments();
-        int lastSlot = appointments.size()-1;
-        System.out.println("====================================");
-        System.err.println("        Pending Appointments        ");
-        System.out.println("====================================");
+        int appointmentCount = initialIndex;
         for (Appointment appointment:appointments){
-            if (appointment.getStatus() == AppointmentStatus.PENDING){
-                System.out.println("Time: " + appointment.getSlot().toString());
-                System.out.println("Doctor: " + appointment.getDoctor());
-                if (appointment != appointments.get(lastSlot)){
-                    System.out.println("-----");
-                }
+            if (appointment.getStatus() == status){
+                System.out.printf("%d. Time: %s\n", appointmentCount, appointment.getSlot().toString());
+                //Complicated function is to match the two lines indentation
+                System.out.printf("%s Doctor: %s\n", " ".repeat(Integer.toString(appointmentCount).length()), appointment.getDoctor().getName()); 
+                appointmentCount += 1;
             }
         }
+        return appointmentCount;
+    }
+
+    public int getChosenAppointmentIndex(int index){
+        int relIndex = 1;
+        int actualIndex = 0;
+        ArrayList<Appointment> appointments = patient.getAppointments();
+        for (Appointment appointment:appointments){
+            if (appointment.getStatus() == AppointmentStatus.BOOKED || appointment.getStatus() == AppointmentStatus.PENDING){ 
+                if (relIndex == index){
+                    return actualIndex;
+                }
+                relIndex += 1;
+                actualIndex += 1;
+            }
+        }
+        return -1;
     }
 
     public boolean updatePhoneNumber(String newNumber){
@@ -234,7 +379,7 @@ public class PatientControl {
             patient.getMedicalRecord().setPhoneNumber(newNumber);
             return true;
         } catch (Exception e) {
-            System.err.println("Error Occured:" + e);
+            System.out.println("Error Occured:" + e);
             return false;
         }
     }
@@ -244,30 +389,43 @@ public class PatientControl {
             patient.getMedicalRecord().setEmailAddress(newEmail);
             return true;
         } catch (Exception e) {
-            System.err.println("Error Occured:" + e);
+            System.out.println("Error Occured:" + e);
             return false;
         }
     }
-
-    public boolean addAppointment(Appointment appointment){
+    public boolean addAppointment(int slotIndex, Doctor doctor){
         try {
+            List<AppointmentSlot> newSlots = doctor.getAvailableSlots();
+            AppointmentSlot selectedslot = newSlots.remove(slotIndex);
+            doctor.setAvailableSlots(newSlots);
+            Appointment newAppointment = new Appointment(patient.getID()+String.valueOf(patient.getTotalAppointmentCount()), patient, selectedDoctor, selectedslot, null);
+            doctor.addAppointment(newAppointment);
+
             ArrayList<Appointment> newAppointments = patient.getAppointments();
-            newAppointments.add(appointment);
+            newAppointments.add(newAppointment);
             patient.setAppointments(newAppointments);
+            patient.addAppointmentCount();
+
             return true;
         } catch (Exception e){
-            System.err.println("Error Occured: " + e);
+            System.out.println("Error Occured: " + e);
             return false;
         }
     }
 
     public boolean deleteAppointment(int appointmentIndex){
+        //add doctor slot, set appointment cancelled
         try {
-            ArrayList<Appointment> newAppointments = patient.getAppointments();
-            newAppointments.remove(appointmentIndex);
+            Appointment chosenAppointment = patient.getAppointments().get(appointmentIndex);
+            Doctor doctor = chosenAppointment.getDoctor();
+            chosenAppointment.setStatus(AppointmentStatus.CANCELLED);
+            AppointmentSlot cancelledSlot = chosenAppointment.getSlot();
+            List<AppointmentSlot> newSlots = doctor.getAvailableSlots();
+            newSlots.add(cancelledSlot);
+            doctor.setAvailableSlots(newSlots);
             return true;
         } catch (Exception e){
-            System.err.println("Error Occured: " + e);
+            System.out.println("Error Occured: " + e);
             return false;
         }
     }
