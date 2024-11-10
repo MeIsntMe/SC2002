@@ -7,9 +7,10 @@ import hospital.models.User;
 
 public class Pharmacist extends User {
     // Fields
-    private List<Prescription> prescriptions; // List of prescriptions to manage
+    // private List<Prescription> prescriptions; // List of prescriptions to manage
     private InventoryControl inventoryControl; // Access to inventory control for managing stock
-
+    private List<Prescription> prescriptions = new ArrayList<>();
+    
     // Constructor
     public Pharmacist(String userId, String password, InventoryControl inventoryControl) {
         super(userId, password);
@@ -39,6 +40,11 @@ public class Pharmacist extends User {
         } else {
             System.out.println("Failed to submit replenishment request for " + medicationName);
         }
+    }
+    
+    public void addPrescription(Prescription prescription) {
+        prescriptions.add(prescription);
+        System.out.println("Prescription added to pharmacist's list.");
     }
 
     // Getter for prescriptions list
