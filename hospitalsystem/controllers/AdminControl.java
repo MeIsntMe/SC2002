@@ -21,20 +21,21 @@ public class AdminControl {
             System.out.print("Enter choice: ");
             try{
                 int choice = scanner.nextInt();
-                int role; 
                 switch (choice) {
                     case 1: 
-                        manageStaff();
+                        StaffControl.manageStaffMenu(scanner);
                         continue;
                     case 2: 
-                        //call appointment control  
+                        //call appointment control
                     case 3: 
-                        //call inventory control
+                        InventoryControl.manageInventoryMenu();
                     case 4: 
-                        //call inventory control
+                        //wait for pharmacist
                     case 5: 
                         MainSystem.currentUser = null; 
-
+                    default: 
+                        System.out.println("Invalid input! Please enter a number between 1-5 ");
+                        break; 
                 }
             } catch (InputMismatchException e) {
                 System.out.println("=====================================");
@@ -47,42 +48,5 @@ public class AdminControl {
         }
     }
 
-    public static void manageStaff(){
-        while (true) {
-            Scanner sc = new Scanner(System.in);
-            
-            System.out.println("=========================================");
-            System.out.println("Staff Management: ");
-            System.out.println("1. Add staff");
-            System.out.println("2. Remove staff");
-            System.out.println("3. Update staff details"); // TO DO: WHAT IS THIS. 
-            System.out.println("4. Display filtered list of staff");
-            System.out.println("5. Exit Staff Management");
-            System.out.print("Enter choice: ");
-
-            try{
-                int choice = sc.nextInt();
-                int role; 
-                switch (choice) {
-                    case 1: 
-                        StaffControl.addStaff(sc);
-                        continue;
-                    case 2: 
-                        StaffControl.removeStaff(sc);
-                        continue;
-                    case 3: 
-                        // TO DO: WHAT IS THIS. 
-                    case 4: 
-                    StaffControl.displayStaffFiltered(sc);
-                    case 5: 
-                        sc.close();
-                        return;
-
-                }
-        }
-    }
-
-    
-    
 }
 

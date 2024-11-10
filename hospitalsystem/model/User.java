@@ -1,10 +1,10 @@
 package hospitalsystem.model;
 
 public abstract class User {
-    private static String userID;
-    private static String password;
-    private static String name; 
-    private static String gender; 
+    private String userID;
+    private String password;
+    private String name; 
+    private String gender; 
 
     User(String userID, String name, String gender, String password) {
         this.userID = userID;
@@ -12,11 +12,13 @@ public abstract class User {
         this.gender = gender; 
         this.password = password;
     }
-
+    
     public String getID() {return userID;}
-    public String getPassword() {return password;}    
     public String getName() {return name;}   
-    public String getGender() {return gender;}
+    public String getGender() {return gender;}    
+    public String getPassword() {return password;}    
 
-    //do the set stuff also
+    public void setName(String name) {this.name = name; }
+    public void setGender(String gender) {this.gender = gender;}
+    public void setPassword(String password) {this.password = password;}
 }
