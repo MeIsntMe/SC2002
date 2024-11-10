@@ -6,8 +6,6 @@ import java.util.HashMap;
 
 
 public class Appointment implements Comparable<Appointment>{
-    
-    
     private String appointmentID;
     private Patient patient;
     private Doctor doctor;
@@ -22,18 +20,16 @@ public class Appointment implements Comparable<Appointment>{
     }
     
     //Does appointment need to initialise with outcome?
-    //Also, serviceType is what again? Isit enum?
+    //Also, serviceType is what again? Isit enum? [Removed it, it got mixed up with my sample prj]
     //What is appointmentID? Defining it by patientID + totalAppointmentCount
-    public Appointment(String appointmentID, Patient patient, Doctor doctor, AppointmentSlot slot, String serviceType) {
+    public Appointment(String appointmentID, Patient patient, Doctor doctor, AppointmentSlot slot) {
         this.appointmentID = appointmentID;
         this.patient = patient;
         this.doctor = doctor;
         this.slot = slot;
         this.status = AppointmentStatus.PENDING;
         this.isAvailable = true;
-        this.outcome.serviceType = serviceType;
-        this.outcome.prescriptions = null;
-        this.outcome.consultationNotes = ""; 
+        this.outcome = new AppointmentOutcome("", new HashMap<>());
     }
 
     // Getter and Setter methods
@@ -81,10 +77,6 @@ public class Appointment implements Comparable<Appointment>{
         this.isAvailable = isAvailable;
     }
 
-    public String getServiceType() {
-        return this.outcome.serviceType;
-    }
-
     public HashMap<String, PrescriptionStatus> getPrescriptions() {
         return this.outcome.prescriptions;
     }
@@ -129,39 +121,31 @@ public class Appointment implements Comparable<Appointment>{
 
     //Non-static inner class
     public class AppointmentOutcome {
-        private String appointmentDate; 
-        private String serviceType;
         private HashMap<String, PrescriptionStatus> prescriptions;
         private String consultationNotes;
 
-        public String getAppointmentDate() {
-            return appointmentDate;
+        public AppointmentOutcome(String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions) {
+
+            this.consultationNotes = consultationNotes;
+            this.prescriptions = prescriptions;
         }
-        
-        public String getServiceType() {
-            return serviceType;
-        }
-        
+
+
+
         public HashMap<String, PrescriptionStatus> getPrescriptions() {
             return prescriptions;
         }
-        
+
         public String getConsultationNotes() {
             return consultationNotes;
         }
 
-        public void setAppointmentDate(String appointmentDate) {
-            this.appointmentDate = appointmentDate;
-        }
-        
-        public void setServiceType(String serviceType) {
-            this.serviceType = serviceType;
-        }
-        
+
+
         public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
             this.prescriptions = prescriptions;
         }
-        
+
         public void setConsultationNotes(String consultationNotes) {
             this.consultationNotes = consultationNotes;
         }
