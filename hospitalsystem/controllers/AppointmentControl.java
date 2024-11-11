@@ -1,144 +1,273 @@
 ﻿package hospitalsystem.controllers;
 
 import hospitalsystem.MainSystem;
-import hospitalsystem.model.Appointment;
-import hospitalsystem.model.Appointment.AppointmentSlot;
-import hospitalsystem.enums.AppointmentStatus;
 import hospitalsystem.model.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
-import hospitalsystem.enums.PrescriptionStatus;
+import hospitalsystem.enums.*;
+import hospitalsystem.model.Appointment.AppointmentSlot;
+
+import java.io.*;
+import java.nio.file.*;
 import java.time.LocalDateTime;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AppointmentControl {
-    private Appointment appointment;
     private static HashMap<String, Appointment> allAppointments = new HashMap<>();
-
-    public AppointmentControl(Appointment appointment) {
-        this.appointment = appointment;
-    }
+    private static final String CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
 
     public static void loadAppointmentsFromCSV(String filePath) {
-        try (BufferedReader br = Files.newBufferedReader(Paths.get(filePath))) {
-            String line;
-            boolean isFirstLine = true;
-            while ((line = br.readLine()) != null) {
-                if (isFirstLine) { // Skip header row
-                    isFirstLine = false;
-                    continue;
+        try (Scanner fileScanner = new Scanner(new File(filePath))) {
+            fileScanner.nextLine(); // Skip the first line
+            while (fileScanner.hasNextLine()) {
+                String[] appointmentData = fileScanner.nextLine().replaceAll("\"", "").split(",");
+                try {
+                    String appointmentID = appointmentData[0].trim();
+                    String patientID = appointmentData[1].trim();
+                    String doctorID = appointmentData[2].trim();
+
+                    // Get Doctor from MainSystem maps - Doctor extends User
+                    User doctorUser = MainSystem.doctorsMap.get(doctorID);
+                    Doctor doctor = null;
+                    if (doctorUser instanceof Doctor) {
+                        doctor = (Doctor) doctorUser;
+                    }
+
+                    // Create new Patient with scanner
+                    Patient patient = new Patient(patientID, fileScanner);
+
+                    if (doctor != null) {
+                        // Parse date/time components
+                        int year = Integer.parseInt(appointmentData[3].trim());
+                        int month = Integer.parseInt(appointmentData[4].trim());
+                        int day = Integer.parseInt(appointmentData[5].trim());
+                        int hour = Integer.parseInt(appointmentData[6].trim());
+                        int minute = Integer.parseInt(appointmentData[7].trim());
+
+                        // Create appointment slot
+                        AppointmentSlot slot = new AppointmentSlot(year, month, day, hour, minute);
+
+                        // Create appointment
+                        Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
+
+                        // Set appointment properties
+                        appointment.setStatus(AppointmentStatus.valueOf(appointmentData[8].trim().toUpperCase()));
+                        appointment.setAvailable(Boolean.parseBoolean(appointmentData[9].trim()));
+                        appointment.setConsultationNotes(appointmentData[10].trim());
+
+                        // Handle prescriptions if they exist
+                        if (appointmentData.length > 11 && !appointmentData[11].trim().isEmpty()) {
+                            HashMap<String, PrescriptionStatus> prescriptions = new HashMap<>();
+                            String[] prescriptionPairs = appointmentData[11].split(";");
+
+                            for (String pair : prescriptionPairs) {
+                                String[] parts = pair.split(":");
+                                if (parts.length == 2) {
+                                    String medicine = parts[0].trim();
+                                    PrescriptionStatus status = PrescriptionStatus.valueOf(parts[1].trim());
+                                    prescriptions.put(medicine, status);
+                                }
+                            }
+                            appointment.setPrescriptions(prescriptions);
+                        }
+
+                        // Add to maps and lists
+                        allAppointments.put(appointmentID, appointment);
+                        doctor.addAppointment(appointment);
+
+                        // Update patient's appointments
+                        ArrayList<Appointment> patientAppointments = patient.getAppointments();
+                        if (patientAppointments == null) {
+                            patientAppointments = new ArrayList<>();
+                        }
+                        patientAppointments.add(appointment);
+                        patient.setAppointments(patientAppointments);
+                        patient.addAppointmentCount();
+
+                    } else {
+                        System.out.println("Doctor not found for ID: " + doctorID);
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error processing appointment line: " + String.join(",", appointmentData));
+                    System.out.println("Error details: " + e.getMessage());
                 }
-                String[] values = line.split(",");
-                if (values.length < 5) continue;
-
-                String appointmentID = values[0];
-                String patientID = values[1];
-                String doctorID = values[2];
-                LocalDateTime dateTime = LocalDateTime.parse(values[3]);
-                String statusStr = values[4];
-
-                AppointmentStatus status = AppointmentStatus.valueOf(statusStr);
-                Patient patient = MainSystem.findPatientById(patientID);
-                Doctor doctor = MainSystem.findDoctorById(doctorID);
-                AppointmentSlot slot = new AppointmentSlot(dateTime.getYear(), dateTime.getMonthValue(), dateTime.getDayOfMonth(), dateTime.getHour(), dateTime.getMinute());
-
-                Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
-                appointment.setStatus(status);
-                allAppointments.put(appointmentID, appointment);
             }
-        } catch (IOException e) {
-            System.out.println("Error loading appointments from CSV file: " + e.getMessage());
+            System.out.println("Successfully loaded " + allAppointments.size() + " appointments");
+
+        } catch (FileNotFoundException e) {
+            System.out.println("An error has occurred\n" + e.getMessage());
         }
     }
 
-    public boolean bookSlot() {
-        if (appointment.isAvailable()) {
+    // Utility methods for managing appointments
+    public static List<Appointment> getAppointmentsByDoctorID(String doctorID) {
+        return allAppointments.values().stream()
+                .filter(appointment -> appointment.getDoctor().getID().equals(doctorID))
+                .sorted()
+                .toList();
+    }
+
+    public static List<Appointment> getAppointmentsByPatientID(String patientID) {
+        return allAppointments.values().stream()
+                .filter(appointment -> appointment.getPatient().getID().equals(patientID))
+                .sorted()
+                .toList();
+    }
+
+    public static Appointment getAppointment(String appointmentID) {
+        return allAppointments.get(appointmentID);
+    }
+
+    public static boolean bookSlot(String appointmentID) {
+        Appointment appointment = allAppointments.get(appointmentID);
+        if (appointment != null && appointment.isAvailable()) {
             appointment.setAvailable(false);
             appointment.setStatus(AppointmentStatus.BOOKED);
-            System.out.println("Appointment booked successfully.");
-            allAppointments.put(appointment.getAppointmentID(), appointment);
+            allAppointments.put(appointmentID, appointment);
+            appointment.getDoctor().addAppointment(appointment);
             return true;
         }
-        System.out.println("Slot is not available.");
         return false;
     }
 
-    public boolean cancelSlot() {
-        if (!appointment.isAvailable()) {
+    public static boolean cancelSlot(String appointmentID) {
+        Appointment appointment = allAppointments.get(appointmentID);
+        if (appointment != null && !appointment.isAvailable()) {
             appointment.setAvailable(true);
             appointment.setStatus(AppointmentStatus.CANCELLED);
-            System.out.println("Appointment cancelled successfully.");
-            allAppointments.put(appointment.getAppointmentID(), appointment);
+            allAppointments.put(appointmentID, appointment);
+            appointment.getDoctor().removeAppointment(appointment);
             return true;
         }
-        System.out.println("Slot is already available.");
         return false;
     }
 
-    public boolean rescheduleAppointment(AppointmentSlot newSlot) {
-        if (!appointment.isAvailable()) {
-            appointment.setAvailable(true);
-            appointment.setStatus(AppointmentStatus.CANCELLED);
-            appointment.setSlot(newSlot);
-            appointment.setAvailable(false);
-            appointment.setStatus(AppointmentStatus.BOOKED);
-            System.out.println("Appointment rescheduled successfully.");
-            allAppointments.put(appointment.getAppointmentID(), appointment);
-            return true;
-        }
-        System.out.println("Cannot reschedule an available appointment.");
-        return false;
-    }
-
-    public void recordOutcome(String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions) {
-        appointment.getAppointmentOutcome().setConsultationNotes(consultationNotes);
-        appointment.getAppointmentOutcome().setPrescriptions(prescriptions);
-        appointment.setStatus(AppointmentStatus.COMPLETED);
-        System.out.println("Appointment outcome recorded.");
-        allAppointments.put(appointment.getAppointmentID(), appointment);
-    }
-
-    public void viewAppointmentDetails() {
-        System.out.println("Appointment ID: " + appointment.getAppointmentID());
-        System.out.println("Patient: " + appointment.getPatient());
-        System.out.println("Doctor: " + appointment.getDoctor().getName());
-        System.out.println("Slot: " + appointment.getSlot());
-        System.out.println("Status: " + appointment.getStatus());
-        System.out.println("Consultation Notes: " + appointment.getConsultationNotes());
-        System.out.println("Prescriptions: ");
-        HashMap<String, PrescriptionStatus> prescriptions = appointment.getPrescriptions();
-        for (String prescription : prescriptions.keySet()) {
-            System.out.println(" - " + prescription + ": " + prescriptions.get(prescription));
+    public static void recordOutcome(String appointmentID, String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions) {
+        Appointment appointment = allAppointments.get(appointmentID);
+        if (appointment != null) {
+            appointment.setConsultationNotes(consultationNotes);
+            appointment.setPrescriptions(prescriptions);
+            appointment.setStatus(AppointmentStatus.COMPLETED);
+            allAppointments.put(appointmentID, appointment);
         }
     }
 
-    // Static method to generate weekly slots
+    // Generate available slots for a week
     public static List<AppointmentSlot> generateWeeklySlots() {
         List<AppointmentSlot> slots = new ArrayList<>();
-        int year = LocalDateTime.now().getYear();
-        int month = LocalDateTime.now().getMonthValue();
-        int day = LocalDateTime.now().getDayOfMonth();
+        LocalDateTime now = LocalDateTime.now();
         int[][] times = {{9, 0}, {10, 30}, {13, 0}, {14, 30}};
-        for (int i = 0; i < 5; i++) { // Loop through Monday to Friday
+
+        for (int i = 0; i < 5; i++) { // Monday to Friday
             for (int[] time : times) {
-                slots.add(new AppointmentSlot(year, month, day + i, time[0], time[1]));
+                slots.add(new AppointmentSlot(
+                        now.getYear(),
+                        now.getMonthValue(),
+                        now.getDayOfMonth() + i,
+                        time[0],
+                        time[1]
+                ));
             }
         }
         return slots;
     }
 
-    public static List<Appointment> getAllScheduledAppointments(Patient patient) {
-        List<Appointment> scheduledAppointments = new ArrayList<>();
-        for (Appointment appointment : allAppointments.values()) {
-            if (appointment.getPatient().equals(patient) && appointment.getStatus() == AppointmentStatus.BOOKED) {
-                scheduledAppointments.add(appointment);
+    public static void saveAppointmentsToCSV(String filePath) {
+        try (FileWriter fw = new FileWriter(filePath);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+
+            // Write header
+            bw.write(CSV_HEADER);
+            bw.newLine();
+
+            // Write appointments sorted by ID for consistency
+            allAppointments.values().stream()
+                    .sorted(Comparator.comparing(Appointment::getAppointmentID))
+                    .forEach(appointment -> {
+                        try {
+                            bw.write(formatAppointmentToCSV(appointment));
+                            bw.newLine();
+                        } catch (IOException e) {
+                            System.out.println("Error writing appointment " + appointment.getAppointmentID() + ": " + e.getMessage());
+                        }
+                    });
+
+            System.out.println("Successfully saved " + allAppointments.size() + " appointments to " + filePath);
+
+        } catch (IOException e) {
+            System.out.println("Error saving appointments to CSV: " + e.getMessage());
+        }
+    }
+
+    private static String formatAppointmentToCSV(Appointment appointment) {
+        StringBuilder sb = new StringBuilder();
+
+        // Get the date components
+        AppointmentSlot slot = appointment.getSlot();
+        LocalDateTime dateTime = slot.getDateTime();
+
+        // Format prescriptions if they exist
+        String prescriptions = formatPrescriptions(appointment.getPrescriptions());
+
+        // Build the CSV line with proper escaping
+        sb.append(escapeCSV(appointment.getAppointmentID())).append(",");
+        sb.append(escapeCSV(appointment.getPatient().getID())).append(",");
+        sb.append(escapeCSV(appointment.getDoctor().getID())).append(",");
+        sb.append(dateTime.getYear()).append(",");
+        sb.append(dateTime.getMonthValue()).append(",");
+        sb.append(dateTime.getDayOfMonth()).append(",");
+        sb.append(dateTime.getHour()).append(",");
+        sb.append(dateTime.getMinute()).append(",");
+        sb.append(appointment.getStatus()).append(",");
+        sb.append(appointment.isAvailable()).append(",");
+        sb.append(escapeCSV(appointment.getConsultationNotes())).append(",");
+        sb.append(escapeCSV(prescriptions));
+
+        return sb.toString();
+    }
+
+    private static String formatPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
+        if (prescriptions == null || prescriptions.isEmpty()) {
+            return "";
+        }
+
+        return prescriptions.entrySet().stream()
+                .map(entry -> entry.getKey() + ":" + entry.getValue())
+                .reduce((a, b) -> a + ";" + b)
+                .orElse("");
+    }
+
+    private static String escapeCSV(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        // If the value contains commas, quotes, or newlines, wrap it in quotes and escape existing quotes
+        boolean needsQuoting = value.contains(",") || value.contains("\"") || value.contains("\n");
+        if (needsQuoting) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
+    }
+
+    // Optional: Method to backup before saving
+    public static void backupAndSave(String filePath) {
+        // Create backup filename with timestamp
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String backupPath = filePath.replace(".csv", "_backup_" + timestamp + ".csv");
+
+        // Copy existing file to backup if it exists
+        File originalFile = new File(filePath);
+        if (originalFile.exists()) {
+            try {
+                Files.copy(originalFile.toPath(), new File(backupPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Backup created: " + backupPath);
+            } catch (IOException e) {
+                System.out.println("Warning: Could not create backup: " + e.getMessage());
             }
         }
-        return scheduledAppointments;
+
+        // Save current data
+        saveAppointmentsToCSV(filePath);
     }
 }
