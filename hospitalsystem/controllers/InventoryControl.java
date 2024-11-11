@@ -102,36 +102,36 @@ public class InventoryControl {
             repeat = MainSystem.getRepeatChoice(sc);
         }  while (repeat);
     } 
+// moved to AdminInventoryControl class
+    // public static void updateLowStockAlarmLine(Scanner sc) {
+    //     boolean repeat;
+    //     do {
+    //         System.out.println("=========================================");  
+    //         System.out.println("Inventory Management > Update Low Stock Alarm Line");
+    //         System.out.print("Enter the name of the medicine to update: ");
+    //         String medicineName = sc.nextLine().trim();
 
-    public static void updateLowStockAlarmLine(Scanner sc) {
-        boolean repeat;
-        do {
-            System.out.println("=========================================");  
-            System.out.println("Inventory Management > Update Low Stock Alarm Line");
-            System.out.print("Enter the name of the medicine to update: ");
-            String medicineName = sc.nextLine().trim();
-
-            // Check if medicine exists
-            if (inventoryMap.containsKey(medicineName)) {
-                Medicine medicine = inventoryMap.get(medicineName);
+    //         // Check if medicine exists
+    //         if (inventoryMap.containsKey(medicineName)) {
+    //             Medicine medicine = inventoryMap.get(medicineName);
                 
-                // Prompt for new stock
-                System.out.println("Current low stock alert line for " + medicineName + " is " + medicine.getLowStockAlert());
-                System.out.println("Enter the new alert line: ");
-                try {
-                    int newAlertLine = Integer.parseInt(sc.nextLine().trim());
-                    medicine.setLowStockAlert(newAlertLine); 
-                    System.out.println("Stock level for " + medicineName + " has been updated to " + newAlertLine);
-                } catch (NumberFormatException e) {
-                    System.out.println("Invalid input. Please enter a valid number.");
-                }
-            } else 
-                System.out.println("Medicine not found in inventory: " + medicineName);
+    //             // Prompt for new stock
+    //             System.out.println("Current low stock alert line for " + medicineName + " is " + medicine.getLowStockAlert());
+    //             System.out.println("Enter the new alert line: ");
+    //             try {
+    //                 int newAlertLine = Integer.parseInt(sc.nextLine().trim());
+    //                 medicine.setLowStockAlert(newAlertLine); 
+    //                 System.out.println("Stock level for " + medicineName + " has been updated to " + newAlertLine);
+    //             } catch (NumberFormatException e) {
+    //                 System.out.println("Invalid input. Please enter a valid number.");
+    //             }
+    //         } else 
+    //             System.out.println("Medicine not found in inventory: " + medicineName);
             
-            // Give option to repeat 
-            repeat = MainSystem.getRepeatChoice(sc);
-        }  while (repeat);
-    } 
+    //         // Give option to repeat 
+    //         repeat = MainSystem.getRepeatChoice(sc);
+    //     }  while (repeat);
+    // } 
 
     public static void loadInventoryFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
@@ -158,54 +158,13 @@ public class InventoryControl {
     private Map<String, Integer> inventory; // Store medication and their quantities
     private Map<String, Integer> lowStockThresholds; // Thresholds for low stock alerts
 
-    // Constructor
-    public InventoryControl() {
-        inventory = new HashMap<>();
-        lowStockThresholds = new HashMap<>();
-    }
 
-    // Method to add a new medication to inventory
-    public void addMedication(String medicationName, int initialStock, int lowStockThreshold) {
-        inventory.put(medicationName, initialStock);
-        lowStockThresholds.put(medicationName, lowStockThreshold);
-        System.out.println(medicationName + " added to inventory with initial stock of " + initialStock);
-    }
-
-    // Method to view the current stock of all medications
-    public void viewInventory() {
-        System.out.println("Medication Inventory:");
-        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
-            System.out.println("Medication: " + entry.getKey() + ", Quantity: " + entry.getValue());
-        }
-    }
     // Check stock level of a specific medication
     public int checkStock(String medicationName) {
         return inventory.getOrDefault(medicationName, -1); // Returns -1 if not found
     }
 
-    // Remove a medication from inventory
-    public boolean removeMedication(String medicationName) {
-        if (inventory.containsKey(medicationName)) {
-            inventory.remove(medicationName);
-            lowStockThresholds.remove(medicationName);
-            System.out.println(medicationName + " has been removed from the inventory.");
-            return true;
-        } else {
-            System.out.println("Error: Medication " + medicationName + " not found in inventory.");
-            return false;
-        }
-    }
-
-    // Update the low stock threshold for a medication
-    public void updateLowStockThreshold(String medicationName, int newThreshold) {
-        if (lowStockThresholds.containsKey(medicationName)) {
-            lowStockThresholds.put(medicationName, newThreshold);
-            System.out.println("Low stock threshold for " + medicationName + " updated to " + newThreshold);
-        } else {
-            System.out.println("Error: Medication " + medicationName + " not found in inventory.");
-        }
-    }
-
+    
     // Method to check if a medication is below the low stock threshold
     public boolean isLowStock(String medicationName) {
         if (inventory.containsKey(medicationName)) {
@@ -214,28 +173,29 @@ public class InventoryControl {
         System.out.println("Medication not found in inventory.");
         return false;
     }
-
-    // Method to submit a replenishment request
-    public boolean submitReplenishmentRequest(String medicationName, int quantity) {
-        if (inventory.containsKey(medicationName)) {
-            inventory.put(medicationName, inventory.get(medicationName) + quantity);
-            System.out.println("Replenishment request: Added " + quantity + " units of " + medicationName);
-            return true;
-        } else {
-            System.out.println("Error: Medication " + medicationName + " does not exist in inventory.");
-            return false;
-        }
-    }
-
-    // Method to update inventory manually
-    public void updateMedicationStock(String medicationName, int newQuantity) {
-        if (inventory.containsKey(medicationName)) {
-            inventory.put(medicationName, newQuantity);
-            System.out.println(medicationName + " stock updated to " + newQuantity);
-        } else {
-            System.out.println("Error: Medication " + medicationName + " does not exist in inventory.");
-        }
-    }
+// moved to PharmacistInventoryControl class
+    // // Method to submit a replenishment request
+    // public boolean submitReplenishmentRequest(String medicationName, int quantity) {
+    //     if (inventory.containsKey(medicationName)) {
+    //         inventory.put(medicationName, inventory.get(medicationName) + quantity);
+    //         System.out.println("Replenishment request: Added " + quantity + " units of " + medicationName);
+    //         return true;
+    //     } else {
+    //         System.out.println("Error: Medication " + medicationName + " does not exist in inventory.");
+    //         return false;
+    //     }
+    // }
+    
+//remove
+    // // Method to update inventory manually
+    // public void updateMedicationStock(String medicationName, int newQuantity) {
+    //     if (inventory.containsKey(medicationName)) {
+    //         inventory.put(medicationName, newQuantity);
+    //         System.out.println(medicationName + " stock updated to " + newQuantity);
+    //     } else {
+    //         System.out.println("Error: Medication " + medicationName + " does not exist in inventory.");
+    //     }
+    // }
 
     // Get a list of medications below the low stock threshold
     public List<String> getLowStockMedications() {
