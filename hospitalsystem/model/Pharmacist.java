@@ -1,59 +1,33 @@
 package hospitalsystem.model;
+
+import java.util.ArrayList;
 import java.util.List;
-import hospital.models.Prescription;
-import hospital.models.PrescriptionStatus;
-import hospital.controls.InventoryControl;
+import hospitalsystem.controllers.PharmacistInventoryControl;
 import hospital.models.User;
 
 public class Pharmacist extends User {
-    // Fields
-    // private List<Prescription> prescriptions; // List of prescriptions to manage
-    private InventoryControl inventoryControl; // Access to inventory control for managing stock
-    private List<Prescription> prescriptions = new ArrayList<>();
-    
+    private List<Prescription> prescriptions; // List of prescriptions managed by the pharmacist
+    private final PharmacistInventoryControl inventoryControl; // Pharmacist-specific inventory control
+
     // Constructor
-    public Pharmacist(String userId, String password, InventoryControl inventoryControl) {
+    public Pharmacist(String userId, String password, PharmacistInventoryControl inventoryControl) {
         super(userId, password);
+        this.prescriptions = new ArrayList<>(); // Initialize the prescription list
         this.inventoryControl = inventoryControl;
     }
-    // Methods
 
-    // View all prescriptions assigned to this pharmacist
-    public void viewPrescriptions() {
-        System.out.println("Viewing all prescriptions:");
-        for (Prescription prescription : prescriptions) {
-            System.out.println(prescription);
-        }
-    }
-
-    // Update the status of a prescription
-    public void updatePrescriptionStatus(Prescription prescription, PrescriptionStatus status) {
-        prescription.setStatus(status);
-        System.out.println("Prescription status updated to: " + status);
-    }
-
-    // Request replenishment for a medication if the stock is low
-    public void requestReplenishment(String medicationName, int quantity) {
-        boolean requestSuccess = inventoryControl.submitReplenishmentRequest(medicationName, quantity);
-        if (requestSuccess) {
-            System.out.println("Replenishment request submitted successfully for " + medicationName);
-        } else {
-            System.out.println("Failed to submit replenishment request for " + medicationName);
-        }
-    }
-    
+    // Method to add a prescription to the pharmacist's list
     public void addPrescription(Prescription prescription) {
         prescriptions.add(prescription);
         System.out.println("Prescription added to pharmacist's list.");
     }
-
-    // Getter for prescriptions list
+    
+    // Getters only, as we don’t want setters for inventory control
     public List<Prescription> getPrescriptions() {
         return prescriptions;
     }
 
-    // Getter for inventory control instance
-    public InventoryControl getInventoryControl() {
+    public PharmacistInventoryControl getInventoryControl() {
         return inventoryControl;
     }
 }
