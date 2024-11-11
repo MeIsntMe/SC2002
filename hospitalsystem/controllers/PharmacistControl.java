@@ -1,4 +1,4 @@
-package hospital.controls;
+package hospitalsystem.controllers;
 
 import java.util.List;
 import hospital.models.Prescription;
