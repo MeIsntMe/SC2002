@@ -130,8 +130,6 @@ public class Appointment implements Comparable<Appointment>{
             this.prescriptions = prescriptions;
         }
 
-
-
         public HashMap<String, PrescriptionStatus> getPrescriptions() {
             return prescriptions;
         }
@@ -139,8 +137,6 @@ public class Appointment implements Comparable<Appointment>{
         public String getConsultationNotes() {
             return consultationNotes;
         }
-
-
 
         public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
             this.prescriptions = prescriptions;

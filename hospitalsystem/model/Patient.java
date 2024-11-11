@@ -1,28 +1,23 @@
 package hospitalsystem.model;
-import java.io.Console;
 import java.util.ArrayList;
-import java.util.Scanner;
 
-import hospitalsystem.model.Appointment.AppointmentSlot;
-
-public class Patient {
+public class Patient extends User{
     private final String patientID;
-    private Scanner sc;
-    private MedicalRecord medicalRecord;
-    //Requires deletion upon finishing appointment
+    private final MedicalRecord medicalRecord;
     private ArrayList<Appointment> appointments;
     private int totalAppointmentCount;
 
-    public Patient(String HospitalID, Scanner scanner){
+    public Patient(String HospitalID, String name, String gender, String password){
+        super(HospitalID, name, gender, password);
         this.patientID = HospitalID;
-        this.sc = scanner;
-        MedicalRecord medicalRecord = new MedicalRecord(this.patientID);
+        this.medicalRecord = new MedicalRecord(this);
     }
 
     public MedicalRecord getMedicalRecord(){
         return this.medicalRecord;
     }
 
+    @Override
     public String getID(){
         return this.patientID;
     }

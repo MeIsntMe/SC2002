@@ -8,6 +8,7 @@ import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class PatientControl {
@@ -15,7 +16,7 @@ public class PatientControl {
     private static Scanner sc;
     private Patient patient;
     private int choice, innerChoice, tempCount;
-    ArrayList<Doctor> doctors = new ArrayList<>(MainSystem.doctors);
+    Map<String, User> doctors = MainSystem.doctorsMap;
     Doctor selectedDoctor;
 
     public void displayMenu(){
@@ -39,7 +40,8 @@ public class PatientControl {
                         break;
                     case 2:
                         //Update Personal Information
-                        //Do we want gender and name?
+                        //Do we want gender and name? No. We not progressive
+                        //Shove into function
                         while(true){
                             System.out.println("What would you like to update?");
                             System.out.println("1. Phone Number");
@@ -393,6 +395,7 @@ public class PatientControl {
             return false;
         }
     }
+    
     public boolean addAppointment(int slotIndex, Doctor doctor){
         try {
             List<AppointmentSlot> newSlots = doctor.getAvailableSlots();
