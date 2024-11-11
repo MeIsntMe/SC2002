@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 public class PatientControl implements MenuInterface{
     private static Scanner sc;
-    private Patient patient;
+    private final Patient patient;
     private int choice, innerChoice, tempCount;
     Map<String, User> doctors = MainSystem.doctorsMap;
     Doctor selectedDoctor;
@@ -362,7 +362,7 @@ public class PatientControl implements MenuInterface{
     }
 
     public int displayAppointmentsByType(AppointmentStatus status){
-        ArrayList<Appointment> appointments = patient.getAppointments();
+        List<Appointment> appointments = patient.getAppointments();
         int appointmentCount = 0;
         for (Appointment appointment:appointments){
             if (appointment.getStatus() == status){
@@ -380,7 +380,7 @@ public class PatientControl implements MenuInterface{
     }
 
     public int displayAppointmentsByType(int initialIndex, AppointmentStatus status){
-        ArrayList<Appointment> appointments = patient.getAppointments();
+        List<Appointment> appointments = patient.getAppointments();
         int appointmentCount = initialIndex;
         for (Appointment appointment:appointments){
             if (appointment.getStatus() == status){
@@ -396,7 +396,7 @@ public class PatientControl implements MenuInterface{
     public int getChosenAppointmentIndex(int index){
         int relIndex = 1;
         int actualIndex = 0;
-        ArrayList<Appointment> appointments = patient.getAppointments();
+        List<Appointment> appointments = patient.getAppointments();
         for (Appointment appointment:appointments){
             if (appointment.getStatus() == AppointmentStatus.BOOKED || appointment.getStatus() == AppointmentStatus.PENDING){ 
                 if (relIndex == index){
@@ -437,10 +437,9 @@ public class PatientControl implements MenuInterface{
             Appointment newAppointment = new Appointment(patient.getID()+String.valueOf(patient.getTotalAppointmentCount()), patient, selectedDoctor, selectedslot, null);
             doctor.addAppointment(newAppointment);
 
-            ArrayList<Appointment> newAppointments = patient.getAppointments();
+            List<Appointment> newAppointments = patient.getAppointments();
             newAppointments.add(newAppointment);
             patient.setAppointments(newAppointments);
-            patient.addAppointmentCount();
 
             return true;
         } catch (Exception e){
