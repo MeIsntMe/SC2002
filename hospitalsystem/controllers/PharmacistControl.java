@@ -6,10 +6,14 @@ import hospital.enums.PrescriptionStatus;
 import hospital.models.Pharmacist;
 import hospital.models.Medicine;
 
-public class PharmacistControl {
-
+public class PharmacistControl implements MenuInterface {
     private Pharmacist pharmacist;
     private InventoryControl inventoryControl;
+
+    @Override
+    public void displayMenu(){
+        //Add menu here
+    }
 
     // Constructor
     public PharmacistControl(Pharmacist pharmacist, InventoryControl inventoryControl) {

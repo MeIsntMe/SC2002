@@ -9,8 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
-public class DoctorControl {
-    public static void displayMenu() {
+public class DoctorControl implements MenuInterface{
+
+    @Override
+    public void displayMenu() {
         Scanner scanner = new Scanner(System.in);
         Doctor currentDoctor = (Doctor) MainSystem.currentUser;
 

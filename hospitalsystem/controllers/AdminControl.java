@@ -7,6 +7,7 @@ import hospitalsystem.MainSystem;
 
 public class AdminControl implements MenuInterface {
     
+    @Override
     public void displayMenu(){
         while (true) {
             Scanner scanner = new Scanner(System.in);

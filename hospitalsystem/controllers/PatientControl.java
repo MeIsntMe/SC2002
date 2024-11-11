@@ -11,22 +11,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class PatientControl {
-    private static List<String> listOfMethods = List.of("test", "test2");
+public class PatientControl implements MenuInterface{
     private static Scanner sc;
     private Patient patient;
     private int choice, innerChoice, tempCount;
     Map<String, User> doctors = MainSystem.doctorsMap;
     Doctor selectedDoctor;
 
+    public PatientControl(User patient) {
+        this.patient = (Patient)patient;
+    }
+
+    
+    @Override
     public void displayMenu(){
         boolean continueFlag = true;
         sc = new Scanner(System.in);
         System.out.println("Available Options: ");
-            for (int i = 0; i < listOfMethods.size(); i++) {
-                System.out.printf("%d: %s\n", i, listOfMethods.get(i));
-                i++;
-            }
+        System.out.println("1. View Medical Record");
+        System.out.println("2. Update Personal Information ");
+        System.out.println("3. View Available Slots for a Doctor ");
+        System.out.println("4. Schedule Appointment with a Doctor ");
+        System.out.println("5. Reschedule Appointment ");
+        System.out.println("6. Cancel Appointment ");
+        System.out.println("7. View Scheduled Appointments ");
+        System.out.println("8. Display Past Appointment Outcomes ");
+        System.out.println("9. Log Out ");
         while (continueFlag){
             try {
                 choice = sc.nextInt();
@@ -40,213 +50,36 @@ public class PatientControl {
                         break;
                     case 2:
                         //Update Personal Information
-                        //Do we want gender and name? No. We not progressive
-                        //Shove into function
-                        while(true){
-                            System.out.println("What would you like to update?");
-                            System.out.println("1. Phone Number");
-                            System.out.println("2. Email");
-                            System.out.println("3. Exit");
-                            System.out.print("Enter choice: ");
-                            innerChoice = sc.nextInt();
-                            if (sc.hasNext()){
-                                sc.skip(".*");
-                            }
-                            if (innerChoice == 1){
-                                while (true){
-                                    System.out.print("Please enter your number: ");
-                                    String newNumber = sc.nextLine();
-                                    if (newNumber.length() > 13){
-                                        System.out.println("Invalid Number. Please try again.");
-                                        continue;
-                                    }
-                                    if (updatePhoneNumber(newNumber)){
-                                        System.out.println("Number succesfully updated.");
-                                        break;
-                                    }
-                                }
-                            }
-                            else if (innerChoice == 2){
-                                while (true){
-                                    System.out.print("Please enter your email: ");
-                                    String newEmail = sc.nextLine();
-                                    if (!newEmail.contains("@")){
-                                        System.out.println("Invalid email. Please try again.");
-                                        continue;
-                                    }
-                                    if (updateEmail(newEmail)){
-                                        System.out.println("Email succesfully updated.");
-                                        break;
-                                    }
-                                }
-                            }
-                            else if (innerChoice != 3){
-                                System.out.println("Invalid choice. Please try again.");
-                                continue;
-                            }
-                            break;
-                        }
+                        updatePersonalInformation();
                         break;
                     case 3:
                         // View available appointment slots of a specific doctor
-                        System.out.println("Which doctor's availability would you like to view?");
-                        for (int i = 0; i < doctors.size(); i++) {
-                            System.out.printf("%d. %s", i, doctors.get(i).getName());
-                        }
-                        while (true) {
-                            innerChoice = sc.nextInt();
-                            if (sc.hasNext()){
-                                sc.skip(".*");
-                            }
-                            if (innerChoice >= doctors.size()){
-                               System.out.printf("Invalid Choice. Please input integer from 1 to %d", doctors.size()-1); 
-                               continue;
-                            }
-                            tempCount = 1;
-                            selectedDoctor = doctors.get(innerChoice);
-                            System.out.println("Availability of Dr. " + selectedDoctor.getName());
-                            for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
-                                System.out.printf("%d. %s\n", tempCount, slot.toString());
-                                tempCount += 1;
-                            }
-                            break;
-                        }
+                        viewAppointmentSlots();
                         break;
                     case 4:
                         //Scheduling an Appointment with a specific doctor
-                        System.out.println("Which doctor would you like to schedule an appointment with?");
-                        for (int i = 0; i < doctors.size(); i++) {
-                            System.out.printf("%d. %s", i, doctors.get(i).getName());
-                        }
-                        while (true) {
-                            innerChoice = sc.nextInt();
-                            if (sc.hasNext()){
-                                sc.skip(".*");
-                            }
-                            if (innerChoice >= doctors.size()){
-                               System.out.printf("Invalid Choice. Please input integer from 1 to %d", doctors.size()-1); 
-                               continue;
-                            }
-                            tempCount = 1;
-                            
-                            System.out.println("Which slot would you like to book?" + selectedDoctor.getName());
-                            for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
-                                System.out.printf("%d. %s\n", tempCount, slot.toString());
-                                tempCount += 1;
-                            }
-                            innerChoice = sc.nextInt();
-                            if (sc.hasNext()){
-                                sc.skip(".*");
-                            }
-                            if (innerChoice > tempCount || innerChoice <= 0){
-                                System.out.println("Invalid Choice. Please try again.");
-                                continue;
-                            }
-                            addAppointment(innerChoice, selectedDoctor);
-                            System.out.println("Appointment Scheduled");
-                            break;
-                        }
+                        scheduleAppointment();
                         break;
                     case 5:
                         //Rescheduling
-                        System.out.println("====================================");
-                        System.out.println("       Scheduled Appointments       ");
-                        System.out.println("====================================");
-                        System.out.println("-----");
-                        System.out.println("Confirmed Appointments:");
-                        System.out.println("-----");
-                        tempCount = displayAppointmentsByType(1, AppointmentStatus.COMPLETED);
-                        System.out.println("-----");
-                        System.out.println("Pending Appointments:");
-                        System.out.println("-----");
-                        displayAppointmentsByType(tempCount, AppointmentStatus.PENDING);
-                        System.out.println("====================================");
-                        while (true){
-                            System.out.println("Which appointment would you like to reschedule?");
-                            System.out.print("Appointment Number: ");
-                            innerChoice = sc.nextInt();
-                            if (sc.hasNext()){
-                                sc.skip(".*");
-                            }
-                            if (getChosenAppointmentIndex(innerChoice)!=-1){
-                                selectedDoctor = patient.getAppointments().get(getChosenAppointmentIndex(innerChoice)).getDoctor();
-                                if (deleteAppointment(getChosenAppointmentIndex(innerChoice))){
-                                    break;
-                                }
-                            }
-                            System.out.println("Unable to find chosen appointment, please try again.");
-                        }
-                        while (true){
-                            System.out.println("Which slot would you like to change to?" + selectedDoctor.getName());
-                            tempCount = 1;
-                            for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
-                                System.out.printf("%d. %s\n", tempCount, slot.toString());
-                                tempCount += 1;
-                            }
-                            innerChoice = sc.nextInt();
-                            if (sc.hasNext()){
-                                sc.skip(".*");
-                            }
-                            if (innerChoice > tempCount || innerChoice <= 0){
-                                System.out.println("Invalid Choice. Please try again.");
-                                continue;
-                            }
-                            addAppointment(innerChoice, selectedDoctor);
-                            System.out.println("Appointment Rescheduled");
-                            break;
-                        }
+                        reschduleAppointment();
                         break;               
                     case 6:
                         //Cancal appointment
-                        System.out.println("====================================");
-                        System.out.println("       Scheduled Appointments       ");
-                        System.out.println("====================================");
-                        System.out.println("-----");
-                        System.out.println("Confirmed Appointments:");
-                        System.out.println("-----");
-                        tempCount = displayAppointmentsByType(1, AppointmentStatus.COMPLETED);
-                        System.out.println("-----");
-                        System.out.println("Pending Appointments:");
-                        System.out.println("-----");
-                        displayAppointmentsByType(tempCount, AppointmentStatus.PENDING);
-                        System.out.println("====================================");
-                        while (true){
-                            System.out.println("Which appointment would you like to cancel?");
-                            System.out.print("Appointment Number: ");
-                            innerChoice = sc.nextInt();
-                            if (sc.hasNext()){
-                                sc.skip(".*");
-                            }
-                            if (getChosenAppointmentIndex(innerChoice)!=-1){
-                                if (deleteAppointment(getChosenAppointmentIndex(innerChoice))){
-                                    System.out.println("Appointment successfully cancelled.");
-                                    break;
-                                }
-                            }
-                            System.out.println("Unable to find chosen appointment, please try again.");
-                        }
+                        cancelAppointment();
                         break;
-                
                     case 7:
                         //View scheduled appointments
-                        System.out.println("====================================");
-                        System.out.println("       Scheduled Appointments       ");
-                        System.out.println("====================================");
-                        System.out.println("-----");
-                        System.out.println("Confirmed Appointments:");
-                        System.out.println("-----");
-                        tempCount = displayAppointmentsByType(1, AppointmentStatus.BOOKED);
-                        System.out.println("-----");
-                        System.out.println("Pending Appointments:");
-                        System.out.println("-----");
-                        displayAppointmentsByType(tempCount, AppointmentStatus.PENDING);
+                        viewScheduledAppointments();
                         break;
                 
                     case 8:
+                        //Display past appointment outcomes
                         displayPastAppointmentOutcomes();
                         break;
                 
                     case 9:
+                        //logout
                         continueFlag = false;
                         System.out.println("You have successfully logged out.");
                         break;
@@ -261,6 +94,206 @@ public class PatientControl {
                 System.out.println("An error has occurred: " + e);
             }
         }
+    }
+
+    public void updatePersonalInformation(){
+        while(true){
+            System.out.println("What would you like to update?");
+            System.out.println("1. Phone Number");
+            System.out.println("2. Email");
+            System.out.println("3. Exit");
+            System.out.print("Enter choice: ");
+            innerChoice = sc.nextInt();
+            if (sc.hasNext()){
+                sc.skip(".*");
+            }
+            if (innerChoice == 1){
+                while (true){
+                    System.out.print("Please enter your number: ");
+                    String newNumber = sc.nextLine();
+                    if (newNumber.length() > 13){
+                        System.out.println("Invalid Number. Please try again.");
+                        continue;
+                    }
+                    if (updatePhoneNumber(newNumber)){
+                        System.out.println("Number succesfully updated.");
+                        break;
+                    }
+                }
+            }
+            else if (innerChoice == 2){
+                while (true){
+                    System.out.print("Please enter your email: ");
+                    String newEmail = sc.nextLine();
+                    if (!newEmail.contains("@")){
+                        System.out.println("Invalid email. Please try again.");
+                        continue;
+                    }
+                    if (updateEmail(newEmail)){
+                        System.out.println("Email succesfully updated.");
+                        break;
+                    }
+                }
+            }
+            else if (innerChoice != 3){
+                System.out.println("Invalid choice. Please try again.");
+                continue;
+            }
+            break;
+        }
+    }
+
+    public void viewAppointmentSlots(){
+        System.out.println("Which doctor's availability would you like to view?");
+        for (int i = 0; i < doctors.size(); i++) {
+            System.out.printf("%d. %s", i, doctors.get(i).getName());
+        }
+        while (true) {
+            innerChoice = sc.nextInt();
+            if (sc.hasNext()){
+                sc.skip(".*");
+            }
+            if (innerChoice >= doctors.size()){
+                System.out.printf("Invalid Choice. Please input integer from 1 to %d", doctors.size()-1); 
+                continue;
+            }
+            tempCount = 1;
+            selectedDoctor = doctors.get(innerChoice);
+            System.out.println("Availability of Dr. " + selectedDoctor.getName());
+            for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
+                System.out.printf("%d. %s\n", tempCount, slot.toString());
+                tempCount += 1;
+            }
+            break;
+        }
+    }
+
+    public void scheduleAppointment(){
+        System.out.println("Which doctor would you like to schedule an appointment with?");
+        for (int i = 0; i < doctors.size(); i++) {
+            System.out.printf("%d. %s", i, doctors.get(i).getName());
+        }
+        while (true) {
+            innerChoice = sc.nextInt();
+            if (sc.hasNext()){
+                sc.skip(".*");
+            }
+            if (innerChoice >= doctors.size()){
+                System.out.printf("Invalid Choice. Please input integer from 1 to %d", doctors.size()-1); 
+                continue;
+            }
+            tempCount = 1;
+            
+            System.out.println("Which slot would you like to book?" + selectedDoctor.getName());
+            for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
+                System.out.printf("%d. %s\n", tempCount, slot.toString());
+                tempCount += 1;
+            }
+            innerChoice = sc.nextInt();
+            if (sc.hasNext()){
+                sc.skip(".*");
+            }
+            if (innerChoice > tempCount || innerChoice <= 0){
+                System.out.println("Invalid Choice. Please try again.");
+                continue;
+            }
+            addAppointment(innerChoice, selectedDoctor);
+            System.out.println("Appointment Scheduled");
+            break;
+        }
+    }
+
+    public void reschduleAppointment(){
+        System.out.println("====================================");
+        System.out.println("       Scheduled Appointments       ");
+        System.out.println("====================================");
+        System.out.println("-----");
+        System.out.println("Confirmed Appointments:");
+        System.out.println("-----");
+        tempCount = displayAppointmentsByType(1, AppointmentStatus.COMPLETED);
+        System.out.println("-----");
+        System.out.println("Pending Appointments:");
+        System.out.println("-----");
+        displayAppointmentsByType(tempCount, AppointmentStatus.PENDING);
+        System.out.println("====================================");
+        while (true){
+            System.out.println("Which appointment would you like to reschedule?");
+            System.out.print("Appointment Number: ");
+            innerChoice = sc.nextInt();
+            if (sc.hasNext()){
+                sc.skip(".*");
+            }
+            if (getChosenAppointmentIndex(innerChoice)!=-1){
+                selectedDoctor = patient.getAppointments().get(getChosenAppointmentIndex(innerChoice)).getDoctor();
+                if (deleteAppointment(getChosenAppointmentIndex(innerChoice))){
+                    break;
+                }
+            }
+            System.out.println("Unable to find chosen appointment, please try again.");
+        }
+        while (true){
+            System.out.println("Which slot would you like to change to?" + selectedDoctor.getName());
+            tempCount = 1;
+            for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
+                System.out.printf("%d. %s\n", tempCount, slot.toString());
+                tempCount += 1;
+            }
+            innerChoice = sc.nextInt();
+            if (sc.hasNext()){
+                sc.skip(".*");
+            }
+            if (innerChoice > tempCount || innerChoice <= 0){
+                System.out.println("Invalid Choice. Please try again.");
+                continue;
+            }
+            addAppointment(innerChoice, selectedDoctor);
+            System.out.println("Appointment Rescheduled");
+            break;
+        }
+    }
+    
+    public void cancelAppointment(){
+        System.out.println("====================================");
+        System.out.println("       Scheduled Appointments       ");
+        System.out.println("====================================");
+        System.out.println("-----");
+        System.out.println("Confirmed Appointments:");
+        System.out.println("-----");
+        tempCount = displayAppointmentsByType(1, AppointmentStatus.COMPLETED);
+        System.out.println("-----");
+        System.out.println("Pending Appointments:");
+        System.out.println("-----");
+        displayAppointmentsByType(tempCount, AppointmentStatus.PENDING);
+        System.out.println("====================================");
+        while (true){
+            System.out.println("Which appointment would you like to cancel?");
+            System.out.print("Appointment Number: ");
+            innerChoice = sc.nextInt();
+            if (sc.hasNext()){
+                sc.skip(".*");
+            }
+            if (getChosenAppointmentIndex(innerChoice)!=-1){
+                if (deleteAppointment(getChosenAppointmentIndex(innerChoice))){
+                    System.out.println("Appointment successfully cancelled.");
+                    break;
+                }
+            }
+            System.out.println("Unable to find chosen appointment, please try again.");
+        }
+    }
+    
+    public void viewScheduledAppointments(){
+        System.out.println("====================================");
+        System.out.println("       Scheduled Appointments       ");
+        System.out.println("====================================");
+        System.out.println("-----");
+        System.out.println("Confirmed Appointments:");
+        System.out.println("-----");
+        tempCount = displayAppointmentsByType(1, AppointmentStatus.BOOKED);
+        System.out.println("-----");
+        System.out.println("Pending Appointments:");
+        System.out.println("-----");
+        displayAppointmentsByType(tempCount, AppointmentStatus.PENDING);
     }
 
     public void displayMedicalRecord(){
