@@ -1,52 +1,23 @@
 package hospitalsystem.controllers;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.util.InputMismatchException;
-import java.util.Map;
 import java.util.Scanner;
 
 import hospitalsystem.MainSystem;
-import hospitalsystem.model.Inventory;
+import hospitalsystem.model.Medicine;
 
 public class InventoryControl {
     
-    // MANAGE INVENTORY MENU
-    public static void manageInventoryMenu(){
-        while (true) {
-            Scanner sc = new Scanner(System.in);
-            
-            System.out.println("=========================================");
-            System.out.println("Inventory Management: ");
-            System.out.println("1. Display inventory");
-            System.out.println("2. Add medicine");
-            System.out.println("3. Remove medicine");
-            System.out.println("4. Update stock level"); 
-            System.out.println("5. Update low stock level alert line");
-            System.out.println("6. Exit Medical Inventory Management");
-            System.out.print("Enter choice: ");
-
-            try{
-                int choice = sc.nextInt();
-                switch (choice) {
-                    case 1 -> displayInventory();
-                    case 2 -> addMedicine(sc);  
-                    case 3 -> removeMedicine(sc);
-                    case 4 -> updateStockLevel(sc);
-                    case 5 -> updateLowStockAlarmLine(sc);
-                    case 6 -> { sc.close(); return; }
-                    default -> System.out.println("Invalid input! Please enter a number between 1-5 ");
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input! ");
-            }
-        }
-    }
+    // HashMap to store inventory 
+    public static Map<String, Medicine> inventoryMap = new HashMap<>();
 
     public static void displayInventory() {
-        if (MainSystem.inventoryMap.isEmpty()) {
+        if (inventoryMap.isEmpty()) {
             System.out.println("The inventory is currently empty.");
             return;
         }
@@ -54,8 +25,8 @@ public class InventoryControl {
         // Print in table format with headers 
         System.out.printf("%-20s %-15s %-20s%n", "Medicine Name", "Initial Stock", "Low Stock Alert Level");
         System.out.println("-------------------------------------------------------------");
-        for (Map.Entry<String, Inventory> entry : MainSystem.inventoryMap.entrySet()) {
-            Inventory med = entry.getValue();
+        for (Map.Entry<String, Medicine> entry : inventoryMap.entrySet()) {
+            Medicine med = entry.getValue();
             System.out.printf("%-20s %-15d %-20d%n", med.getMedicineName(), med.getInitialStock(), med.getLowStockAlert());
         }
     }
@@ -74,8 +45,8 @@ public class InventoryControl {
             int lowStockAlert = sc.nextInt();
             sc.nextLine();
 
-            Inventory medicine = new Inventory(medicineName, initialStock, lowStockAlert);
-            MainSystem.inventoryMap.put(medicineName, medicine);
+            Medicine medicine = new Medicine(medicineName, initialStock, lowStockAlert);
+            inventoryMap.put(medicineName, medicine);
             System.out.printf("%s successfully added into inventory.", medicineName);
             
             // Give option to repeat 
@@ -91,8 +62,8 @@ public class InventoryControl {
             System.out.print("Enter name of medicine to remove:");
             String medicineName = sc.nextLine();
             
-            if (MainSystem.inventoryMap.containsKey(medicineName)) {
-                MainSystem.inventoryMap.remove(medicineName);
+            if (inventoryMap.containsKey(medicineName)) {
+                inventoryMap.remove(medicineName);
                 System.out.println(medicineName + " has been removed from the inventory.");
             } else 
                 System.out.println("Medicine not found in inventory: " + medicineName);
@@ -111,8 +82,8 @@ public class InventoryControl {
             String medicineName = sc.nextLine().trim();
 
             // Check if medicine exists
-            if (MainSystem.inventoryMap.containsKey(medicineName)) {
-                Inventory medicine = MainSystem.inventoryMap.get(medicineName);
+            if (inventoryMap.containsKey(medicineName)) {
+                Medicine medicine = inventoryMap.get(medicineName);
                 
                 // Prompt for new stock
                 System.out.println("Current stock level for " + medicineName + " is " + medicine.getInitialStock());
@@ -141,8 +112,8 @@ public class InventoryControl {
             String medicineName = sc.nextLine().trim();
 
             // Check if medicine exists
-            if (MainSystem.inventoryMap.containsKey(medicineName)) {
-                Inventory medicine = MainSystem.inventoryMap.get(medicineName);
+            if (inventoryMap.containsKey(medicineName)) {
+                Medicine medicine = inventoryMap.get(medicineName);
                 
                 // Prompt for new stock
                 System.out.println("Current low stock alert line for " + medicineName + " is " + medicine.getLowStockAlert());
@@ -162,6 +133,25 @@ public class InventoryControl {
         }  while (repeat);
     } 
 
+    public static void loadInventoryFromCSV(String filePath) {
+        try (Scanner scanner = new Scanner(new File(filePath))) {
+            scanner.nextLine(); // Skip the header line if there is one
+            while (scanner.hasNextLine()) {
+                String[] inventoryData = scanner.nextLine().split(",");
+                String medicineName = inventoryData[0].trim();
+                int initialStock = Integer.parseInt(inventoryData[1].trim());
+                int lowStockAlert = Integer.parseInt(inventoryData[2].trim());
+
+                Medicine medicine = new Medicine(medicineName, initialStock, lowStockAlert);
+                inventoryMap.put(medicineName, medicine);
+            }
+            System.out.println("Inventory loaded successfully from CSV.");
+        } catch (FileNotFoundException e) {
+            System.out.println("CSV file not found: " + e.getMessage());
+        } catch (NumberFormatException e) {
+            System.out.println("Error parsing number from CSV: " + e.getMessage());
+        }
+    }
 
     // MERGE CONFLICT WITH BELOW - TO DISCUSS
 

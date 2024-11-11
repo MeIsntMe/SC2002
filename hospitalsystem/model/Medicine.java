@@ -1,11 +1,11 @@
 package hospitalsystem.model;
 
-public class Inventory {
+public class Medicine {
     private String medicineName;
     private int initialStock;
     private int lowStockAlert;
 
-    public Inventory(String medicineName, int initialStock, int lowStockAlert) {
+    public Medicine(String medicineName, int initialStock, int lowStockAlert) {
         this.medicineName = medicineName;
         this.initialStock = initialStock;
         this.lowStockAlert = lowStockAlert;

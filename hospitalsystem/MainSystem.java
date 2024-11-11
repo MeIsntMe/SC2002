@@ -16,7 +16,7 @@ import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
-import hospitalsystem.model.Inventory;
+import hospitalsystem.model.Medicine;
 import hospitalsystem.controllers.*;
 import hospitalsystem.enums.UserType;
 
@@ -30,14 +30,10 @@ public class MainSystem {
     public static Map<String, User> adminsMap = new HashMap<>();
     public static Map<String, User> pharmsMap = new HashMap<>();
 
-    // HashMap to store inventory 
-    public static Map<String, Inventory> inventoryMap = new HashMap<>();
-
     public static void main(String[] args) {
 
         loadPatientfromCSV("patientFilePath.csv");
         loadStaffFromCSV("staffFilePath.csv"); 
-        loadInventoryFromCSV("inventoryFilePath.csv");
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -51,7 +47,7 @@ public class MainSystem {
                 UserType role; 
                 switch (choice) {
                     case 1: 
-                        //going to need to initialise and call, not static
+                        //going to need to initialise and call, not static 
                         role = login(scanner); 
                         switch (role) {
                             case PATIENT -> PatientControl.displayMenu();
@@ -72,7 +68,7 @@ public class MainSystem {
         }
     }
 
-    // LOGIN: returns role type if login successful, else returns null 
+    // Log in: returns role type if login successful, else returns null 
     public static UserType login(Scanner sc) {
         
         UserType role = getRoleInput(sc); // Get role
@@ -94,33 +90,33 @@ public class MainSystem {
         if (user != null && user.getPassword().equals(inputPassword)) {
             System.out.printf("Login successful. Welcome %s!", currentUser.getName());
             currentUser = user;
+
+            // Reset password for first time log in
+            resetPassword(currentUser, sc);
+
             return role;
-        } else {
+        } 
+        else {
             System.out.println("Invalid ID or password.");
             return null;
         }
     }
 
-    // SUPPORTING FUNC: returns role type
-    public static UserType getRoleInput(Scanner scanner) {
-        while (true) {
-            System.out.println("Select role: 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
-            int role;
-            try {
-                role = scanner.nextInt(); 
-                switch (role) {
-                    case 1 -> {return UserType.PATIENT;}
-                    case 2 -> {return UserType.DOCTOR;}
-                    case 3 -> {return UserType.PHARMACIST;}
-                    case 4 -> {return UserType.ADMINISTRATOR;}
-                    default -> System.out.println("Invalid role number specified. Please enter a number between 1 and 4.");
-                }
-            } catch (Exception e) {
-                System.out.println("Invalid input. Please enter a number between 1 and 4.");
-            }
+    // Reset password for first time log in 
+    public static void resetPassword(User user, Scanner sc){
+
+        // Check if first time log in
+        if (user.getPassword().equals("password")) {
+            System.out.println("=========================================");
+            System.out.println("Default password detected. Please reset your password.");
+            System.out.println("Enter new password: ");
+            String newPW = sc.nextLine(); 
+
+            user.setPassword(newPW);
+            System.out.println("Password updated!");
         }
     }
-
+    
     public static void loadPatientfromCSV (String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the first line
@@ -174,26 +170,6 @@ public class MainSystem {
         }
     }
 
-    public static void loadInventoryFromCSV(String filePath) {
-        try (Scanner scanner = new Scanner(new File(filePath))) {
-            scanner.nextLine(); // Skip the header line if there is one
-            while (scanner.hasNextLine()) {
-                String[] inventoryData = scanner.nextLine().split(",");
-                String medicineName = inventoryData[0].trim();
-                int initialStock = Integer.parseInt(inventoryData[1].trim());
-                int lowStockAlert = Integer.parseInt(inventoryData[2].trim());
-
-                Inventory medicine = new Inventory(medicineName, initialStock, lowStockAlert);
-                inventoryMap.put(medicineName, medicine);
-            }
-            System.out.println("Inventory loaded successfully from CSV.");
-        } catch (FileNotFoundException e) {
-            System.out.println("CSV file not found: " + e.getMessage());
-        } catch (NumberFormatException e) {
-            System.out.println("Error parsing number from CSV: " + e.getMessage());
-        }
-    }
-
     // SUPPORTING FUNC: allows users to choose 1 to continue repeat whatever action
     public static boolean getRepeatChoice(Scanner scanner) {
         while (true) {
@@ -209,4 +185,26 @@ public class MainSystem {
             }
         }
     }
+
+    // SUPPORTING FUNC: get role type
+    public static UserType getRoleInput(Scanner scanner) {
+        while (true) {
+            System.out.println("Select role (1-4): 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
+            int role;
+            try {
+                role = scanner.nextInt(); 
+                switch (role) {
+                    case 1 -> {return UserType.PATIENT;}
+                    case 2 -> {return UserType.DOCTOR;}
+                    case 3 -> {return UserType.PHARMACIST;}
+                    case 4 -> {return UserType.ADMINISTRATOR;}
+                    default -> System.out.println("Invalid role number specified. Please enter a number between 1 and 4.");
+                }
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please enter a number between 1 and 4.");
+            }
+        }
+    }
+
+    // 
 }
