@@ -15,13 +15,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
+//central database for appointments
 public class AppointmentControl {
-    private Appointment appointment;
     private static HashMap<String, Appointment> allAppointments = new HashMap<>();
-
-    public AppointmentControl(Appointment appointment) {
-        this.appointment = appointment;
-    }
 
     public static void loadAppointmentsFromFile(String filePath) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
