@@ -26,17 +26,21 @@ public class AppointmentControl {
                     String patientID = appointmentData[1].trim();
                     String doctorID = appointmentData[2].trim();
 
-                    // Get Doctor from MainSystem maps - Doctor extends User
+                    // Get Doctor and Patient from MainSystem maps
                     User doctorUser = MainSystem.doctorsMap.get(doctorID);
+                    User patientUser = MainSystem.patientsMap.get(patientID);
+
                     Doctor doctor = null;
+                    Patient patient = null;
+
                     if (doctorUser instanceof Doctor) {
                         doctor = (Doctor) doctorUser;
                     }
+                    if (patientUser instanceof Patient) {
+                        patient = (Patient) patientUser;
+                    }
 
-                    // Create new Patient with scanner
-                    Patient patient = new Patient(patientID, fileScanner);
-
-                    if (doctor != null) {
+                    if (doctor != null && patient != null) {
                         // Parse date/time components
                         int year = Integer.parseInt(appointmentData[3].trim());
                         int month = Integer.parseInt(appointmentData[4].trim());
@@ -85,7 +89,12 @@ public class AppointmentControl {
                         patient.addAppointmentCount();
 
                     } else {
-                        System.out.println("Doctor not found for ID: " + doctorID);
+                        if (doctor == null) {
+                            System.out.println("Doctor not found for ID: " + doctorID);
+                        }
+                        if (patient == null) {
+                            System.out.println("Patient not found for ID: " + patientID);
+                        }
                     }
                 } catch (Exception e) {
                     System.out.println("Error processing appointment line: " + String.join(",", appointmentData));
@@ -153,23 +162,59 @@ public class AppointmentControl {
     }
 
     // Generate available slots for a week
-    public static List<AppointmentSlot> generateWeeklySlots() {
+    public static List<AppointmentSlot> generateWeeklySlots(Doctor doctor) {
         List<AppointmentSlot> slots = new ArrayList<>();
+
+        // Get next Monday
         LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextMonday = now.plusDays(1);
+        while (nextMonday.getDayOfWeek().getValue() != 1) {  // 1 = Monday
+            nextMonday = nextMonday.plusDays(1);
+        }
+
         int[][] times = {{9, 0}, {10, 30}, {13, 0}, {14, 30}};
 
         for (int i = 0; i < 5; i++) { // Monday to Friday
+            LocalDateTime currentDay = nextMonday.plusDays(i);
             for (int[] time : times) {
-                slots.add(new AppointmentSlot(
-                        now.getYear(),
-                        now.getMonthValue(),
-                        now.getDayOfMonth() + i,
+                // Create slot using the current day but with specified time
+                AppointmentSlot slot = new AppointmentSlot(
+                        currentDay.getYear(),
+                        currentDay.getMonthValue(),
+                        currentDay.getDayOfMonth(),
                         time[0],
                         time[1]
-                ));
+                );
+                slots.add(slot);
+
+                // Create a new appointment for this slot
+                String appointmentID = generateAppointmentID(doctor.getID(), slot);
+                Appointment appointment = new Appointment(appointmentID, null, doctor, slot);
+                appointment.setStatus(AppointmentStatus.PENDING);
+                appointment.setAvailable(true);
+
+                // Add to global appointments map
+                allAppointments.put(appointmentID, appointment);
             }
         }
+
+        // Update doctor's available slots
+        doctor.setAvailableSlots(slots);
+
+        System.out.println("Generated " + slots.size() + " slots for next week for doctor " + doctor.getID());
         return slots;
+    }
+
+    private static String generateAppointmentID(String doctorID, AppointmentSlot slot) {
+        LocalDateTime dt = slot.getDateTime();
+        return String.format("APT_%s_%d%02d%02d%02d%02d",
+                doctorID,
+                dt.getYear(),
+                dt.getMonthValue(),
+                dt.getDayOfMonth(),
+                dt.getHour(),
+                dt.getMinute()
+        );
     }
 
     public static void saveAppointmentsToCSV(String filePath) {
@@ -224,6 +269,25 @@ public class AppointmentControl {
         sb.append(escapeCSV(prescriptions));
 
         return sb.toString();
+    }
+
+    public static void updateSlotAvailability(String doctorID, AppointmentSlot slot, boolean makeAvailable) {
+        // Find the appointment for this slot
+        Appointment appointment = allAppointments.values().stream()
+                .filter(apt -> apt.getDoctor().getID().equals(doctorID) &&
+                        apt.getSlot().getDateTime().equals(slot.getDateTime()))
+                .findFirst()
+                .orElse(null);
+
+        if (appointment != null) {
+            appointment.setAvailable(makeAvailable);
+            if (!makeAvailable) {
+                appointment.setStatus(AppointmentStatus.BOOKED);
+            } else {
+                appointment.setStatus(AppointmentStatus.PENDING);
+            }
+            allAppointments.put(appointment.getAppointmentID(), appointment);
+        }
     }
 
     private static String formatPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
