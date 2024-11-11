@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import hospitalsystem.model.Medicine;
+import java.time.LocalDate;
 
 import java.util.Scanner;
 
@@ -43,9 +45,12 @@ public class InventoryControl {
             sc.nextLine();
             System.out.print("Enter low stock level alarm: ");
             int lowStockAlert = sc.nextInt();
+            System.out.print("Enter expiration date (YYYY-MM-DD): ");
+            LocalDate expirationDate = LocalDate.parse(sc.next().trim());
             sc.nextLine();
+            
 
-            Medicine medicine = new Medicine(medicineName, initialStock, lowStockAlert);
+            Medicine medicine = new Medicine(medicineName, initialStock, lowStockAlert, expirationDate);
             inventoryMap.put(medicineName, medicine);
             System.out.printf("%s successfully added into inventory.", medicineName);
             
