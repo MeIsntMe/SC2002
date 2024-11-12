@@ -18,7 +18,7 @@ public class PharmacistControl implements MenuInterface {
         this.inventoryControl = inventoryControl;
     }
 
-      @Override
+    @Override
     public void displayMenu() {
         Scanner sc = new Scanner(System.in);
         while (true) {
