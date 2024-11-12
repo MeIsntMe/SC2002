@@ -81,13 +81,12 @@ public class AppointmentControl {
                         doctor.addAppointment(appointment);
 
                         // Update patient's appointments
-                        ArrayList<Appointment> patientAppointments = patient.getAppointments();
+                        List<Appointment> patientAppointments = patient.getAppointments();
                         if (patientAppointments == null) {
                             patientAppointments = new ArrayList<>();
                         }
                         patientAppointments.add(appointment);
                         patient.setAppointments(patientAppointments);
-                        patient.addAppointmentCount();
 
                     } else {
                         if (doctor == null) {
