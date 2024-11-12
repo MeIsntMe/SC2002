@@ -14,22 +14,29 @@ import java.util.List;
 import java.util.Scanner;
 
 public class DoctorControl implements MenuInterface{
+    private final Doctor doctor;  // Add instance variable
+
+    public DoctorControl(User user) {  // Add constructor
+        if (!(user instanceof Doctor)) {
+            throw new IllegalArgumentException("User must be a Doctor");
+        }
+        this.doctor = (Doctor) user;
+    }
 
     @Override
     public void displayMenu() {
         Scanner scanner = new Scanner(System.in);
-        Doctor currentDoctor = (Doctor) MainSystem.currentUser;
 
         while (true) {
             System.out.println("=========================================");
             System.out.println("Doctor Menu");
-            System.out.println("1. View Patient Medical Record");           // Test Case 9
-            System.out.println("2. Update Patient Medical Record");         // Test Case 10
-            System.out.println("3. View Personal Schedule");               // Test Case 11
-            System.out.println("4. Set Availability");                     // Test Case 12
-            System.out.println("5. Accept/Decline Appointments");          // Test Case 13
-            System.out.println("6. View Upcoming Appointments");           // Test Case 14
-            System.out.println("7. Record Appointment Outcome");           // Test Case 15
+            System.out.println("1. View Patient Medical Record");
+            System.out.println("2. Update Patient Medical Record");
+            System.out.println("3. View Personal Schedule");
+            System.out.println("4. Set Availability");
+            System.out.println("5. Accept/Decline Appointments");
+            System.out.println("6. View Upcoming Appointments");
+            System.out.println("7. Record Appointment Outcome");
             System.out.println("8. Logout");
             System.out.print("Enter choice: ");
 
@@ -45,19 +52,19 @@ public class DoctorControl implements MenuInterface{
                         handleUpdatePatientRecord(scanner);
                         break;
                     case 3:
-                        viewPersonalSchedule(currentDoctor);
+                        viewPersonalSchedule();  // Changed to use instance method
                         break;
                     case 4:
-                        handleSetAvailability(currentDoctor, scanner);
+                        handleSetAvailability(scanner);
                         break;
                     case 5:
-                        handleAppointmentRequests(currentDoctor, scanner);
+                        handleAppointmentRequests(scanner);  // Updated to use instance method
                         break;
                     case 6:
-                        viewUpcomingAppointments(currentDoctor);
+                        viewUpcomingAppointments();  // Changed to use instance method
                         break;
                     case 7:
-                        handleRecordOutcome(currentDoctor, scanner);
+                        handleRecordOutcome(scanner);
                         break;
                     case 8:
                         System.out.println("Logging out...");
@@ -70,12 +77,12 @@ public class DoctorControl implements MenuInterface{
                 System.out.println("Invalid input. Please enter a valid number.");
             } catch (Exception e) {
                 System.out.println("An error has occurred: " + e.getMessage());
-                scanner.nextLine(); // Clear the invalid input
+                scanner.nextLine();
             }
         }
     }
 
-    private static void handleViewPatientRecord(Scanner scanner) {
+    private void handleViewPatientRecord(Scanner scanner) {
         System.out.print("Enter Patient ID: ");
         String patientId = scanner.nextLine();
         Patient patient = findPatientById(patientId);
@@ -86,11 +93,11 @@ public class DoctorControl implements MenuInterface{
         }
     }
 
-    private static void viewPersonalSchedule(Doctor doctor) {
+    private void viewPersonalSchedule() {
         System.out.println("\n=== Personal Schedule ===");
 
         // Show Available Slots
-        List<AppointmentSlot> availableSlots = doctor.getAvailableSlots().stream()
+        List<AppointmentSlot> availableSlots = this.doctor.getAvailableSlots().stream()
                 .sorted((s1, s2) -> s1.getDateTime().compareTo(s2.getDateTime()))
                 .toList();
 
@@ -104,7 +111,7 @@ public class DoctorControl implements MenuInterface{
         }
 
         // Show Booked Appointments
-        List<Appointment> bookedAppointments = doctor.getUpcomingAppointments().stream()
+        List<Appointment> bookedAppointments = this.doctor.getUpcomingAppointments().stream()
                 .filter(apt -> apt.getStatus() == AppointmentStatus.BOOKED)
                 .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
                 .toList();
@@ -170,7 +177,7 @@ public class DoctorControl implements MenuInterface{
         }
     }
 
-    private static void handleUpdatePatientRecord(Scanner scanner) {
+    private void handleUpdatePatientRecord(Scanner scanner) {
         System.out.print("Enter Patient ID: ");
         String patientId = scanner.nextLine();
         Patient patient = findPatientById(patientId);
@@ -201,12 +208,10 @@ public class DoctorControl implements MenuInterface{
             int choice = Integer.parseInt(scanner.nextLine());
             switch (choice) {
                 case 1:
-                    addNewMedicalUpdate(patient, (Doctor) MainSystem.currentUser, scanner);
+                    addNewMedicalUpdate(patient, scanner);
                     break;
-
                 case 2:
                     return;
-
                 default:
                     System.out.println("Invalid choice.");
             }
@@ -215,7 +220,7 @@ public class DoctorControl implements MenuInterface{
         }
     }
 
-    private static void addNewMedicalUpdate(Patient patient, Doctor doctor, Scanner scanner) {
+    private void addNewMedicalUpdate(Patient patient, Scanner scanner) {
         System.out.println("\n=== Add New Medical Update ===");
 
         // Get consultation notes
@@ -251,7 +256,7 @@ public class DoctorControl implements MenuInterface{
         );
 
         // Create and configure appointment
-        Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
+        Appointment appointment = new Appointment(appointmentID, patient, this.doctor, slot);
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointment.setAvailable(false);
 
@@ -273,7 +278,7 @@ public class DoctorControl implements MenuInterface{
         System.out.println("Medical record updated successfully.");
     }
 
-    private static Patient findPatientById(String patientId) {
+    private Patient findPatientById(String patientId) {
         User user = MainSystem.patientsMap.get(patientId);
         if (user instanceof Patient) {
             return (Patient) user;
@@ -281,7 +286,7 @@ public class DoctorControl implements MenuInterface{
         return null;
     }
 
-    private static void viewPatientMedicalRecord(Patient patient) {
+    private void viewPatientMedicalRecord(Patient patient) {
         MedicalRecord mr = patient.getMedicalRecord();
         if (mr == null) {
             System.out.println("Medical record not found for patient ID: " + patient.getID());
@@ -330,36 +335,89 @@ public class DoctorControl implements MenuInterface{
         System.out.println("=====================================");
     }
 
-    private static void handleSetAvailability(Doctor currentDoctor, Scanner scanner) {
+    private void handleSetAvailability(Scanner scanner) {
+        AppointmentControl.loadAppointmentsFromCSV("appointments.csv");
+
         System.out.println("\n=== Managing Doctor Availability ===");
 
-        // Get current and next week slots
-        List<Appointment.AppointmentSlot> thisWeekSlots = getThisWeekSlots(currentDoctor);
-        List<Appointment.AppointmentSlot> nextWeekSlots = getNextWeekSlots(currentDoctor);
+        List<Appointment.AppointmentSlot> thisWeekSlots = getThisWeekSlots();
+        List<Appointment.AppointmentSlot> nextWeekSlots = getNextWeekSlots();
 
         boolean hasThisWeekSlots = !thisWeekSlots.isEmpty();
         boolean hasNextWeekSlots = !nextWeekSlots.isEmpty();
 
         if (!hasThisWeekSlots && !hasNextWeekSlots) {
-            // No slots created yet
             System.out.println("No slots found. Creating slots for this week and next week.");
-            AppointmentControl.generateWeeklySlots(currentDoctor); // This week
-            AppointmentControl.generateWeeklySlots(currentDoctor); // Next week
-            displayAvailableSlots(currentDoctor);
-
+            AppointmentControl.generateWeeklySlots(this.doctor);
+            AppointmentControl.generateWeeklySlots(this.doctor);
+            displayAvailableSlots();
         } else if (hasThisWeekSlots && !hasNextWeekSlots) {
-            // Only this week exists, create next week
             System.out.println("Creating slots for next week.");
-            AppointmentControl.generateWeeklySlots(currentDoctor);
-            displayAvailableSlots(currentDoctor);
-
+            AppointmentControl.generateWeeklySlots(this.doctor);
+            displayAvailableSlots();
         } else {
-            // Both weeks exist, allow modifications
-            manageExistingSlots(currentDoctor, scanner);
+            manageExistingSlots(scanner);
+        }
+
+        AppointmentControl.saveAppointmentsToCSV("appointments.csv");
+    }
+
+    private void handleAppointmentRequests(Scanner scanner) {
+        // 1. Load CSV to HashMap
+        AppointmentControl.loadAppointmentsFromCSV("appointments.csv");
+
+        System.out.println("\n=== Pending Appointment Requests ===");
+        List<Appointment> pendingAppointments = this.doctor.getUpcomingAppointments().stream()
+                .filter(apt -> apt.getStatus() == AppointmentStatus.PENDING && !apt.isAvailable())
+                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
+                .toList();
+
+        if (pendingAppointments.isEmpty()) {
+            System.out.println("No pending appointment requests.");
+            return;
+        }
+
+        // Display pending appointments
+        for (int i = 0; i < pendingAppointments.size(); i++) {
+            Appointment apt = pendingAppointments.get(i);
+            System.out.printf("%d. Patient: %s - Date: %s %s\n",
+                    i + 1,
+                    apt.getPatient().getName(),
+                    apt.getSlot().getDate(),
+                    apt.getSlot().getTime());
+        }
+
+        System.out.print("Enter appointment number to process (0 to cancel): ");
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice == 0) return;
+            if (choice < 1 || choice > pendingAppointments.size()) {
+                System.out.println("Invalid appointment number.");
+                return;
+            }
+
+            Appointment selectedAppointment = pendingAppointments.get(choice - 1);
+            System.out.print("Accept appointment? (y/n): ");
+            String response = scanner.nextLine().trim().toLowerCase();
+
+            if (response.startsWith("y")) {
+                selectedAppointment.setStatus(AppointmentStatus.BOOKED);
+                System.out.println("Appointment accepted successfully.");
+            } else {
+                selectedAppointment.setStatus(AppointmentStatus.CANCELLED);
+                selectedAppointment.setAvailable(true);
+                System.out.println("Appointment declined.");
+            }
+
+            // Save changes to CSV
+            AppointmentControl.saveAppointmentsToCSV("appointments.csv");
+
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
         }
     }
 
-    private static void manageExistingSlots(Doctor doctor, Scanner scanner) {
+    private void manageExistingSlots(Scanner scanner) {
         while (true) {
             System.out.println("\n=== Manage Availability ===");
             System.out.println("1. View all slots");
@@ -372,13 +430,13 @@ public class DoctorControl implements MenuInterface{
                 int choice = Integer.parseInt(scanner.nextLine());
                 switch (choice) {
                     case 1:
-                        displayAvailableSlots(doctor);
+                        displayAvailableSlots();
                         break;
                     case 2:
-                        markSlotUnavailable(doctor, scanner);
+                        markSlotUnavailable(scanner);
                         break;
                     case 3:
-                        markSlotAvailable(doctor, scanner);
+                        markSlotAvailable(scanner);
                         break;
                     case 4:
                         return;
@@ -391,9 +449,9 @@ public class DoctorControl implements MenuInterface{
         }
     }
 
-    private static void markSlotUnavailable(Doctor doctor, Scanner scanner) {
+    private void markSlotUnavailable(Scanner scanner) {
         System.out.println("\n=== Mark Slot as Unavailable ===");
-        List<Appointment> availableAppointments = doctor.getUpcomingAppointments().stream()
+        List<Appointment> availableAppointments = this.doctor.getUpcomingAppointments().stream()
                 .filter(Appointment::isAvailable)
                 .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
                 .toList();
@@ -431,20 +489,23 @@ public class DoctorControl implements MenuInterface{
             // Update the slot
             Appointment selectedAppointment = availableAppointments.get(slotNum - 1);
             AppointmentControl.updateSlotAvailability(
-                    doctor.getID(),
+                    this.doctor.getID(),
                     selectedAppointment.getSlot(),
                     false  // makeAvailable = false
             );
             System.out.println("Slot marked as unavailable successfully.");
+
+            // Save changes to CSV
+            AppointmentControl.saveAppointmentsToCSV("appointments.csv");
 
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
         }
     }
 
-    private static void markSlotAvailable(Doctor doctor, Scanner scanner) {
+    private void markSlotAvailable(Scanner scanner) {
         System.out.println("\n=== Mark Slot as Available ===");
-        List<Appointment> unavailableAppointments = doctor.getUpcomingAppointments().stream()
+        List<Appointment> unavailableAppointments = this.doctor.getUpcomingAppointments().stream()
                 .filter(apt -> !apt.isAvailable() && apt.getStatus() == AppointmentStatus.UNAVAILABLE)
                 .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
                 .toList();
@@ -482,20 +543,25 @@ public class DoctorControl implements MenuInterface{
             // Update the slot
             Appointment selectedAppointment = unavailableAppointments.get(slotNum - 1);
             AppointmentControl.updateSlotAvailability(
-                    doctor.getID(),
+                    this.doctor.getID(),
                     selectedAppointment.getSlot(),
                     true  // makeAvailable = true
             );
             System.out.println("Slot marked as available successfully.");
+
+            // Save changes to CSV
+            AppointmentControl.saveAppointmentsToCSV("appointments.csv");
 
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
         }
     }
 
-    private static void handleRecordOutcome(Doctor currentDoctor, Scanner scanner) {
-        // Show upcoming appointments first
-        List<Appointment> appointments = currentDoctor.getUpcomingAppointments().stream()
+    private void handleRecordOutcome(Scanner scanner) {
+        // 1. Load CSV to HashMap
+        AppointmentControl.loadAppointmentsFromCSV("appointments.csv");
+
+        List<Appointment> appointments = this.doctor.getUpcomingAppointments().stream()
                 .filter(apt -> apt.getStatus() == AppointmentStatus.BOOKED)
                 .toList();
 
@@ -554,14 +620,17 @@ public class DoctorControl implements MenuInterface{
 
             System.out.println("Appointment outcome recorded successfully.");
 
+            // Save changes to CSV
+            AppointmentControl.saveAppointmentsToCSV("appointments.csv");
+
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
         }
     }
 
-    private static List<Appointment.AppointmentSlot> getThisWeekSlots(Doctor doctor) {
+    private List<Appointment.AppointmentSlot> getThisWeekSlots() {
         LocalDateTime now = LocalDateTime.now();
-        return doctor.getAvailableSlots().stream()
+        return this.doctor.getAvailableSlots().stream()
                 .filter(slot -> {
                     LocalDateTime slotTime = slot.getDateTime();
                     long daysBetween = ChronoUnit.DAYS.between(now.toLocalDate(), slotTime.toLocalDate());
@@ -570,9 +639,9 @@ public class DoctorControl implements MenuInterface{
                 .toList();
     }
 
-    private static List<Appointment.AppointmentSlot> getNextWeekSlots(Doctor doctor) {
+    private List<Appointment.AppointmentSlot> getNextWeekSlots() {  // Changed from static
         LocalDateTime now = LocalDateTime.now();
-        return doctor.getAvailableSlots().stream()
+        return this.doctor.getAvailableSlots().stream()
                 .filter(slot -> {
                     LocalDateTime slotTime = slot.getDateTime();
                     long daysBetween = ChronoUnit.DAYS.between(now.toLocalDate(), slotTime.toLocalDate());
@@ -581,8 +650,8 @@ public class DoctorControl implements MenuInterface{
                 .toList();
     }
 
-    private static void displayAvailableSlots(Doctor doctor) {
-        List<Appointment.AppointmentSlot> slots = doctor.getAvailableSlots();
+    private void displayAvailableSlots() {
+        List<Appointment.AppointmentSlot> slots = this.doctor.getAvailableSlots();
         System.out.println("\n=== Available Slots ===");
         System.out.println("This Week:");
         for (int i = 0; i < slots.size(); i++) {
@@ -591,8 +660,22 @@ public class DoctorControl implements MenuInterface{
         }
     }
 
-    private static void viewUpcomingAppointments(Doctor doctor) {
-        List<Appointment> appointments = doctor.getUpcomingAppointments();
+    private boolean isSlotInThisWeek(AppointmentSlot slot) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime slotTime = slot.getDateTime();
+        long daysBetween = ChronoUnit.DAYS.between(now.toLocalDate(), slotTime.toLocalDate());
+        return daysBetween >= 0 && daysBetween <= 7;
+    }
+
+    private boolean isSlotInNextWeek(AppointmentSlot slot) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime slotTime = slot.getDateTime();
+        long daysBetween = ChronoUnit.DAYS.between(now.toLocalDate(), slotTime.toLocalDate());
+        return daysBetween > 7 && daysBetween <= 14;
+    }
+
+    private void viewUpcomingAppointments() {
+        List<Appointment> appointments = this.doctor.getUpcomingAppointments();
         if (appointments.isEmpty()) {
             System.out.println("No upcoming appointments.");
             return;

@@ -2,6 +2,8 @@ package hospitalsystem.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import hospitalsystem.MainSystem;
 import hospitalsystem.controllers.DoctorControl;
 import hospitalsystem.enums.AppointmentStatus;
 import hospitalsystem.model.Appointment.AppointmentSlot;
@@ -44,6 +46,7 @@ public class Doctor extends User {
     }
 
     public static void displayMenu() {
-        DoctorControl.displayMenu();
+        DoctorControl control = new DoctorControl(MainSystem.currentUser);
+        control.displayMenu();
     }
 }
