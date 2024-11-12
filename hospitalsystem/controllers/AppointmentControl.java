@@ -17,8 +17,10 @@ public class AppointmentControl {
     private static HashMap<String, Appointment> allAppointments = new HashMap<>();
     private static final String CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
 
-    public static void loadAppointmentsFromCSV(String filePath) {
-        try (Scanner fileScanner = new Scanner(new File(filePath))) {
+    private static final String CSV_PATH = "hospitalsystem/data/Appointment.csv";
+
+    public static void loadAppointmentsFromCSV() {
+        try (Scanner fileScanner = new Scanner(new File(CSV_PATH))) {
             fileScanner.nextLine(); // Skip the first line
             while (fileScanner.hasNextLine()) {
                 String[] appointmentData = fileScanner.nextLine().replaceAll("\"", "").split(",");
@@ -217,8 +219,8 @@ public class AppointmentControl {
         );
     }
 
-    public static void saveAppointmentsToCSV(String filePath) {
-        try (FileWriter fw = new FileWriter(filePath);
+    public static void saveAppointmentsToCSV() {
+        try (FileWriter fw = new FileWriter(CSV_PATH);
              BufferedWriter bw = new BufferedWriter(fw)) {
 
             // Write header
@@ -237,7 +239,7 @@ public class AppointmentControl {
                         }
                     });
 
-            System.out.println("Successfully saved " + allAppointments.size() + " appointments to " + filePath);
+            System.out.println("Successfully saved " + allAppointments.size() + " appointments to " + CSV_PATH);
 
         } catch (IOException e) {
             System.out.println("Error saving appointments to CSV: " + e.getMessage());
@@ -334,13 +336,11 @@ public class AppointmentControl {
     }
 
     // Optional: Method to backup before saving
-    public static void backupAndSave(String filePath) {
-        // Create backup filename with timestamp
+    public static void backupAndSave() {  // Removed path parameter
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String backupPath = filePath.replace(".csv", "_backup_" + timestamp + ".csv");
+        String backupPath = CSV_PATH.replace(".csv", "_backup_" + timestamp + ".csv");
 
-        // Copy existing file to backup if it exists
-        File originalFile = new File(filePath);
+        File originalFile = new File(CSV_PATH);
         if (originalFile.exists()) {
             try {
                 Files.copy(originalFile.toPath(), new File(backupPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -350,7 +350,6 @@ public class AppointmentControl {
             }
         }
 
-        // Save current data
-        saveAppointmentsToCSV(filePath);
+        saveAppointmentsToCSV();
     }
 }

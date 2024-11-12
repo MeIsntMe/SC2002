@@ -336,7 +336,7 @@ public class DoctorControl implements MenuInterface{
     }
 
     private void handleSetAvailability(Scanner scanner) {
-        AppointmentControl.loadAppointmentsFromCSV("appointments.csv");
+        AppointmentControl.loadAppointmentsFromCSV();
 
         System.out.println("\n=== Managing Doctor Availability ===");
 
@@ -359,12 +359,12 @@ public class DoctorControl implements MenuInterface{
             manageExistingSlots(scanner);
         }
 
-        AppointmentControl.saveAppointmentsToCSV("appointments.csv");
+        AppointmentControl.saveAppointmentsToCSV();
     }
 
     private void handleAppointmentRequests(Scanner scanner) {
         // 1. Load CSV to HashMap
-        AppointmentControl.loadAppointmentsFromCSV("appointments.csv");
+        AppointmentControl.loadAppointmentsFromCSV();
 
         System.out.println("\n=== Pending Appointment Requests ===");
         List<Appointment> pendingAppointments = this.doctor.getUpcomingAppointments().stream()
@@ -410,7 +410,7 @@ public class DoctorControl implements MenuInterface{
             }
 
             // Save changes to CSV
-            AppointmentControl.saveAppointmentsToCSV("appointments.csv");
+            AppointmentControl.saveAppointmentsToCSV();
 
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
@@ -496,7 +496,7 @@ public class DoctorControl implements MenuInterface{
             System.out.println("Slot marked as unavailable successfully.");
 
             // Save changes to CSV
-            AppointmentControl.saveAppointmentsToCSV("appointments.csv");
+            AppointmentControl.saveAppointmentsToCSV();
 
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
@@ -550,7 +550,7 @@ public class DoctorControl implements MenuInterface{
             System.out.println("Slot marked as available successfully.");
 
             // Save changes to CSV
-            AppointmentControl.saveAppointmentsToCSV("appointments.csv");
+            AppointmentControl.saveAppointmentsToCSV();
 
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
@@ -559,7 +559,7 @@ public class DoctorControl implements MenuInterface{
 
     private void handleRecordOutcome(Scanner scanner) {
         // 1. Load CSV to HashMap
-        AppointmentControl.loadAppointmentsFromCSV("appointments.csv");
+        AppointmentControl.loadAppointmentsFromCSV();
 
         List<Appointment> appointments = this.doctor.getUpcomingAppointments().stream()
                 .filter(apt -> apt.getStatus() == AppointmentStatus.BOOKED)
@@ -621,7 +621,7 @@ public class DoctorControl implements MenuInterface{
             System.out.println("Appointment outcome recorded successfully.");
 
             // Save changes to CSV
-            AppointmentControl.saveAppointmentsToCSV("appointments.csv");
+            AppointmentControl.saveAppointmentsToCSV();
 
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
