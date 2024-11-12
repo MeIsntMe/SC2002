@@ -75,7 +75,7 @@ public class PatientControl implements MenuInterface{
                 
                     case 8:
                         //Display past appointment outcomes
-                        displayPastAppointmentOutcomes();
+                        AppointmentControl.displayPastAppointmentOutcomes(this);
                         break;
                 
                     case 9:
@@ -317,31 +317,6 @@ public class PatientControl implements MenuInterface{
         System.out.println("Blood Type: " + mr.getBloodType());
         System.out.println("-----");
         System.out.println("List of Past Appointment Outcomes:");
-        for (AppointmentOutcome outcome:appointmentOutcomes){
-            System.out.println("Appointment Date: " + outcome.getAppointmentDate());
-            System.out.println("Service Type: " + outcome.getServiceType());
-            
-            System.out.println("Prescriptions:");
-            HashMap<String, PrescriptionStatus> prescriptions = outcome.getPrescriptions();
-            for (String prescriptionName : prescriptions.keySet()) {
-                System.out.println(" - " + prescriptionName + ": " + prescriptions.get(prescriptionName));
-            }
-            
-            System.out.println("Consultation Notes: ");
-            System.out.println(outcome.getConsultationNotes());
-            if (outcome != appointmentOutcomes.get(lastSlot)){
-                System.out.println("-----");
-            }
-        }
-        System.out.println("=====================================");
-    }
-
-    public void displayPastAppointmentOutcomes(){
-        ArrayList<AppointmentOutcome> appointmentOutcomes = patient.getMedicalRecord().getAppointmentOutcomes();
-        int lastSlot = appointmentOutcomes.size()-1;
-        System.out.println("=====================================");
-        System.out.println("      Past Appointment Outcomes      ");
-        System.out.println("=====================================");
         for (AppointmentOutcome outcome:appointmentOutcomes){
             System.out.println("Appointment Date: " + outcome.getAppointmentDate());
             System.out.println("Service Type: " + outcome.getServiceType());

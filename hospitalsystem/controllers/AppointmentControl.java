@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.List;
 
 public class AppointmentControl {
     private static HashMap<String, Appointment> allAppointments = new HashMap<>();
@@ -334,6 +333,32 @@ public class AppointmentControl {
             return false;
         }
     }
+
+    public void displayPastAppointmentOutcomes(Patient patient){
+        ArrayList<AppointmentOutcome> appointmentOutcomes = patient.getMedicalRecord().getAppointmentOutcomes();
+        int lastSlot = appointmentOutcomes.size()-1;
+        System.out.println("=====================================");
+        System.out.println("      Past Appointment Outcomes      ");
+        System.out.println("=====================================");
+        for (AppointmentOutcome outcome:appointmentOutcomes){
+            System.out.println("Appointment Date: " + outcome.getAppointmentDate());
+            System.out.println("Service Type: " + outcome.getServiceType());
+            
+            System.out.println("Prescriptions:");
+            HashMap<String, PrescriptionStatus> prescriptions = outcome.getPrescriptions();
+            for (String prescriptionName : prescriptions.keySet()) {
+                System.out.println(" - " + prescriptionName + ": " + prescriptions.get(prescriptionName));
+            }
+            
+            System.out.println("Consultation Notes: ");
+            System.out.println(outcome.getConsultationNotes());
+            if (outcome != appointmentOutcomes.get(lastSlot)){
+                System.out.println("-----");
+            }
+        }
+        System.out.println("=====================================");
+    }
+
 
     // Optional: Method to backup before saving
     public static void backupAndSave() {  // Removed path parameter
