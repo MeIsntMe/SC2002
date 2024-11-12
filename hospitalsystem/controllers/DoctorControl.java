@@ -242,8 +242,7 @@ public class DoctorControl implements MenuInterface{
 
         // Create slot with current time
         LocalDateTime now = LocalDateTime.now();
-        Appointment.AppointmentSlot slot = new Appointment(appointmentID, patient, doctor, null)
-                .new AppointmentSlot(
+        Appointment.AppointmentSlot slot = new Appointment.AppointmentSlot(
                 now.getYear(),
                 now.getMonthValue(),
                 now.getDayOfMonth(),
