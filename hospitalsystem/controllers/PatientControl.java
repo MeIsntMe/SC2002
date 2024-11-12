@@ -197,7 +197,7 @@ public class PatientControl implements MenuInterface{
                 System.out.println("Invalid Choice. Please try again.");
                 continue;
             }
-            addAppointment(innerChoice, selectedDoctor);
+            AppointmentControl.addAppointment(innerChoice, selectedDoctor, this);
             System.out.println("Appointment Scheduled");
             break;
         }
@@ -246,7 +246,7 @@ public class PatientControl implements MenuInterface{
                 System.out.println("Invalid Choice. Please try again.");
                 continue;
             }
-            addAppointment(innerChoice, selectedDoctor);
+            AppointmentControl.addAppointment(innerChoice, selectedDoctor, this);
             System.out.println("Appointment Rescheduled");
             break;
         }
@@ -425,25 +425,6 @@ public class PatientControl implements MenuInterface{
             return true;
         } catch (Exception e) {
             System.out.println("Error Occured:" + e);
-            return false;
-        }
-    }
-    
-    public boolean addAppointment(int slotIndex, Doctor doctor){
-        try {
-            List<AppointmentSlot> newSlots = doctor.getAvailableSlots();
-            AppointmentSlot selectedslot = newSlots.remove(slotIndex);
-            doctor.setAvailableSlots(newSlots);
-            Appointment newAppointment = new Appointment(patient.getID()+String.valueOf(patient.getTotalAppointmentCount()), patient, selectedDoctor, selectedslot, null);
-            doctor.addAppointment(newAppointment);
-
-            List<Appointment> newAppointments = patient.getAppointments();
-            newAppointments.add(newAppointment);
-            patient.setAppointments(newAppointments);
-
-            return true;
-        } catch (Exception e){
-            System.out.println("Error Occured: " + e);
             return false;
         }
     }

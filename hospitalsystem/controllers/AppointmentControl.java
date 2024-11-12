@@ -3,7 +3,7 @@
 import hospitalsystem.MainSystem;
 import hospitalsystem.model.*;
 import hospitalsystem.enums.*;
-import hospitalsystem.model.Appointment.AppointmentSlot;
+import hospitalsystem.model.Appointment.*;
 
 import java.io.*;
 import java.nio.file.*;
@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.List;
 
 public class AppointmentControl {
     private static HashMap<String, Appointment> allAppointments = new HashMap<>();
@@ -205,7 +206,7 @@ public class AppointmentControl {
         return slots;
     }
 
-    private static String generateAppointmentID(String doctorID, AppointmentSlot slot) {
+    public static String generateAppointmentID(String doctorID, AppointmentSlot slot) {
         LocalDateTime dt = slot.getDateTime();
         return String.format("APT_%s_%d%02d%02d%02d%02d",
                 doctorID,
@@ -312,6 +313,25 @@ public class AppointmentControl {
             return "\"" + value.replace("\"", "\"\"") + "\"";
         }
         return value;
+    }
+
+    public static boolean addAppointment(int slotIndex, Doctor doctor, Patient patient){
+        try {
+            List<AppointmentSlot> newSlots = doctor.getAvailableSlots();
+            AppointmentSlot selectedslot = newSlots.remove(slotIndex);
+            doctor.setAvailableSlots(newSlots);
+            Appointment newAppointment = new Appointment(AppointmentControl.generateAppointmentID(selectedDoctor.getID(), selectedslot), patient, selectedDoctor, selectedslot);
+            doctor.addAppointment(newAppointment);
+
+            List<Appointment> newAppointments = patient.getAppointments();
+            newAppointments.add(newAppointment);
+            patient.setAppointments(newAppointments);
+
+            return true;
+        } catch (Exception e){
+            System.out.println("Error Occured: " + e);
+            return false;
+        }
     }
 
     // Optional: Method to backup before saving
