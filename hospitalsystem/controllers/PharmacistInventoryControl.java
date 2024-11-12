@@ -2,6 +2,9 @@ package hospitalsystem.controllers;
 
 import java.util.Scanner;
 
+import hospitalsystem.model.Medicine;
+import hospitalsystem.model.ReplenishmentRequest;
+
 public class PharmacistInventoryControl extends InventoryControl {
 
     public PharmacistInventoryControl() {
@@ -11,16 +14,20 @@ public class PharmacistInventoryControl extends InventoryControl {
     // Method specific to Pharmacist to submit a manual replenishment request
     public void submitReplenishmentRequest(Scanner sc) {
         System.out.print("Enter the medication name to request replenishment: ");
-        String medicationName = sc.nextLine();
-        if (inventoryMap.containsKey(medicationName)) {
+        String medicineName = sc.nextLine();
+
+        // Check if medicine exists 
+        if (inventoryMap.containsKey(medicineName)) {
             System.out.print("Enter the quantity for replenishment: ");
             int quantity = sc.nextInt();
             sc.nextLine();
-            Medicine medicine = inventoryMap.get(medicationName);
-            medicine.setInitialStock(medicine.getInitialStock() + quantity);
-            System.out.println("Replenishment request submitted for " + medicationName + ", added " + quantity + " units.");
+
+            // Submit request 
+            ReplenishmentRequest request = new ReplenishmentRequest(medicineName, quantity);
+            InventoryControl.requestMap.put(medicineName, request);
+            System.out.println("Replenishment request submitted for " + medicineName + ", added " + quantity + " units.");
         } else {
-            System.out.println("Error: Medication " + medicationName + " not found in inventory.");
+            System.out.println("Error: Medication " + medicineName + " not found in inventory.");
         }
     }
 

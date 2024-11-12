@@ -1,10 +1,10 @@
 package hospitalsystem.controllers;
 
 import java.util.List;
-import hospital.models.Prescription;
-import hospital.enums.PrescriptionStatus;
-import hospital.models.Pharmacist;
-import hospital.models.Medicine;
+import hospitalsystem.model.Prescription;
+import hospitalsystem.enums.PrescriptionStatus;
+import hospitalsystem.model.Pharmacist;
+import hospitalsystem.model.Medicine;
 
 public class PharmacistControl implements MenuInterface {
     private Pharmacist pharmacist;
@@ -51,15 +51,6 @@ public class PharmacistControl implements MenuInterface {
             System.out.println("Medication: " + medicationName + ", Stock: " + stock);
         }
         return stock;
-    }
-
-    // Request replenishment for a specific medication
-    public void requestReplenishment(String medicationName, int quantity) {
-        if (inventoryControl.submitReplenishmentRequest(medicationName, quantity)) {
-            System.out.println("Replenishment requested for " + medicationName + ", quantity: " + quantity);
-        } else {
-            System.out.println("Failed to request replenishment for " + medicationName);
-        }
     }
 
     // Automatically check for low stock medications and display them
