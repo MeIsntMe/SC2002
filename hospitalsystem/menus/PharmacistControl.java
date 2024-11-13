@@ -1,12 +1,16 @@
 package hospitalsystem.menus;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 import hospitalsystem.model.Prescription;
-import hospitalsystem.apptcontrol.AppointmentControl;
+import hospitalsystem.appointmentcontrol.AppointmentControl;
 import hospitalsystem.enums.PrescriptionStatus;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.Medicine;
+import hospitalsystem.model.Medicine.Batch;
 import hospitalsystem.model.Patient;
 import hospitalsystem.model.User;
 import java.time.LocalDate;
@@ -23,6 +27,52 @@ public class PharmacistControl implements MenuInterface {
             throw new IllegalArgumentException("User must be a Doctor");
         }
         this.pharmacist = (Pharmacist) currentUser;
+    }
+
+    
+    //Shift to pharmacistControl
+    // Method to add a new batch to the medicine
+    public void addBatch(int quantity, LocalDate expirationDate) {
+        batches.add(new Batch(quantity, expirationDate));
+        batches.sort(Comparator.comparing(Batch::getExpirationDate));
+        System.out.println("Added batch of " + quantity + " units for " + medicineName + ", expires on " + expirationDate);
+    }
+
+    // Get batches nearing expiration
+    public List<Batch> getNearingExpirationBatches(int weeksBeforeExpiration) {
+        List<Batch> nearingExpiration = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        for (Batch batch : batches) {
+            if (batch.getExpirationDate().isBefore(today.plusWeeks(weeksBeforeExpiration))) {
+                nearingExpiration.add(batch);
+            }
+        }
+        return nearingExpiration;
+    }
+
+    // Dispense a specified quantity, prioritizing batches closest to expiration
+    public boolean dispense(int quantity) {
+        Iterator<Batch> iterator = batches.iterator();
+        int batchQuantity;
+        while (iterator.hasNext() && quantity > 0) {
+            Batch batch = iterator.next();
+            batchQuantity = batch.getQuantity();
+            if (batchQuantity <= quantity) {
+                quantity -= batchQuantity;
+                iterator.remove();
+                System.out.println("Used up batch of " + medicineName + " with expiration date: " + batch.getExpirationDate());
+            } else {
+                batch.setQuantity(batchQuantity - quantity);
+                System.out.println("Dispensed " + quantity + " units from batch of " + medicineName + " with expiration date: " + batch.getExpirationDate());
+                quantity = 0;
+            }
+        }
+
+        if (quantity > 0) {
+            System.out.println("Insufficient stock to dispense " + quantity + " units of " + medicineName);
+            return false;
+        }
+        return true;
     }
 
     // // View Inventory and Stock Information sub-menu

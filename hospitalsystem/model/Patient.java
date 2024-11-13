@@ -1,8 +1,9 @@
 package hospitalsystem.model;
-import hospitalsystem.apptcontrol.AppointmentControl;
 import hospitalsystem.menus.*;
 
 import java.time.LocalDate;
+
+import hospitalsystem.appointmentcontrol.AppointmentControl;
 import hospitalsystem.controllers.*;
 import hospitalsystem.enums.BloodType;
 import java.util.List;
@@ -11,12 +12,16 @@ public class Patient extends User{
     private final MedicalRecord medicalRecord;
     private final BloodType bloodType;
     private List<Appointment> appointments;
+    private String email;
+    private String phoneNumber;
 
-    public Patient(String HospitalID, String name, int age, String gender, String password, BloodType bloodType){
+    public Patient(String HospitalID, String name, int age, String gender, String password, BloodType bloodType, String email, String phoneNumber){
         super(HospitalID, name, age, gender, password);
         this.medicalRecord = new MedicalRecord(this);
         this.appointments = AppointmentControl.getAppointmentsByPatientID(this.getID());
         this.bloodType = bloodType;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
     }
 
     public MedicalRecord getMedicalRecord(){

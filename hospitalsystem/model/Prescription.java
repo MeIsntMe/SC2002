@@ -4,8 +4,6 @@ import hospitalsystem.enums.PrescriptionStatus;
 import java.util.HashMap;
 
 public class Prescription {
-
-    private HashMap<String, Integer> prescriptionList = new HashMap<>(); // Prescription key: medicine name, point to quantity 
     private final HashMap<Medicine, Integer> medicineList = new HashMap<>(); //Prescription key: medicine name, point to quantity 
     private PrescriptionStatus status;  // Status of the prescription (e.g., PENDING, DISPENSED)
 
@@ -13,26 +11,13 @@ public class Prescription {
     private final String doctorID;               // Doctor that assigned prescription
 
     // Constructor
-    public Prescription(String medicineName, String patientID, int dosage, PrescriptionStatus status) {
-        this.id = ++idCounter;             // Assign a unique ID to each prescription
-        this.medicine = medicine;
-    public Prescription(String doctorID, String patientID) {
+    public Prescription(String medicineName, String doctorID, String patientID, int dosage, PrescriptionStatus status) {
         this.patientID = patientID;
         this.status = PrescriptionStatus.PENDING;
         this.doctorID = doctorID;
     }
 
     // Getters and Setters methods 
-    public HashMap getPrescriptionList() {return prescriptionList;}
-    public void setPrescriptionList(String medicineName, int dosage) {
-        prescriptionList.put(medicineName, dosage);
-    }
-    public int getId() {
-        return id;
-    }
-
-    public Medicine getMedicine() {
-        return medicine;
     public HashMap<Medicine, Integer> getMedicineList() {
         return medicineList;
     }
