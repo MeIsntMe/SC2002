@@ -38,15 +38,6 @@ public class InventoryControl {
         }
     }
 
-    // Getter for inventoryMap
-    public Map<String, Medicine> getInventoryMap() {
-        return inventoryMap;
-    }
-    // Getter for requestMap
-    public Map<String, ReplenishmentRequest> getRequestMap() {
-        return requestMap;
-    }
-
     public static void addMedicine(Scanner sc) {
         boolean repeat;
         System.out.println("=========================================");  
@@ -176,5 +167,16 @@ public class InventoryControl {
             }
         }
         return lowStockMedications;
+    }
+
+    
+    // Getter for inventoryMap
+    public Map<String, Medicine> getInventoryMap() {
+        return inventoryMap;
+    }
+    
+    // Getter for requestMap
+    public Map<String, ReplenishmentRequest> getRequestMap() {
+        return requestMap;
     }
 }
