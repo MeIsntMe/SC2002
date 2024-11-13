@@ -1,4 +1,4 @@
-package hospitalsystem.controllers;
+package hospitalsystem.apptcontrol;
 
 import hospitalsystem.MainSystem;
 import hospitalsystem.enums.*;
@@ -46,7 +46,7 @@ public class AppointmentControl {
             return medicineName + ": " + status;
         }
     }
-
+    //moved
     public static void loadAppointmentsFromCSV() {
         try (Scanner fileScanner = new Scanner(new File(CSV_PATH))) {
             fileScanner.nextLine(); // Skip the first line

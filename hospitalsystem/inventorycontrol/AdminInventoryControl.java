@@ -1,11 +1,11 @@
-package hospitalsystem.controllers;
+package hospitalsystem.inventorycontrol;
 
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 import java.time.LocalDate;
 
-import hospitalsystem.MainSystem;
+import hospitalsystem.HMS;
 import hospitalsystem.enums.RequestStatus;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;

@@ -1,6 +1,7 @@
-package hospitalsystem.controllers;
+package hospitalsystem.menus;
 
-import hospitalsystem.MainSystem;
+import hospitalsystem.HMS;
+import hospitalsystem.apptcontrol.AppointmentControl;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import hospitalsystem.model.Appointment.AppointmentSlot;

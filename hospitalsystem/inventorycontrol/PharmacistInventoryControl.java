@@ -1,6 +1,7 @@
-package hospitalsystem.controllers;
+package hospitalsystem.inventorycontrol;
 
 import java.util.Scanner;
+
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
 //import hospitalsystem.model.Batch;

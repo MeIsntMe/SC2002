@@ -68,7 +68,6 @@ public class Medicine {
     }
 
     // Get batches nearing expiration
-    // For what?
     public List<Batch> getNearingExpirationBatches(int weeksBeforeExpiration) {
         List<Batch> nearingExpiration = new ArrayList<>();
         LocalDate today = LocalDate.now();

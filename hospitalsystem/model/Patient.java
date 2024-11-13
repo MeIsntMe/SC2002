@@ -1,5 +1,6 @@
 package hospitalsystem.model;
-import hospitalsystem.controllers.*;
+import hospitalsystem.apptcontrol.AppointmentControl;
+import hospitalsystem.menus.*;
 
 import java.time.LocalDate;
 import java.util.List;

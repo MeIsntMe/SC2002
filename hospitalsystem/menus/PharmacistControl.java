@@ -1,8 +1,9 @@
-package hospitalsystem.controllers;
+package hospitalsystem.menus;
 
 import java.util.List;
 import java.util.Scanner;
 import hospitalsystem.model.Prescription;
+import hospitalsystem.apptcontrol.AppointmentControl;
 import hospitalsystem.enums.PrescriptionStatus;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.Medicine;

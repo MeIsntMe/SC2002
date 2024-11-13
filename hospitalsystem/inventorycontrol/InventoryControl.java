@@ -1,6 +1,7 @@
-package hospitalsystem.controllers;
+package hospitalsystem.inventorycontrol;
 
-import hospitalsystem.MainSystem;
+import hospitalsystem.HMS;
+import hospitalsystem.data.Database;
 import hospitalsystem.enums.RequestStatus;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
@@ -16,27 +17,23 @@ import java.util.Scanner;
 
 public class InventoryControl {
     
-    // HashMap to store inventory 
-    public static Map<String, Medicine> inventoryMap = new HashMap<>(); // key is medicine name
-    public static Map<String, ReplenishmentRequest> requestMap = new HashMap<>(); // key is medicine name
-
     public static void displayInventory() {
-        if (inventoryMap.isEmpty()) {
+
+        if (!Database.inventoryMap.isEmpty()) {
+            System.out.printf("%-20s %-15s %-20s %-20s%n", "Medicine Name", "Batch Quantity", "Expiration Date", "Low Stock Alert Level");
+            System.out.println("-------------------------------------------------------------------------------");
+            for (Map.Entry<String, Medicine> entry : Database.inventoryMap.entrySet()) {
+                Medicine med = entry.getValue();
+                for (Medicine.Batch batch : med.getBatches()) { 
+                    System.out.printf("%-20s %-15d %-20s %-20d%n", 
+                        med.getMedicineName(), batch.getQuantity(), batch.getExpirationDate(), med.getLowStockAlert());
+                }
+                System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.isLowStock() ? " **LOW STOCK ALERT**" : ""));
+                System.out.println();
+            }
+        } else {
             System.out.println("The inventory is currently empty.");
             return;
-        }
-
-        // Print in table format with headers
-        System.out.printf("%-20s %-15s %-20s %-20s%n", "Medicine Name", "Batch Quantity", "Expiration Date", "Low Stock Alert Level");
-        System.out.println("-------------------------------------------------------------------------------");
-        for (Map.Entry<String, Medicine> entry : inventoryMap.entrySet()) {
-            Medicine med = entry.getValue();
-            for (Medicine.Batch batch : med.getBatches()) { 
-                System.out.printf("%-20s %-15d %-20s %-20d%n", 
-                    med.getMedicineName(), batch.getQuantity(), batch.getExpirationDate(), med.getLowStockAlert());
-            }
-            System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.isLowStock() ? " **LOW STOCK ALERT**" : ""));
-            System.out.println();
         }
     }
 
@@ -68,10 +65,10 @@ public class InventoryControl {
         ReplenishmentRequest request = requestMap.get(medicineName);
         if (request != null && request.getStatus() == RequestStatus.APPROVED) {
             // Check if the medicine exists in the inventory
-            Medicine medicine = inventoryMap.get(medicineName);
+            Medicine medicine = Database.inventoryMap.get(medicineName);
             if (medicine == null) {
                 medicine = new Medicine(medicineName, 10); // Default low stock alert threshold
-                inventoryMap.put(medicineName, medicine);
+                Database.inventoryMap.put(medicineName, medicine);
             }
 
             // Add a new batch with specified quantity and expiration date
@@ -89,8 +86,6 @@ public class InventoryControl {
 
     public static void addMedicine(Scanner sc) {
         boolean repeat;
-        System.out.println("=========================================");  
-        System.out.println("Inventory Management > Add Medicine");
         do {
             System.out.print("Enter name of medicine to add: ");
             String medicineName = sc.nextLine();
@@ -103,10 +98,10 @@ public class InventoryControl {
             sc.nextLine();
 
             // Check if the medicine already exists in the inventory; if not, create a new one
-            Medicine medicine = inventoryMap.get(medicineName);
+            Medicine medicine = Database.inventoryMap.get(medicineName);
             if (medicine == null) {
                 medicine = new Medicine(medicineName, lowStockAlert);
-                inventoryMap.put(medicineName, medicine);
+                Database.inventoryMap.put(medicineName, medicine);
             }
 
             // Add the new batch with its quantity and expiration date
@@ -114,8 +109,36 @@ public class InventoryControl {
             System.out.printf("%s successfully added into inventory%n", medicineName);
             
             // Option to repeat the addition
-            repeat = MainSystem.getRepeatChoice(sc);
+            repeat = HMS.repeat(sc);
         } while (repeat);
+    }
+
+    public static void addMedicine(Scanner sc) {
+        while (true) {
+            System.out.print("Enter name of medicine to add: ");
+            String medicineName = sc.nextLine();
+            System.out.print("Enter initial stock level for the batch: ");
+            int initialStock = sc.nextInt();
+            System.out.print("Enter low stock alert level: ");
+            int lowStockAlert = sc.nextInt();
+            System.out.print("Enter expiration date (YYYY-MM-DD): ");
+            LocalDate expirationDate = LocalDate.parse(sc.next().trim());
+            sc.nextLine();
+
+            // Create new medicine if it does not already exist 
+            Medicine medicine = Database.inventoryMap.get(medicineName);
+            if (medicine == null) {
+                medicine = new Medicine(medicineName, lowStockAlert);
+                Database.inventoryMap.put(medicineName, medicine);
+            }
+
+            // Add the new batch with its quantity and expiration date
+            medicine.addBatch(initialStock, expirationDate);
+            System.out.printf("%s successfully added into inventory%n", medicineName);
+            
+            // Give option to repeat 
+            if (!HMS.repeat()) break;
+        }
     }
 
     public static void removeMedicine(Scanner sc) {
@@ -126,15 +149,15 @@ public class InventoryControl {
             System.out.print("Enter name of medicine to remove: ");
             String medicineName = sc.nextLine();
             
-            if (inventoryMap.containsKey(medicineName)) {
-                inventoryMap.remove(medicineName);
+            if (Database.inventoryMap.containsKey(medicineName)) {
+                Database.inventoryMap.remove(medicineName);
                 System.out.println(medicineName + " has been removed from the inventory.");
             } else {
                 System.out.println("Medicine not found in inventory: " + medicineName);
             }
             
             // Option to repeat
-            repeat = MainSystem.getRepeatChoice(sc);
+            repeat = HMS.getRepeatChoice(sc);
         } while (repeat);
     }
 
@@ -147,8 +170,8 @@ public class InventoryControl {
             String medicineName = sc.nextLine().trim();
 
             // Check if medicine exists
-            if (inventoryMap.containsKey(medicineName)) {
-                Medicine medicine = inventoryMap.get(medicineName);
+            if (Database.inventoryMap.containsKey(medicineName)) {
+                Medicine medicine = Database.inventoryMap.get(medicineName);
                 
                 // Prompt for new batch stock
                 System.out.println("Current total stock level for " + medicineName + " is " + medicine.getTotalQuantity());
@@ -165,52 +188,24 @@ public class InventoryControl {
             }
             
             // Option to repeat
-            repeat = MainSystem.getRepeatChoice(sc);
+            repeat = HMS.getRepeatChoice(sc);
         }  while (repeat);
     } 
 
-    public static void loadInventoryFromCSV(String filePath) {
-        try (Scanner scanner = new Scanner(new File(filePath))) {
-            scanner.nextLine(); // Skip the header line if there is one
-            while (scanner.hasNextLine()) {
-                String[] inventoryData = scanner.nextLine().split(",");
-                String medicineName = inventoryData[0].trim();
-                int initialStock = Integer.parseInt(inventoryData[1].trim());
-                int lowStockAlert = Integer.parseInt(inventoryData[2].trim());
-                LocalDate expirationDate = LocalDate.parse(inventoryData[3].trim());
-
-                // Check if the medicine exists; if not, create a new one
-                Medicine medicine = inventoryMap.get(medicineName);
-                if (medicine == null) {
-                    medicine = new Medicine(medicineName, lowStockAlert);
-                    inventoryMap.put(medicineName, medicine);
-                }
-                
-                // Add batch to the medicine
-                medicine.addBatch(initialStock, expirationDate);
-            }
-            System.out.println("Inventory loaded successfully from CSV.");
-        } catch (FileNotFoundException e) {
-            System.out.println("CSV file not found: " + e.getMessage());
-        } catch (NumberFormatException e) {
-            System.out.println("Error parsing number from CSV: " + e.getMessage());
-        }
-    }
-
     // Additional unchanged methods for checking stock, low stock, etc., from the original code
     public int checkStock(String medicineName) {
-        Medicine medicine = inventoryMap.get(medicineName);
+        Medicine medicine = Database.inventoryMap.get(medicineName);
         return medicine != null ? medicine.getTotalQuantity() : -1;
     }
 
     public boolean isLowStock(String medicineName) {
-        Medicine medicine = inventoryMap.get(medicineName);
+        Medicine medicine = Database.inventoryMap.get(medicineName);
         return medicine != null && medicine.isLowStock();
     }
 
     public List<String> getLowStockMedications() {
         List<String> lowStockMedications = new ArrayList<>();
-        for (Map.Entry<String, Medicine> entry : inventoryMap.entrySet()) {
+        for (Map.Entry<String, Medicine> entry : Database.inventoryMap.entrySet()) {
             if (entry.getValue().isLowStock()) {
                 lowStockMedications.add(entry.getKey());
             }
