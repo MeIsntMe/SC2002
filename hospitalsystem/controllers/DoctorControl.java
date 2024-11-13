@@ -3,15 +3,14 @@ package hospitalsystem.controllers;
 import hospitalsystem.MainSystem;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
-import hospitalsystem.model.Appointment.AppointmentSlot;
 import hospitalsystem.model.Appointment.AppointmentOutcome;
-
+import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
+ 
 public class DoctorControl implements MenuInterface{
     // Instance variables 
     private final Doctor doctor; 

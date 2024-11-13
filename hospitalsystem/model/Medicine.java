@@ -2,19 +2,32 @@ package hospitalsystem.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
 public class Medicine {
-    private String medicineName;
+    private final String medicineName;
+    private final String instructions;
     private List<Batch> batches;
-    private int lowStockAlert;  // Low stock alert threshold
+    private int minimumStockLevel;  // Low stock alert threshold
+    
 
     // Constructor
-    public Medicine(String medicineName, int lowStockAlert) {
+    public Medicine(String medicineName, int minimumStockLevel, String instructions) {
         this.medicineName = medicineName;
         this.batches = new ArrayList<>(); //This should be retrieve from csv
-        this.lowStockAlert = lowStockAlert;
+        this.minimumStockLevel = minimumStockLevel;
+        this.instructions = instructions;
+        //Get rid of expired batches
+        Iterator<Batch> iterator = batches.iterator();
+        while (iterator.hasNext()) {
+            Batch batch = iterator.next();
+            if (batch.isExpired()) {
+                System.out.println("Removing expired batch of " + medicineName + " with expiration date: " + batch.getExpirationDate());
+                iterator.remove();
+            }
+        }
     }
 
     // Getters
@@ -27,17 +40,19 @@ public class Medicine {
     }
 
     public int getLowStockAlert() {
-        return lowStockAlert;
+        return minimumStockLevel;
     }
 
-    public void setLowStockAlert(int lowStockAlert) {
-        this.lowStockAlert = lowStockAlert;
+    public String getInstructions(){
+        return instructions;
     }
 
-    // Method to add a new batch to the medicine
-    public void addBatch(int quantity, LocalDate expirationDate) {
-        batches.add(new Batch(quantity, expirationDate));
-        System.out.println("Added batch of " + quantity + " units for " + medicineName + ", expires on " + expirationDate);
+    public void setMinimumSttockLevel(int lowStockAlert) {
+        this.minimumStockLevel = lowStockAlert;
+    }
+
+    public void setBatch(List<Batch> newBatches){
+        this.batches = newBatches;
     }
 
     // Get total quantity across all batches
@@ -50,25 +65,25 @@ public class Medicine {
     }
 
     // Method to check if the total stock is below the low stock alert threshold
-    public boolean isLowStock() {
-        return getTotalQuantity() < lowStockAlert;
+    public boolean getIsLowStock() {
+        return getTotalQuantity() < minimumStockLevel;
     }
 
-    // Remove expired batches
-    // Should this just be in constructor?
-    public void removeExpiredBatches() {
-        Iterator<Batch> iterator = batches.iterator();
-        while (iterator.hasNext()) {
-            Batch batch = iterator.next();
-            if (batch.isExpired()) {
-                System.out.println("Removing expired batch of " + medicineName + " with expiration date: " + batch.getExpirationDate());
-                iterator.remove();
-            }
-        }
+    @Override
+    public String toString(){
+        return medicineName;
+    }
+
+
+    //Shift to pharmacistControl
+    // Method to add a new batch to the medicine
+    public void addBatch(int quantity, LocalDate expirationDate) {
+        batches.add(new Batch(quantity, expirationDate));
+        batches.sort(Comparator.comparing(Batch::getExpirationDate));
+        System.out.println("Added batch of " + quantity + " units for " + medicineName + ", expires on " + expirationDate);
     }
 
     // Get batches nearing expiration
-    // For what?
     public List<Batch> getNearingExpirationBatches(int weeksBeforeExpiration) {
         List<Batch> nearingExpiration = new ArrayList<>();
         LocalDate today = LocalDate.now();
@@ -83,12 +98,12 @@ public class Medicine {
     // Dispense a specified quantity, prioritizing batches closest to expiration
     public boolean dispense(int quantity) {
         Iterator<Batch> iterator = batches.iterator();
+        int batchQuantity;
         while (iterator.hasNext() && quantity > 0) {
             Batch batch = iterator.next();
-            int batchQuantity = batch.getQuantity();
+            batchQuantity = batch.getQuantity();
             if (batchQuantity <= quantity) {
                 quantity -= batchQuantity;
-                batch.setQuantity(0);
                 iterator.remove();
                 System.out.println("Used up batch of " + medicineName + " with expiration date: " + batch.getExpirationDate());
             } else {
@@ -106,14 +121,19 @@ public class Medicine {
     }
 
     // Nested Batch class within Medicine
-    public class Batch {
+    public class Batch implements Comparable<Batch>{
         private int quantity;
-        private LocalDate expirationDate;
+        private final LocalDate expirationDate;
 
         // Constructor
         public Batch(int quantity, LocalDate expirationDate) {
             this.quantity = quantity;
             this.expirationDate = expirationDate;
+        }
+
+        @Override
+        public int compareTo(Batch otherBatch){
+            return this.expirationDate.compareTo(otherBatch.expirationDate);
         }
 
         // Getters

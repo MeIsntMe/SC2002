@@ -42,7 +42,7 @@ public class AdminControl implements MenuInterface {
                     case 1 -> UserControl.manageStaffMenu(scanner);
                     case 2 -> //call appointment control
                     case 3 -> AdminInventoryControl.manageInventoryMenu();
-                    case 4 -> AdminInventoryControl.approveRequests(sc);
+                    case 4 -> AdminInventoryControl.approveRequests(scanner);
                     case 5 -> {MainSystem.currentUser = null; return;}
                     default -> System.out.println("Invalid input! Please enter a number between 1-5 ");
                 }

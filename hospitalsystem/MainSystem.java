@@ -62,10 +62,13 @@ public class MainSystem {
                             case ADMINISTRATOR:
                                 control = new AdminControl(currentUser);
                                 break;
-                            case null: 
+                            default: 
+                                control = null;
                                 break;
                         }
-                        control.displayMenu();
+                        if (control != null){
+                            control.displayMenu();
+                        }
                     case 2:
                         scanner.close();
                         return;

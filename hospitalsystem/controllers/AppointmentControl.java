@@ -480,7 +480,7 @@ public class AppointmentControl {
                 System.out.println("Warning: Could not create backup: " + e.getMessage());
             }
         }
-
+ 
         saveAppointmentsToCSV();
     }
 }
