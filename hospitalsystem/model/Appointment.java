@@ -1,8 +1,11 @@
 package hospitalsystem.model;
 
 import hospitalsystem.enums.*;
+import hospitalsystem.model.Appointment.AppointmentOutcome;
+import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Appointment implements Comparable<Appointment> {
     private final String appointmentID;
@@ -11,6 +14,7 @@ public class Appointment implements Comparable<Appointment> {
     private final AppointmentSlot slot;
     private AppointmentStatus status;
     private AppointmentOutcome outcome;
+    private Boolean isAvailable = true;
 
     @Override
     public int compareTo(Appointment appointment) {
@@ -23,7 +27,7 @@ public class Appointment implements Comparable<Appointment> {
         this.doctor = doctor;
         this.slot = slot;
         this.status = AppointmentStatus.PENDING;
-        this.outcome = new AppointmentOutcome(this, "", new HashMap<>(), "", "");
+        this.outcome = new AppointmentOutcome(this, "", new ArrayList<>(), "", "");
     }
 
     // Getter and Setter methods
@@ -47,6 +51,13 @@ public class Appointment implements Comparable<Appointment> {
         return status;
     }
 
+    public boolean getIsAvailable(){
+        return this.isAvailable;
+    }
+    public void setIsAvailable(boolean newValue){
+        this.isAvailable = newValue;
+    }
+
     public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
@@ -59,11 +70,11 @@ public class Appointment implements Comparable<Appointment> {
         this.outcome = outcome;
     }
 
-    public HashMap<String, PrescriptionStatus> getPrescriptions() {
+    public List<Prescription> getPrescriptions() {
         return this.outcome.getPrescriptions();
     }
 
-    public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
+    public void setPrescriptions(List<Prescription> prescriptions) {
         this.outcome.setPrescriptions(prescriptions);
     }
 
@@ -104,12 +115,12 @@ public class Appointment implements Comparable<Appointment> {
     // Non-static inner class
     public class AppointmentOutcome {
         private final Appointment appointment;
-        private HashMap<String, PrescriptionStatus> prescriptions;
+        private List<Prescription> prescriptions;
         private String serviceType;
         private String recordedDate;
         private String consultationNotes;
 
-        public AppointmentOutcome(Appointment appointment, String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions, String recordedDate, String serviceType) {
+        public AppointmentOutcome(Appointment appointment, String consultationNotes, List<Prescription> prescriptions, String recordedDate, String serviceType) {
             this.appointment = appointment;
             this.consultationNotes = consultationNotes;
             this.prescriptions = prescriptions;
@@ -117,7 +128,7 @@ public class Appointment implements Comparable<Appointment> {
             this.serviceType = serviceType;
         }
 
-        public HashMap<String, PrescriptionStatus> getPrescriptions() {
+        public List<Prescription> getPrescriptions() {
             return prescriptions;
         }
 
@@ -145,7 +156,7 @@ public class Appointment implements Comparable<Appointment> {
             this.serviceType = newServiceType;
         }
 
-        public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
+        public void setPrescriptions(List<Prescription> prescriptions) {
             this.prescriptions = prescriptions;
         }
 
