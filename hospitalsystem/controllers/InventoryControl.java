@@ -1,6 +1,7 @@
 package hospitalsystem.controllers;
 
 import hospitalsystem.MainSystem;
+import hospitalsystem.enums.RequestStatus;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
 import java.io.File;
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+
 
 public class InventoryControl {
     
@@ -37,6 +39,53 @@ public class InventoryControl {
             System.out.println();
         }
     }
+
+    // Getter for inventoryMap
+    public Map<String, Medicine> getInventoryMap() {
+        return inventoryMap;
+    }
+    // Getter for requestMap
+    public Map<String, ReplenishmentRequest> getRequestMap() {
+        return requestMap;
+    }
+
+    // Store a new replenishment request
+    public void addReplenishmentRequest(ReplenishmentRequest request) {
+        requestMap.put(request.getMedicineName(), request);
+        System.out.println("Replenishment request added for " + request.getMedicineName() +
+                           " with quantity " + request.getRequestedQuantity());
+    }
+
+    // Retrieve pending requests
+    public Iterable<ReplenishmentRequest> getPendingRequests() {
+        return requestMap.values().stream()
+                .filter(request -> request.getStatus() == RequestStatus.PENDING)
+                .toList();
+    }
+
+    // Add a new batch with an expiration date for an approved replenishment request
+    public boolean addBatchToInventory(String medicineName, int quantity, LocalDate expirationDate) {
+        ReplenishmentRequest request = requestMap.get(medicineName);
+        if (request != null && request.getStatus() == RequestStatus.APPROVED) {
+            // Check if the medicine exists in the inventory
+            Medicine medicine = inventoryMap.get(medicineName);
+            if (medicine == null) {
+                medicine = new Medicine(medicineName, 10); // Default low stock alert threshold
+                inventoryMap.put(medicineName, medicine);
+            }
+
+            // Add a new batch with specified quantity and expiration date
+            medicine.addBatch(quantity, expirationDate);
+            requestMap.remove(medicineName);  // Remove the request once fulfilled
+            System.out.println("Added batch of " + quantity + " units for " + medicineName +
+                               " with expiration date " + expirationDate + ".");
+            return true;
+        } else {
+            System.out.println("Request for " + medicineName + " is not approved or does not exist.");
+            return false;
+        }
+    }
+
 
     public static void addMedicine(Scanner sc) {
         boolean repeat;
@@ -167,16 +216,5 @@ public class InventoryControl {
             }
         }
         return lowStockMedications;
-    }
-
-    
-    // Getter for inventoryMap
-    public Map<String, Medicine> getInventoryMap() {
-        return inventoryMap;
-    }
-    
-    // Getter for requestMap
-    public Map<String, ReplenishmentRequest> getRequestMap() {
-        return requestMap;
     }
 }

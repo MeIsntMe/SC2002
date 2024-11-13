@@ -13,7 +13,7 @@ public class Medicine {
     // Constructor
     public Medicine(String medicineName, int lowStockAlert) {
         this.medicineName = medicineName;
-        this.batches = new ArrayList<>();
+        this.batches = new ArrayList<>(); //This should be retrieve from csv
         this.lowStockAlert = lowStockAlert;
     }
 
@@ -55,6 +55,7 @@ public class Medicine {
     }
 
     // Remove expired batches
+    // Should this just be in constructor?
     public void removeExpiredBatches() {
         Iterator<Batch> iterator = batches.iterator();
         while (iterator.hasNext()) {
@@ -67,6 +68,7 @@ public class Medicine {
     }
 
     // Get batches nearing expiration
+    // For what?
     public List<Batch> getNearingExpirationBatches(int weeksBeforeExpiration) {
         List<Batch> nearingExpiration = new ArrayList<>();
         LocalDate today = LocalDate.now();
