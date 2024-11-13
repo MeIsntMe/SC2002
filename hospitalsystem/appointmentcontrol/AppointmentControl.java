@@ -17,9 +17,8 @@ import java.util.stream.Collectors;
 
 public class AppointmentControl {
 
-    // Hashmap storing all appointments 
+    // ONLY HAVE THE FUNCTIONS THAT WILL BE INHERITED BY ALL THE SUBCLASSES 
     
-
     // Utility methods for managing appointments
     public static List<Appointment> getAppointmentsByDoctorID(String doctorID) {
         return Database.appointmentMap.values().stream()
