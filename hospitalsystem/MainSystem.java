@@ -56,23 +56,20 @@ public class MainSystem {
                         switch (role) {
                             case PATIENT:
                                 control = new PatientControl(currentUser);
-                                control.displayMenu();
                                 break;
                             case DOCTOR:
                                 control = new DoctorControl(currentUser);
-                                control.displayMenu();
                                 break;
                             case PHARMACIST:
                                 control = new PharmacistControl(currentUser);
-                                control.displayMenu();
                                 break;
                             case ADMINISTRATOR:
                                 control = new AdminControl(currentUser);
-                                control.displayMenu();
                                 break;
                             case null: 
                                 break;
                         }
+                        control.displayMenu();
                     case 2:
                         scanner.close();
                         return;
