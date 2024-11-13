@@ -3,30 +3,39 @@ import hospitalsystem.apptcontrol.AppointmentControl;
 import hospitalsystem.menus.*;
 
 import java.time.LocalDate;
+import hospitalsystem.controllers.*;
+import hospitalsystem.enums.BloodType;
 import java.util.List;
 
 public class Patient extends User{
-    private LocalDate DOB; 
-    private String bloodType; 
-    private String email;
     private final MedicalRecord medicalRecord;
+    private final BloodType bloodType;
     private List<Appointment> appointments;
 
-    // Constructor
-    public Patient(String patientID, String name, LocalDate DOB, String gender, String bloodType, String email, String password){
-        super(patientID, name, gender, password);
-        this.DOB = DOB; 
-        this.bloodType = bloodType;
-        this.email = email;
+    public Patient(String HospitalID, String name, int age, String gender, String password, BloodType bloodType){
+        super(HospitalID, name, age, gender, password);
         this.medicalRecord = new MedicalRecord(this);
-        this.appointments = AppointmentControl.getAppointmentsByPatientID(patientID);
+        this.appointments = AppointmentControl.getAppointmentsByPatientID(this.getID());
+        this.bloodType = bloodType;
     }
 
-    public MedicalRecord getMedicalRecord() {return this.medicalRecord;}
+    public MedicalRecord getMedicalRecord(){
+        return this.medicalRecord;
+    }
 
-    public List<Appointment> getAppointments() {return this.appointments;}
+    public List<Appointment> getAppointments(){
+        return this.appointments;
+    }
 
-    public int getTotalAppointmentCount() {return this.appointments.size();}
+    public int getTotalAppointmentCount(){
+        return this.appointments.size();
+    }
 
-    public void setAppointments(List<Appointment> newAppointments) {this.appointments = newAppointments;}
+    public BloodType getBloodType(){
+        return this.bloodType;
+    }
+
+    public void setAppointments(List<Appointment> newAppointments){
+        this.appointments = newAppointments;
+    }
 }

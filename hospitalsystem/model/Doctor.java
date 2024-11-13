@@ -1,29 +1,21 @@
 package hospitalsystem.model;
 
+import hospitalsystem.MainSystem;
+import hospitalsystem.controllers.DoctorControl;
 import java.util.ArrayList;
 import java.util.List;
 
-import hospitalsystem.MainSystem;
-import hospitalsystem.controllers.DoctorControl;
-import hospitalsystem.enums.AppointmentStatus;
-import hospitalsystem.model.Appointment.AppointmentSlot;
-
 public class Doctor extends User {
-    private int age;
     private List<Appointment.AppointmentSlot> availableSlots;
     private List<Appointment> upcomingAppointments;
 
-    public Doctor(String doctorID, String name, String gender, int age, String password) {
-        super(doctorID, name, gender, password);
-        this.age = age;
+    public Doctor(String doctorID, String name, int age, String gender, String password) {
+        super(doctorID, name, age, gender, password);
         this.availableSlots = new ArrayList<>();
         this.upcomingAppointments = new ArrayList<>();
     }
 
     // Getter and Setter methods
-    public int getAge() {return age;}
-    
-    public void setAge(int age ) {this.age = age; }
 
     public List<Appointment.AppointmentSlot> getAvailableSlots() {
         return availableSlots;
