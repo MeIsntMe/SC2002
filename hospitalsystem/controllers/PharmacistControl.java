@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 public class PharmacistControl implements MenuInterface {
     private Pharmacist pharmacist;
-    private InventoryControl inventoryControl;
+    //private InventoryControl inventoryControl;
 
     // Constructor
     public PharmacistControl(Pharmacist pharmacist, InventoryControl inventoryControl) {
