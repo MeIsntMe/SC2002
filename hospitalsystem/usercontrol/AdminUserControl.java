@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import hospitalsystem.HMS;
 import hospitalsystem.data.Database;
+import hospitalsystem.enums.BloodType;
 import hospitalsystem.enums.UserType;
 import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Doctor;
@@ -122,7 +123,7 @@ public class AdminUserControl extends UserControl {
     }
 
     // Add staff
-    public static void addStaff(Scanner sc){
+    public static void addUser(Scanner sc){
         while (true) {
 
             // Prompt for role and details
@@ -133,6 +134,7 @@ public class AdminUserControl extends UserControl {
             String gender = sc.nextLine();
             String password = "password";
             String nil = "";
+            BloodType bloodtype = 
             int age = 0;
 
             // Auto-generate ID
@@ -141,19 +143,19 @@ public class AdminUserControl extends UserControl {
             // Create and add user
             switch (role) {
                 case PATIENT: 
-                    Patient patient = new Patient(userID, name, nil, gender, nil, nil, password);
+                    Patient patient = new Patient(userID, name, nil, age, gender, nil, nil, password);
                     Database.patientsMap.put(userID, patient);
                     break;
                 case DOCTOR: 
-                    Doctor doc = new Doctor(userID, name, gender, age, password);
+                    Doctor doc = new Doctor(userID, name, age, gender, password);
                     Database.doctorsMap.put(userID, doc);
                     break; 
                 case PHARMACIST: 
-                    Pharmacist pharm = new Pharmacist(userID, name, gender, age, password);
+                    Pharmacist pharm = new Pharmacist(userID, name, age, gender, password);
                     Database.pharmsMap.put(userID, doc);
                     break; 
                 case ADMINISTRATOR:
-                    Administrator admin = new Administrator(userID, name, gender, age, password);
+                    Administrator admin = new Administrator(userID, name, age, gender, password);
                     Database.adminsMap.put(userID, admin);
                     break; 
             }
@@ -237,6 +239,27 @@ public class AdminUserControl extends UserControl {
         // remove returns the removed value if it exists, or null if not found
     }
 
+    // Get role input 
+    public static UserType getRoleInput(Scanner scanner) {
+        while (true) {
+            System.out.println("Select role: 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
+            int role;
+            try {
+                role = scanner.nextInt(); 
+                switch (role) {
+                    case 1 -> {return UserType.PATIENT;}
+                    case 2 -> {return UserType.DOCTOR;}
+                    case 3 -> {return UserType.PHARMACIST;}
+                    case 4 -> {return UserType.ADMINISTRATOR;}
+                    default -> System.out.println("Invalid role number specified. Please enter a number between 1 and 4.");
+                }
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please enter a number between 1 and 4.");
+            }
+        }
+    }
+
+    // Get staff role input 
     public static UserType getStaffRoleInput(Scanner sc) {
         while (true) {
             System.out.println("Select role (1-3): 1. Doctor | 2. Pharmacist | 3. Administrator");

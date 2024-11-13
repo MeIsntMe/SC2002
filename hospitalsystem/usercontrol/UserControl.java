@@ -105,25 +105,6 @@ public abstract class UserControl {
         }
     }
 
-    public static UserType getRoleInput(Scanner scanner) {
-        while (true) {
-            System.out.println("Select role: 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
-            int role;
-            try {
-                role = scanner.nextInt(); 
-                switch (role) {
-                    case 1 -> {return UserType.PATIENT;}
-                    case 2 -> {return UserType.DOCTOR;}
-                    case 3 -> {return UserType.PHARMACIST;}
-                    case 4 -> {return UserType.ADMINISTRATOR;}
-                    default -> System.out.println("Invalid role number specified. Please enter a number between 1 and 4.");
-                }
-            } catch (Exception e) {
-                System.out.println("Invalid input. Please enter a number between 1 and 4.");
-            }
-        }
-    }
-
     public static UserType getStaffRoleInput(Scanner scanner) {
         while (true) {
             System.out.println("Select role (1-3): 1. Doctor | 2. Pharmacist | 3. Administrator");
