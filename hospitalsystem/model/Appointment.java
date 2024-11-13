@@ -25,7 +25,7 @@ public class Appointment implements Comparable<Appointment> {
         this.slot = slot;
         this.status = AppointmentStatus.PENDING;
         this.isAvailable = true;
-        this.outcome = new AppointmentOutcome(this, "", new HashMap<>());
+        this.outcome = new AppointmentOutcome(this, "", new HashMap<>(), "", "");
     }
 
     // Getter and Setter methods
