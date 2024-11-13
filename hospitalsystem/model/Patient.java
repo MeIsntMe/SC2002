@@ -1,10 +1,5 @@
 package hospitalsystem.model;
-import hospitalsystem.menus.*;
-
-import java.time.LocalDate;
-
 import hospitalsystem.appointmentcontrol.AppointmentControl;
-import hospitalsystem.controllers.*;
 import hospitalsystem.enums.BloodType;
 import java.util.List;
 

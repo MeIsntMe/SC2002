@@ -1,7 +1,7 @@
 package hospitalsystem.model;
 
-import hospitalsystem.MainSystem;
-import hospitalsystem.controllers.DoctorControl;
+import hospitalsystem.*;
+import hospitalsystem.menus.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +38,7 @@ public class Doctor extends User {
     }
 
     public static void displayMenu() {
-        DoctorControl control = new DoctorControl(MainSystem.currentUser);
+        DoctorControl control = new DoctorControl(HMS.currentUser);
         control.displayMenu();
     }
 }

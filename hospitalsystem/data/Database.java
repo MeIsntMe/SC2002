@@ -1,13 +1,19 @@
 package hospitalsystem.data;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import hospitalsystem.enums.AppointmentStatus;
 import hospitalsystem.enums.PrescriptionStatus;
@@ -36,6 +42,9 @@ public class Database {
 
     public static HashMap<String, Appointment> appointmentMap = new HashMap<>();    // AppointmentID -> Appointment
   
+    // CSV Variables
+    private static final String APPOINTMENT_CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
+    private static final String APPOINTMENT_CSV_PATH = "hospitalsystem/data/Appointment.csv";
     // Methods to load from CSV into Hashmap 
 
     public static void loadPatientfromCSV (String filePath) {
@@ -160,7 +169,7 @@ public class Database {
 
                         // Set appointment properties
                         appointment.setStatus(AppointmentStatus.valueOf(appointmentData[8].trim().toUpperCase()));
-                        appointment.setAvailable(Boolean.parseBoolean(appointmentData[9].trim()));
+                        appointment.setIsAvailable(Boolean.parseBoolean(appointmentData[9].trim()));
                         appointment.setConsultationNotes(appointmentData[10].trim());
 
                         // Handle prescriptions if they exist
@@ -208,6 +217,83 @@ public class Database {
 
         } catch (FileNotFoundException e) {
             System.out.println("An error has occurred\n" + e.getMessage());
+        }
+    }
+
+    private static String formatPrescriptions(HashMap<String, PrescriptionStatus> prescriptionMap) {
+        if (prescriptionMap == null || prescriptionMap.isEmpty()) {
+            return "";
+        }
+
+        return prescriptionMap.entrySet().stream()
+                .map(entry -> entry.getKey() + ":" + entry.getValue())
+                .collect(Collectors.joining(";"));
+    }
+
+    private static String escapeCSV(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        // If the value contains commas, quotes, or newlines, wrap it in quotes and escape existing quotes
+        boolean needsQuoting = value.contains(",") || value.contains("\"") || value.contains("\n");
+        if (needsQuoting) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
+    }
+
+    private static String formatAppointmentToCSV(Appointment appointment) {
+        StringBuilder sb = new StringBuilder();
+
+        // Get the date components
+        AppointmentSlot slot = appointment.getSlot();
+        LocalDateTime dateTime = slot.getDateTime();
+
+        // Format prescriptions if they exist
+        String prescriptions = formatPrescriptions(appointment.getPrescriptions());
+
+        // Build the CSV line with proper escaping
+        sb.append(escapeCSV(appointment.getAppointmentID())).append(",");
+        sb.append(escapeCSV(appointment.getPatient().getID())).append(",");
+        sb.append(escapeCSV(appointment.getDoctor().getID())).append(",");
+        sb.append(dateTime.getYear()).append(",");
+        sb.append(dateTime.getMonthValue()).append(",");
+        sb.append(dateTime.getDayOfMonth()).append(",");
+        sb.append(dateTime.getHour()).append(",");
+        sb.append(dateTime.getMinute()).append(",");
+        sb.append(appointment.getStatus()).append(",");
+        sb.append(appointment.getIsAvailable()).append(",");
+        sb.append(escapeCSV(appointment.getConsultationNotes())).append(",");
+        sb.append(escapeCSV(prescriptions));
+
+        return sb.toString();
+    }
+
+    public static void saveAppointmentsToCSV() {
+        try (FileWriter fw = new FileWriter(APPOINTMENT_CSV_PATH);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+
+            // Write header
+            bw.write(APPOINTMENT_CSV_HEADER);
+            bw.newLine();
+
+            // Write appointments sorted by ID for consistency
+            Database.appointmentMap.values().stream()
+                    .sorted(Comparator.comparing(Appointment::getAppointmentID))
+                    .forEach(appointment -> {
+                        try {
+                            bw.write(formatAppointmentToCSV(appointment));
+                            bw.newLine();
+                        } catch (IOException e) {
+                            System.out.println("Error writing appointment " + appointment.getAppointmentID() + ": " + e.getMessage());
+                        }
+                    });
+
+            System.out.println("Successfully saved " + Database.appointmentMap.size() + " appointments to " + APPOINTMENT_CSV_PATH);
+
+        } catch (IOException e) {
+            System.out.println("Error saving appointments to CSV: " + e.getMessage());
         }
     }
 
