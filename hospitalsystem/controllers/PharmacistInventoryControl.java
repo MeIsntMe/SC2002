@@ -4,7 +4,7 @@ import java.util.Scanner;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
 import hospitalsystem.model.Batch;
-import java.time.LocalDate;
+//import java.time.LocalDate;
 
 public class PharmacistInventoryControl extends InventoryControl {
 
@@ -12,24 +12,21 @@ public class PharmacistInventoryControl extends InventoryControl {
         super();
     }
 
-    // Method for Pharmacist to submit a manual replenishment request
+    // Method for Pharmacist to submit a manual replenishment request (without expiration date)
     public void submitReplenishmentRequest(Scanner sc) {
         System.out.print("Enter the medication name to request replenishment: ");
         String medicineName = sc.nextLine();
 
-        // Check if the medicine exists 
+        // Check if the medicine exists
         if (inventoryMap.containsKey(medicineName)) {
             System.out.print("Enter the quantity for replenishment: ");
             int quantity = sc.nextInt();
             sc.nextLine();  // Consume newline
-            System.out.print("Enter the desired expiration date for the replenishment batch (YYYY-MM-DD): ");
-            LocalDate expirationDate = LocalDate.parse(sc.nextLine().trim());
 
-            // Create a replenishment request (without adding to inventory)
-            ReplenishmentRequest request = new ReplenishmentRequest(medicineName, quantity, expirationDate);
-            requestMap.put(medicineName, request);
-            System.out.println("Replenishment request submitted for " + medicineName + " with " + quantity + " units (expiration: " + expirationDate + ").");
-
+            // Create a replenishment request (without expiration date)
+            ReplenishmentRequest request = new ReplenishmentRequest(medicineName, quantity);
+            addReplenishmentRequest(request);
+            System.out.println("Replenishment request submitted for " + medicineName + " with " + quantity + " units.");
         } else {
             System.out.println("Error: Medication " + medicineName + " not found in inventory.");
         }
@@ -46,8 +43,8 @@ public class PharmacistInventoryControl extends InventoryControl {
                     foundExpiring = true;
                     System.out.println("Warning: Batch of " + medicine.getMedicineName() + " is nearing expiration on " + batch.getExpirationDate() + " with " + batch.getQuantity() + " units.");
 
-                    // Create a replenishment request for the expiring batch’s quantity (without adding to inventory)
-                    submitAutomaticReplenishmentRequest(medicine.getMedicineName(), batch.getQuantity(), LocalDate.now().plusMonths(6)); // Example future expiration
+                    // Submit a replenishment request for the expiring batch’s quantity (without expiration date)
+                    submitAutomaticReplenishmentRequest(medicine.getMedicineName(), batch.getQuantity());
                 }
             }
         }
@@ -57,10 +54,19 @@ public class PharmacistInventoryControl extends InventoryControl {
         }
     }
 
-    // Helper method to submit automatic replenishment requests for expiring medicines
-    private void submitAutomaticReplenishmentRequest(String medicationName, int quantity, LocalDate expirationDate) {
+    // Helper method to submit automatic replenishment requests for expiring medicines (without expiration date)
+    private void submitAutomaticReplenishmentRequest(String medicationName, int quantity) {
         System.out.println("Automatically submitting replenishment request for " + quantity + " units of " + medicationName + ".");
-        ReplenishmentRequest request = new ReplenishmentRequest(medicationName, quantity, expirationDate);
-        requestMap.put(medicationName, request);
+        ReplenishmentRequest request = new ReplenishmentRequest(medicationName, quantity);
+        addReplenishmentRequest(request);
     }
+
+
+    // Add the replenishment request to the requestMap
+    private void addReplenishmentRequest(ReplenishmentRequest request) {
+        requestMap.put(request.getMedicineName(), request);
+        System.out.println("Replenishment request added for " + request.getMedicineName() + 
+                           " with quantity " + request.getRequestedQuantity());
+    }
+
 }
