@@ -13,7 +13,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class AppointmentControl {
-    private static HashMap<String, Appointment> allAppointments = new HashMap<>();
+
+    // Hashmap storing all appointments 
+    private static HashMap<String, Appointment> allAppointments = new HashMap<>(); // key: AppointmentID
     private static final String CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
     private static final String CSV_PATH = "hospitalsystem/data/Appointment.csv";
 

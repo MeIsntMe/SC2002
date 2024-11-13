@@ -21,9 +21,9 @@ public class Doctor extends User {
     }
 
     // Getter and Setter methods
-    public int getAge() {
-        return age;
-    }
+    public int getAge() {return age;}
+    
+    public void setAge(int age ) {this.age = age; }
 
     public List<Appointment.AppointmentSlot> getAvailableSlots() {
         return availableSlots;

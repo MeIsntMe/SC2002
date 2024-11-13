@@ -9,18 +9,19 @@ import hospitalsystem.model.Appointment.AppointmentOutcome;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
 public class DoctorControl implements MenuInterface{
-    private final Doctor doctor;  // Add instance variable
+    // Instance variables 
+    private final Doctor doctor; 
 
-    public DoctorControl(User user) {  // Add constructor
-        if (!(user instanceof Doctor)) {
+    // Constructor
+    public DoctorControl(User currentUser) { 
+        if (!(currentUser instanceof Doctor)) {
             throw new IllegalArgumentException("User must be a Doctor");
         }
-        this.doctor = (Doctor) user;
+        this.doctor = (Doctor) currentUser;
     }
 
     @Override
@@ -29,7 +30,7 @@ public class DoctorControl implements MenuInterface{
 
         while (true) {
             System.out.println("=========================================");
-            System.out.println("Doctor Menu");
+            System.out.println("Doctor Menu:");
             System.out.println("1. View Patient Medical Record");
             System.out.println("2. Update Patient Medical Record");
             System.out.println("3. View Personal Schedule");
@@ -45,34 +46,21 @@ public class DoctorControl implements MenuInterface{
                 int choice = Integer.parseInt(input);
 
                 switch (choice) {
-                    case 1:
-                        handleViewPatientRecord(scanner);
-                        break;
-                    case 2:
-                        handleUpdatePatientRecord(scanner);
-                        break;
-                    case 3:
-                        viewPersonalSchedule();  // Changed to use instance method
-                        break;
-                    case 4:
-                        handleSetAvailability(scanner);
-                        break;
-                    case 5:
-                        handleAppointmentRequests(scanner);  // Updated to use instance method
-                        break;
-                    case 6:
-                        viewUpcomingAppointments();  // Changed to use instance method
-                        break;
-                    case 7:
-                        handleRecordOutcome(scanner);
-                        break;
-                    case 8:
+                    case 1 -> handleViewPatientRecord(scanner);
+                    case 2 -> handleUpdatePatientRecord(scanner);
+                    case 3 -> viewPersonalSchedule();  // Changed to use instance method
+                    case 4 -> handleSetAvailability(scanner);
+                    case 5 -> handleAppointmentRequests(scanner);  // Updated to use instance method
+                    case 6 -> viewUpcomingAppointments();  // Changed to use instance method
+                    case 7 -> handleRecordOutcome(scanner);
+                    case 8 -> {
                         System.out.println("Logging out...");
                         MainSystem.currentUser = null;
                         return;
-                    default:
-                        System.out.println("Invalid choice, try again.");
+                    }
+                    default -> System.out.println("Invalid choice, try again.");
                 }
+
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid number.");
             } catch (Exception e) {

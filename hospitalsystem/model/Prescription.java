@@ -1,14 +1,19 @@
 package hospitalsystem.model;
 
+import java.util.HashMap;
+
 import hospitalsystem.enums.PrescriptionStatus;
 
 public class Prescription {
+
+    private HashMap<String, Integer> prescriptionList = new HashMap<>(); //Prescription key: medicine name, point to quantity 
+    private PrescriptionStatus status;  // Status of the prescription (e.g., PENDING, DISPENSED)
+
     private static int idCounter = 0;      // Static counter for unique ID assignment
     private int id;                        // Unique ID for each prescription
     private Medicine medicine;             // Reference to a Medicine
     private String patientID;              // Patient associated with this prescription
     private int dosage;                    // Dosage of the medicine prescribed
-    private PrescriptionStatus status;     // Status of the prescription (e.g., PENDING, DISPENSED)
 
     // Constructor
     public Prescription(Medicine medicine, String patientID, int dosage, PrescriptionStatus status) {
@@ -19,7 +24,9 @@ public class Prescription {
         this.status = status;
     }
 
-    // Getters
+    // Getters and Setters methods 
+    public HashMap getPrescriptionList() {return prescriptionList;}
+    public
     public int getId() {
         return id;
     }

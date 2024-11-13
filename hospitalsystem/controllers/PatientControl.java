@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class PatientControl implements MenuInterface {
+    
+    // Instance variables 
     private static Scanner sc;
     private final Patient patient;
     private int choice, innerChoice, tempCount;
@@ -30,10 +32,13 @@ public class PatientControl implements MenuInterface {
     }}}
     Doctor selectedDoctor;
 
-    public PatientControl(User patient) {
-        this.patient = (Patient)patient;
+    //Constructor
+    public PatientControl(User currentUser) { 
+        if (!(currentUser instanceof Patient)) {
+            throw new IllegalArgumentException("User must be a Doctor");
+        }
+        this.patient = (Patient) currentUser;
     }
-
     
     @Override
     public void displayMenu(){

@@ -17,7 +17,7 @@ public class MedicalRecord {
     //Requires update when appointment is finished
     public MedicalRecord(Patient patient){
         this.id = patient.getID();
-        ArrayList<Appointment> appointmentList = patient.getAppointments();
+        ArrayList<Appointment> appointmentList = new ArrayList<>(patient.getAppointments());
         for (Appointment appointment: appointmentList){
             if (appointment.getStatus() == AppointmentStatus.COMPLETED){
                 this.appointmentOutcomes.add(appointment.getAppointmentOutcome());

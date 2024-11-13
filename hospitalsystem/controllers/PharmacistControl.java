@@ -6,97 +6,23 @@ import hospitalsystem.model.Prescription;
 import hospitalsystem.enums.PrescriptionStatus;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.Medicine;
+import hospitalsystem.model.Patient;
+import hospitalsystem.model.User;
 import java.time.LocalDate;
 import hospitalsystem.model.ReplenishmentRequest;
-import hospitalsystem.model.RequestStatus;
 
 
 public class PharmacistControl implements MenuInterface {
-    private Pharmacist pharmacist;
-    private InventoryControl inventoryControl;
+
+    private final Pharmacist pharmacist;
 
     // Constructor
-    public PharmacistControl(Pharmacist pharmacist, InventoryControl inventoryControl) {
-        this.pharmacist = pharmacist;
-        this.inventoryControl = inventoryControl;
+    public PharmacistControl(User currentUser) { 
+        if (!(currentUser instanceof Pharmacist)) {
+            throw new IllegalArgumentException("User must be a Doctor");
+        }
+        this.pharmacist = (Pharmacist) currentUser;
     }
-
-    // @Override
-    // public void displayMenu() {
-    //     Scanner sc = new Scanner(System.in);
-    //     while (true) {
-    //         System.out.println("=========================================");
-    //         System.out.println("Pharmacist Control Menu:");
-    //         System.out.println("1. Manage Prescriptions");
-    //         System.out.println("2. View Inventory and Stock Information");
-    //         System.out.println("3. Submit and View Replenishment Requests");
-    //         System.out.println("4. Exit");
-    //         System.out.print("Enter choice: ");
-
-    //         int choice = sc.nextInt();
-    //         sc.nextLine();  // Consume newline
-
-    //         switch (choice) {
-    //             case 1:
-    //                 managePrescriptions(sc);
-    //                 break;
-    //             case 2:
-    //                 viewInventoryAndStock(sc);
-    //                 break;
-    //             case 3:
-    //                 manageReplenishmentRequests(sc);
-    //                 break;
-    //             case 4:
-    //                 System.out.println("Exiting Pharmacist Control.");
-    //                 return;
-    //             default:
-    //                 System.out.println("Invalid input. Please select an option between 1 and 4.");
-    //         }
-    //     }
-    // }
-
-    // // Manage Prescriptions sub-menu
-    // private void managePrescriptions(Scanner sc) {
-    //     System.out.println("=== Manage Prescriptions ===");
-    //     System.out.println("1. View Prescriptions");
-    //     System.out.println("2. Update Prescription Status");
-    //     System.out.println("3. Fulfill Prescription");
-    //     System.out.print("Select an option: ");
-        
-    //     int option = sc.nextInt();
-    //     sc.nextLine(); // Consume newline
-    //     switch (option) {
-    //         case 1:
-    //             viewPrescriptions();
-    //             break;
-    //         case 2:
-    //             System.out.print("Enter Prescription ID to update: ");
-    //             int prescriptionId = sc.nextInt();
-    //             sc.nextLine(); // Consume newline
-    //             Prescription prescription = findPrescriptionById(prescriptionId);
-    //             if (prescription != null) {
-    //                 System.out.print("Enter new status (e.g., PENDING, DISPENSED, REJECTED): ");
-    //                 String status = sc.nextLine().toUpperCase();
-    //                 updatePrescriptionStatus(prescription, PrescriptionStatus.valueOf(status));
-    //             } else {
-    //                 System.out.println("Prescription not found.");
-    //             }
-    //             break;
-    //         case 3:
-    //             System.out.print("Enter Prescription ID to fulfill: ");
-    //             prescriptionId = sc.nextInt();
-    //             sc.nextLine(); // Consume newline
-    //             prescription = findPrescriptionById(prescriptionId);
-    //             if (prescription != null) {
-    //                 fulfillPrescription(prescription);
-    //             } else {
-    //                 System.out.println("Prescription not found.");
-    //             }
-    //             break;
-    //         default:
-    //             System.out.println("Invalid option. Returning to main menu.");
-    //     }
-    // }
 
     // // View Inventory and Stock Information sub-menu
     // private void viewInventoryAndStock(Scanner sc) {
@@ -171,23 +97,15 @@ public class PharmacistControl implements MenuInterface {
             sc.nextLine();  // Consume newline
 
             switch (choice) {
-                case 1:
-                    viewAppointmentOutcomeRecord();
-                    break;
-                case 2:
-                    updatePrescriptionStatus(sc);
-                    break;
-                case 3:
-                    viewInventory();
-                    break;
-                case 4:
-                    submitReplenishmentRequest(sc);
-                    break;
-                case 5:
+                case 1 -> viewAppointmentOutcomeRecord();
+                case 2 -> updatePrescriptionStatus(sc);
+                case 3 -> viewInventory();
+                case 4 -> submitReplenishmentRequest(sc);
+                case 5 -> {
                     System.out.println("Logging out of Pharmacist Control.");
                     return;
-                default:
-                    System.out.println("Invalid input. Please select an option between 1 and 5.");
+                }
+                default -> System.out.println("Invalid input. Please select an option between 1 and 5.");
             }
         }
     }

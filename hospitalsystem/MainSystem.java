@@ -7,21 +7,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 import java.time.LocalDate;
-
 
 import hospitalsystem.model.Patient;
 import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
-import hospitalsystem.model.Medicine;
 import hospitalsystem.controllers.*;
 import hospitalsystem.enums.UserType;
-
 
 public class MainSystem {
 
@@ -160,13 +156,13 @@ public class MainSystem {
                 String patientData[] = scanner.nextLine().split(",");
                 String patientID = patientData[0].trim();
                 String name = patientData[1].trim();
-                String DOB = patientData[2].trim();
+                LocalDate DOB = LocalDate.parse(patientData[2].trim());
                 String gender = patientData[3].trim().toLowerCase();
                 String bloodType = patientData[4].trim();
-                String userEmail = patientData[5].trim();
+                String email = patientData[5].trim();
                 String password = patientData.length > 6 ? patientData[6].trim() : "password"; 
-                
-                Patient patient = new Patient(patientID, name, DOB, gender, bloodType, userEmail, password); 
+
+                Patient patient = new Patient(patientID, name, DOB, gender, bloodType, email, password); 
                 patientsMap.put(patientID, patient);
             }
         } catch (FileNotFoundException e) {

@@ -4,9 +4,25 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import hospitalsystem.MainSystem;
+import hospitalsystem.model.Administrator;
+import hospitalsystem.model.Doctor;
+import hospitalsystem.model.Patient;
+import hospitalsystem.model.Pharmacist;
+import hospitalsystem.model.User;
 
 public class AdminControl implements MenuInterface {
     
+    private final Administrator admin; 
+
+    // Constructor
+    public AdminControl(User currentUser) { 
+        if (!(currentUser instanceof Doctor)) {
+            throw new IllegalArgumentException("User must be a Doctor");
+        }
+        this.admin = (Administrator) currentUser;
+    }
+
+
     @Override
     public void displayMenu(){
         while (true) {
