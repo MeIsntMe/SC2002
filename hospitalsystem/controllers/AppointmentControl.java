@@ -1,4 +1,4 @@
-﻿package hospitalsystem.controllers;
+package hospitalsystem.controllers;
 
 import hospitalsystem.MainSystem;
 import hospitalsystem.model.*;
