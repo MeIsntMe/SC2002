@@ -3,6 +3,8 @@ package hospitalsystem.model;
 import hospitalsystem.enums.PrescriptionStatus;
 
 public class Prescription {
+    private static int idCounter = 0;      // Static counter for unique ID assignment
+    private int id;                        // Unique ID for each prescription
     private Medicine medicine;             // Reference to a Medicine
     private String patientID;              // Patient associated with this prescription
     private int dosage;                    // Dosage of the medicine prescribed
@@ -10,13 +12,18 @@ public class Prescription {
 
     // Constructor
     public Prescription(Medicine medicine, String patientID, int dosage, PrescriptionStatus status) {
+        this.id = ++idCounter;             // Assign a unique ID to each prescription
         this.medicine = medicine;
         this.patientID = patientID;
         this.dosage = dosage;
         this.status = status;
     }
 
-    // Getters and setters
+    // Getters
+    public int getId() {
+        return id;
+    }
+
     public Medicine getMedicine() {
         return medicine;
     }
@@ -33,14 +40,14 @@ public class Prescription {
         return status;
     }
 
+    // Setter for status
     public void setStatus(PrescriptionStatus status) {
         this.status = status;
     }
 
     @Override
     public String toString() {
-        return "Prescription [Medicine: " + medicine.getMedicineName() + ", Patient ID: " + patientID +
+        return "Prescription [ID: " + id + ", Medicine: " + medicine.getMedicineName() + ", Patient ID: " + patientID +
                 ", Dosage: " + dosage + "mg, Status: " + status + "]";
     }
 }
-

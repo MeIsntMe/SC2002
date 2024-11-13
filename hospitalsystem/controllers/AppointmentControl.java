@@ -10,12 +10,40 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AppointmentControl {
     private static HashMap<String, Appointment> allAppointments = new HashMap<>();
     private static final String CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
-
     private static final String CSV_PATH = "hospitalsystem/data/Appointment.csv";
+
+    //Inner Class
+    public static class Prescription {
+        private String medicineName;
+        private PrescriptionStatus status;
+
+        public Prescription(String medicineName, PrescriptionStatus status) {
+            this.medicineName = medicineName;
+            this.status = status;
+        }
+
+        public String getMedicineName() {
+            return medicineName;
+        }
+
+        public PrescriptionStatus getStatus() {
+            return status;
+        }
+
+        public void setStatus(PrescriptionStatus status) {
+            this.status = status;
+        }
+
+        @Override
+        public String toString() {
+            return medicineName + ": " + status;
+        }
+    }
 
     public static void loadAppointmentsFromCSV() {
         try (Scanner fileScanner = new Scanner(new File(CSV_PATH))) {
@@ -151,11 +179,18 @@ public class AppointmentControl {
         return false;
     }
 
-    public static void recordOutcome(String appointmentID, String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions) {
+    public static void recordOutcome(String appointmentID, String consultationNotes, List<Prescription> prescriptions) {
         Appointment appointment = allAppointments.get(appointmentID);
         if (appointment != null) {
             appointment.setConsultationNotes(consultationNotes);
-            appointment.setPrescriptions(prescriptions);
+
+            // Convert prescriptions to HashMap for compatibility with existing AppointmentOutcome
+            HashMap<String, PrescriptionStatus> prescriptionMap = new HashMap<>();
+            for (Prescription prescription : prescriptions) {
+                prescriptionMap.put(prescription.getMedicineName(), prescription.getStatus());
+            }
+            appointment.setPrescriptions(prescriptionMap);
+
             appointment.setStatus(AppointmentStatus.COMPLETED);
             allAppointments.put(appointmentID, appointment);
         }
@@ -290,15 +325,82 @@ public class AppointmentControl {
         }
     }
 
-    private static String formatPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {
-        if (prescriptions == null || prescriptions.isEmpty()) {
+    private static String formatPrescriptions(HashMap<String, PrescriptionStatus> prescriptionMap) {
+        if (prescriptionMap == null || prescriptionMap.isEmpty()) {
             return "";
         }
 
-        return prescriptions.entrySet().stream()
+        return prescriptionMap.entrySet().stream()
                 .map(entry -> entry.getKey() + ":" + entry.getValue())
-                .reduce((a, b) -> a + ";" + b)
-                .orElse("");
+                .collect(Collectors.joining(";"));
+    }
+
+    private static List<Prescription> parsePrescriptions(String prescriptionStr) {
+        List<Prescription> prescriptions = new ArrayList<>();
+        if (prescriptionStr == null || prescriptionStr.isEmpty()) {
+            return prescriptions;
+        }
+
+        String[] prescriptionPairs = prescriptionStr.split(";");
+        for (String pair : prescriptionPairs) {
+            String[] parts = pair.split(":");
+            if (parts.length == 2) {
+                String medicine = parts[0].trim();
+                PrescriptionStatus status = PrescriptionStatus.valueOf(parts[1].trim());
+                prescriptions.add(new Prescription(medicine, status));
+            }
+        }
+        return prescriptions;
+    }
+
+    public static List<Prescription> getAppointmentPrescriptions(String appointmentID) {
+        Appointment appointment = allAppointments.get(appointmentID);
+        if (appointment != null) {
+            HashMap<String, PrescriptionStatus> prescriptionMap = appointment.getPrescriptions();
+            return prescriptionMap.entrySet().stream()
+                    .map(entry -> new Prescription(entry.getKey(), entry.getValue()))
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
+    }
+
+    public static boolean updatePrescriptionStatus(String appointmentID, String medicineName, PrescriptionStatus newStatus) {
+        Appointment appointment = allAppointments.get(appointmentID);
+        if (appointment != null) {
+            HashMap<String, PrescriptionStatus> prescriptions = appointment.getPrescriptions();
+            if (prescriptions.containsKey(medicineName)) {
+                prescriptions.put(medicineName, newStatus);
+                appointment.setPrescriptions(prescriptions);
+                allAppointments.put(appointmentID, appointment);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean addPrescription(String appointmentID, String medicineName, PrescriptionStatus status) {
+        Appointment appointment = allAppointments.get(appointmentID);
+        if (appointment != null) {
+            HashMap<String, PrescriptionStatus> prescriptions = appointment.getPrescriptions();
+            prescriptions.put(medicineName, status);
+            appointment.setPrescriptions(prescriptions);
+            allAppointments.put(appointmentID, appointment);
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean removePrescription(String appointmentID, String medicineName) {
+        Appointment appointment = allAppointments.get(appointmentID);
+        if (appointment != null) {
+            HashMap<String, PrescriptionStatus> prescriptions = appointment.getPrescriptions();
+            if (prescriptions.remove(medicineName) != null) {
+                appointment.setPrescriptions(prescriptions);
+                allAppointments.put(appointmentID, appointment);
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String escapeCSV(String value) {

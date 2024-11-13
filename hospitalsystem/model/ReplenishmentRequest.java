@@ -6,18 +6,23 @@ import java.time.LocalDate;
 public class ReplenishmentRequest {
     private String medicineName;
     private int requestedQuantity;
-    private LocalDate expirationDate; // New attribute to track the expiration date of the requested batch
-    private RequestStatus status; 
+    private LocalDate expirationDate;  // New field for expiration date
+    private RequestStatus status;
 
     // Constructor with expiration date
     public ReplenishmentRequest(String medicineName, int requestedQuantity, LocalDate expirationDate) {
         this.medicineName = medicineName;
         this.requestedQuantity = requestedQuantity;
         this.expirationDate = expirationDate;
-        this.status = RequestStatus.PENDING; // Default status set to pending approval
+        this.status = RequestStatus.PENDING; // Default status to pending approval
     }
 
-    // Getters
+    // Overloaded constructor without expiration date
+    public ReplenishmentRequest(String medicineName, int requestedQuantity) {
+        this(medicineName, requestedQuantity, null);  // Set expirationDate as null
+    }
+    
+    // Getters and setters
     public String getMedicineName() {
         return medicineName;
     }
@@ -27,14 +32,13 @@ public class ReplenishmentRequest {
     }
 
     public LocalDate getExpirationDate() {
-        return expirationDate; // New getter for expiration date
+        return expirationDate;
     }
 
     public RequestStatus getStatus() {
         return status;
     }
 
-    // Setters for status changes
     public void accept() {
         this.status = RequestStatus.APPROVED;
     }

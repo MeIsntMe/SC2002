@@ -1,18 +1,18 @@
 package hospitalsystem.controllers;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+import hospitalsystem.MainSystem;
+import hospitalsystem.enums.RequestStatus;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
-import hospitalsystem.model.Batch;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
-import hospitalsystem.MainSystem;
 
 public class InventoryControl {
     
@@ -31,7 +31,7 @@ public class InventoryControl {
         System.out.println("-------------------------------------------------------------------------------");
         for (Map.Entry<String, Medicine> entry : inventoryMap.entrySet()) {
             Medicine med = entry.getValue();
-            for (Batch batch : med.getBatches()) {
+            for (Medicine.Batch batch : med.getBatches()) { 
                 System.out.printf("%-20s %-15d %-20s %-20d%n", 
                     med.getMedicineName(), batch.getQuantity(), batch.getExpirationDate(), med.getLowStockAlert());
             }
@@ -39,6 +39,53 @@ public class InventoryControl {
             System.out.println();
         }
     }
+
+    // Getter for inventoryMap
+    public Map<String, Medicine> getInventoryMap() {
+        return inventoryMap;
+    }
+    // Getter for requestMap
+    public Map<String, ReplenishmentRequest> getRequestMap() {
+        return requestMap;
+    }
+
+    // Store a new replenishment request
+    public void addReplenishmentRequest(ReplenishmentRequest request) {
+        requestMap.put(request.getMedicineName(), request);
+        System.out.println("Replenishment request added for " + request.getMedicineName() +
+                           " with quantity " + request.getRequestedQuantity());
+    }
+
+    // Retrieve pending requests
+    public Iterable<ReplenishmentRequest> getPendingRequests() {
+        return requestMap.values().stream()
+                .filter(request -> request.getStatus() == RequestStatus.PENDING)
+                .toList();
+    }
+
+    // Add a new batch with an expiration date for an approved replenishment request
+    public boolean addBatchToInventory(String medicineName, int quantity, LocalDate expirationDate) {
+        ReplenishmentRequest request = requestMap.get(medicineName);
+        if (request != null && request.getStatus() == RequestStatus.APPROVED) {
+            // Check if the medicine exists in the inventory
+            Medicine medicine = inventoryMap.get(medicineName);
+            if (medicine == null) {
+                medicine = new Medicine(medicineName, 10); // Default low stock alert threshold
+                inventoryMap.put(medicineName, medicine);
+            }
+
+            // Add a new batch with specified quantity and expiration date
+            medicine.addBatch(quantity, expirationDate);
+            requestMap.remove(medicineName);  // Remove the request once fulfilled
+            System.out.println("Added batch of " + quantity + " units for " + medicineName +
+                               " with expiration date " + expirationDate + ".");
+            return true;
+        } else {
+            System.out.println("Request for " + medicineName + " is not approved or does not exist.");
+            return false;
+        }
+    }
+
 
     public static void addMedicine(Scanner sc) {
         boolean repeat;
