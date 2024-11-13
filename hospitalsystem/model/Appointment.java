@@ -119,12 +119,16 @@ public class Appointment implements Comparable<Appointment> {
     public class AppointmentOutcome {
         private Appointment appointment;
         private HashMap<String, PrescriptionStatus> prescriptions;
+        private String serviceType; //Required by assignment. Do we make it an enum?
+        private String recordedDate; //Required by assignment
         private String consultationNotes;
 
-        public AppointmentOutcome(Appointment appointment, String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions) {
+        public AppointmentOutcome(Appointment appointment, String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions, String recordedDate, String serviceType) {
             this.appointment = appointment;
             this.consultationNotes = consultationNotes;
             this.prescriptions = prescriptions;
+            this.recordedDate = recordedDate;
+            this.serviceType = serviceType;
         }
 
         public HashMap<String, PrescriptionStatus> getPrescriptions() {
@@ -137,6 +141,14 @@ public class Appointment implements Comparable<Appointment> {
 
         public Appointment getAppointment() {
             return appointment;
+        }
+
+        public String getRecordedDate(){
+            return this.recordedDate;
+        }
+
+        public String getServiceType(){
+            return this.serviceType;
         }
 
         public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {

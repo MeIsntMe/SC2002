@@ -11,11 +11,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class PatientControl implements MenuInterface{
+public class PatientControl implements MenuInterface {
     private static Scanner sc;
     private final Patient patient;
     private int choice, innerChoice, tempCount;
-    Map<String, User> doctors = MainSystem.doctorsMap;
+    Map<String, Doctor> doctors = new HashMap<>();
+    {{for (Map.Entry<String, User> entry : MainSystem.doctorsMap.entrySet()) {
+        if (entry.getValue() instanceof Doctor) {
+            doctors.put(entry.getKey(), (Doctor) entry.getValue());
+        }
+        }   
+    }};
+    ArrayList<Doctor> doctorList = new ArrayList<>();
+    {{for (User user : MainSystem.doctorsMap.values()) {
+        if (user instanceof Doctor) {
+            doctorList.add((Doctor) user);
+        }
+    }}}
     Doctor selectedDoctor;
 
     public PatientControl(User patient) {
@@ -75,7 +87,7 @@ public class PatientControl implements MenuInterface{
                 
                     case 8:
                         //Display past appointment outcomes
-                        AppointmentControl.displayPastAppointmentOutcomes(this);
+                        AppointmentControl.displayPastAppointmentOutcomes(this.patient);
                         break;
                 
                     case 9:
@@ -144,9 +156,10 @@ public class PatientControl implements MenuInterface{
     }
 
     public void viewAppointmentSlots(){
+        
         System.out.println("Which doctor's availability would you like to view?");
         for (int i = 0; i < doctors.size(); i++) {
-            System.out.printf("%d. %s", i, doctors.get(i).getName());
+            System.out.printf("%d. %s", i, doctorList.get(i).getName());
         }
         while (true) {
             innerChoice = sc.nextInt();
@@ -158,7 +171,7 @@ public class PatientControl implements MenuInterface{
                 continue;
             }
             tempCount = 1;
-            selectedDoctor = doctors.get(innerChoice);
+            selectedDoctor = doctorList.get(innerChoice);
             System.out.println("Availability of Dr. " + selectedDoctor.getName());
             for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
                 System.out.printf("%d. %s\n", tempCount, slot.toString());
@@ -171,7 +184,7 @@ public class PatientControl implements MenuInterface{
     public void scheduleAppointment(){
         System.out.println("Which doctor would you like to schedule an appointment with?");
         for (int i = 0; i < doctors.size(); i++) {
-            System.out.printf("%d. %s", i, doctors.get(i).getName());
+            System.out.printf("%d. %s", i, doctorList.get(i).getName());
         }
         while (true) {
             innerChoice = sc.nextInt();
@@ -179,12 +192,12 @@ public class PatientControl implements MenuInterface{
                 sc.skip(".*");
             }
             if (innerChoice >= doctors.size()){
-                System.out.printf("Invalid Choice. Please input integer from 1 to %d", doctors.size()-1); 
+                System.out.printf("Invalid Choice. Please input integer from 1 to %d", doctorList.size()-1); 
                 continue;
             }
             tempCount = 1;
-            
-            System.out.println("Which slot would you like to book?" + selectedDoctor.getName());
+            selectedDoctor = doctorList.get(innerChoice);
+            System.out.printf("Which slot of %s would you like to book?", selectedDoctor.getName());
             for (AppointmentSlot slot:selectedDoctor.getAvailableSlots()){
                 System.out.printf("%d. %s\n", tempCount, slot.toString());
                 tempCount += 1;
@@ -197,7 +210,7 @@ public class PatientControl implements MenuInterface{
                 System.out.println("Invalid Choice. Please try again.");
                 continue;
             }
-            AppointmentControl.addAppointment(innerChoice, selectedDoctor, this);
+            AppointmentControl.addAppointment(innerChoice, selectedDoctor, this.patient);
             System.out.println("Appointment Scheduled");
             break;
         }
@@ -246,7 +259,7 @@ public class PatientControl implements MenuInterface{
                 System.out.println("Invalid Choice. Please try again.");
                 continue;
             }
-            AppointmentControl.addAppointment(innerChoice, selectedDoctor, this);
+            AppointmentControl.addAppointment(innerChoice, selectedDoctor, this.patient);
             System.out.println("Appointment Rescheduled");
             break;
         }
@@ -318,7 +331,7 @@ public class PatientControl implements MenuInterface{
         System.out.println("-----");
         System.out.println("List of Past Appointment Outcomes:");
         for (AppointmentOutcome outcome:appointmentOutcomes){
-            System.out.println("Appointment Date: " + outcome.getAppointmentDate());
+            System.out.println("Appointment Date: " + outcome.getRecordedDate());
             System.out.println("Service Type: " + outcome.getServiceType());
             
             System.out.println("Prescriptions:");

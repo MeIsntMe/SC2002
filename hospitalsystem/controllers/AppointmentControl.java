@@ -1,16 +1,15 @@
 package hospitalsystem.controllers;
 
 import hospitalsystem.MainSystem;
-import hospitalsystem.model.*;
 import hospitalsystem.enums.*;
-import hospitalsystem.model.Appointment.*;
-
+import hospitalsystem.model.*;
+import hospitalsystem.model.Appointment.AppointmentOutcome;
+import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.io.*;
 import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AppointmentControl {
     private static HashMap<String, Appointment> allAppointments = new HashMap<>();
@@ -320,12 +319,15 @@ public class AppointmentControl {
             List<AppointmentSlot> newSlots = doctor.getAvailableSlots();
             AppointmentSlot selectedslot = newSlots.remove(slotIndex);
             doctor.setAvailableSlots(newSlots);
-            Appointment newAppointment = new Appointment(AppointmentControl.generateAppointmentID(selectedDoctor.getID(), selectedslot), patient, selectedDoctor, selectedslot);
+            Appointment newAppointment = new Appointment(AppointmentControl.generateAppointmentID(doctor.getID(), selectedslot), patient, doctor, selectedslot);
             doctor.addAppointment(newAppointment);
 
             List<Appointment> newAppointments = patient.getAppointments();
             newAppointments.add(newAppointment);
             patient.setAppointments(newAppointments);
+
+            allAppointments.put(patient.getID(), newAppointment);
+            allAppointments.put(doctor.getID(), newAppointment);
 
             return true;
         } catch (Exception e){
@@ -334,14 +336,14 @@ public class AppointmentControl {
         }
     }
 
-    public void displayPastAppointmentOutcomes(Patient patient){
+    public static void displayPastAppointmentOutcomes(Patient patient){
         ArrayList<AppointmentOutcome> appointmentOutcomes = patient.getMedicalRecord().getAppointmentOutcomes();
         int lastSlot = appointmentOutcomes.size()-1;
         System.out.println("=====================================");
         System.out.println("      Past Appointment Outcomes      ");
         System.out.println("=====================================");
         for (AppointmentOutcome outcome:appointmentOutcomes){
-            System.out.println("Appointment Date: " + outcome.getAppointmentDate());
+            System.out.println("Appointment Date: " + outcome.getRecordedDate());
             System.out.println("Service Type: " + outcome.getServiceType());
             
             System.out.println("Prescriptions:");
