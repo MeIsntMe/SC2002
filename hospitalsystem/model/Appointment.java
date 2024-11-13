@@ -113,12 +113,12 @@ public class Appointment implements Comparable<Appointment> {
         public String toString() {
             return getDate() + ' ' + getTime();
         }
-    }
+    } 
 
     // Non-static inner class
     public class AppointmentOutcome {
         private Appointment appointment;
-        private HashMap<String, PrescriptionStatus> prescriptions;
+        private Prescription prescription; 
         private String serviceType; //Required by assignment. Do we make it an enum?
         private String recordedDate; //Required by assignment
         private String consultationNotes;
