@@ -129,54 +129,6 @@ public class DoctorControl implements MenuInterface{
         }
     }
 
-    private static void handleAppointmentRequests(Doctor currentDoctor, Scanner scanner) {
-        System.out.println("\n=== Pending Appointment Requests ===");
-
-        List<Appointment> pendingAppointments = currentDoctor.getUpcomingAppointments().stream()
-                .filter(apt -> apt.getStatus() == AppointmentStatus.PENDING && !apt.isAvailable())
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-
-        if (pendingAppointments.isEmpty()) {
-            System.out.println("No pending appointment requests.");
-            return;
-        }
-
-        for (int i = 0; i < pendingAppointments.size(); i++) {
-            Appointment apt = pendingAppointments.get(i);
-            System.out.printf("%d. Patient: %s - Date: %s %s\n",
-                    i + 1,
-                    apt.getPatient().getName(),
-                    apt.getSlot().getDate(),
-                    apt.getSlot().getTime());
-        }
-
-        System.out.print("Enter appointment number to process (0 to cancel): ");
-        try {
-            int choice = Integer.parseInt(scanner.nextLine());
-            if (choice == 0) return;
-            if (choice < 1 || choice > pendingAppointments.size()) {
-                System.out.println("Invalid appointment number.");
-                return;
-            }
-
-            Appointment selectedAppointment = pendingAppointments.get(choice - 1);
-            System.out.print("Accept appointment? (y/n): ");
-            String response = scanner.nextLine().trim().toLowerCase();
-
-            if (response.startsWith("y")) {
-                selectedAppointment.setStatus(AppointmentStatus.BOOKED);
-                System.out.println("Appointment accepted successfully.");
-            } else {
-                selectedAppointment.setStatus(AppointmentStatus.CANCELLED);
-                selectedAppointment.setAvailable(true);
-                System.out.println("Appointment declined.");
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Please enter a valid number.");
-        }
-    }
-
     private void handleUpdatePatientRecord(Scanner scanner) {
         System.out.print("Enter Patient ID: ");
         String patientId = scanner.nextLine();
