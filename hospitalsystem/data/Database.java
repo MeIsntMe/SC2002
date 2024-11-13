@@ -5,8 +5,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -297,4 +300,20 @@ public class Database {
         }
     }
 
+    public static void backupAndSave() {  // Removed path parameter
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String backupPath = APPOINTMENT_CSV_PATH.replace(".csv", "_backup_" + timestamp + ".csv");
+
+        File originalFile = new File(APPOINTMENT_CSV_PATH);
+        if (originalFile.exists()) {
+            try {
+                Files.copy(originalFile.toPath(), new File(backupPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Backup created: " + backupPath);
+            } catch (IOException e) {
+                System.out.println("Warning: Could not create backup: " + e.getMessage());
+            }
+        }
+ 
+        saveAppointmentsToCSV();
+    }
 }
