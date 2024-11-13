@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import hospitalsystem.enums.AppointmentStatus;
+import hospitalsystem.enums.BloodType;
 import hospitalsystem.enums.PrescriptionStatus;
 import hospitalsystem.enums.UserType;
 import hospitalsystem.model.Administrator;
@@ -46,12 +47,13 @@ public class Database {
                 String patientID = patientData[0].trim();
                 String name = patientData[1].trim();
                 LocalDate DOB = LocalDate.parse(patientData[2].trim());
-                String gender = patientData[3].trim().toLowerCase();
-                String bloodType = patientData[4].trim();
-                String email = patientData[5].trim();
-                String password = patientData.length > 6 ? patientData[6].trim() : "password"; 
+                int age = Integer.valueOf(patientData[3].trim());
+                String gender = patientData[4].trim().toLowerCase();
+                BloodType bloodType = BloodType.valueOf(patientData[5].trim());
+                String email = patientData[6].trim();
+                String password = patientData.length > 6 ? patientData[7].trim() : "password"; 
 
-                Patient patient = new Patient(patientID, name, DOB, gender, bloodType, email, password); 
+                Patient patient = new Patient(patientID, name, DOB, age, gender, bloodType, email, password); 
                 patientsMap.put(patientID, patient);
             }
         } catch (FileNotFoundException e) {
@@ -211,4 +213,5 @@ public class Database {
         }
     }
 
+    // add the save 
 }
