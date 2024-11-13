@@ -277,7 +277,7 @@ public class Database {
 
     public static void saveAppointmentsToCSV() {
         try (FileWriter fw = new FileWriter(APPOINTMENT_CSV_PATH);
-             BufferedWriter bw = new BufferedWriter(fw)) {
+            BufferedWriter bw = new BufferedWriter(fw)) {
 
             // Write header
             bw.write(APPOINTMENT_CSV_HEADER);
