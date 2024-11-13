@@ -183,15 +183,15 @@ public class DoctorControl implements MenuInterface{
             notes.append(line).append("\n");
         }
 
-        // Get prescriptions
-        HashMap<String, PrescriptionStatus> prescriptions = new HashMap<>();
+        // Get prescriptions (always PENDING)
+        List<AppointmentControl.Prescription> prescriptions = new ArrayList<>();
         while (true) {
             System.out.print("Add prescription? (y/n): ");
             if (!scanner.nextLine().toLowerCase().startsWith("y")) break;
 
             System.out.print("Enter medication name: ");
             String medication = scanner.nextLine();
-            prescriptions.put(medication, PrescriptionStatus.PENDING);
+            prescriptions.add(new AppointmentControl.Prescription(medication, PrescriptionStatus.PENDING));
         }
 
         // Create a new appointment record for this update
@@ -218,14 +218,6 @@ public class DoctorControl implements MenuInterface{
                 notes.toString(),
                 prescriptions
         );
-
-        // Update medical record's appointment outcomes
-        ArrayList<AppointmentOutcome> outcomes = patient.getMedicalRecord().getAppointmentOutcomes();
-        if (outcomes == null) {
-            outcomes = new ArrayList<>();
-        }
-        outcomes.add(appointment.getAppointmentOutcome());
-        patient.getMedicalRecord().setAppointmentOutcomes(outcomes);
 
         System.out.println("Medical record updated successfully.");
     }
@@ -269,11 +261,16 @@ public class DoctorControl implements MenuInterface{
             for (AppointmentOutcome outcome : appointmentOutcomes) {
                 System.out.println("\nAppointment Date: " + outcome.getAppointment().getSlot().getDate());
 
-                HashMap<String, PrescriptionStatus> prescriptions = outcome.getPrescriptions();
+                // Display prescriptions using new format
+                List<AppointmentControl.Prescription> prescriptions =
+                        AppointmentControl.getAppointmentPrescriptions(outcome.getAppointment().getAppointmentID());
+
                 if (!prescriptions.isEmpty()) {
                     System.out.println("Prescriptions:");
-                    for (String prescriptionName : prescriptions.keySet()) {
-                        System.out.println(" - " + prescriptionName + ": " + prescriptions.get(prescriptionName));
+                    for (AppointmentControl.Prescription prescription : prescriptions) {
+                        System.out.printf(" - %s: %s\n",
+                                prescription.getMedicineName(),
+                                prescription.getStatus());
                     }
                 }
 
@@ -552,15 +549,15 @@ public class DoctorControl implements MenuInterface{
                 notes.append(line).append("\n");
             }
 
-            // Get prescriptions
-            HashMap<String, PrescriptionStatus> prescriptions = new HashMap<>();
+            // Get prescriptions (always PENDING)
+            List<AppointmentControl.Prescription> prescriptions = new ArrayList<>();
             while (true) {
                 System.out.print("Add prescription? (y/n): ");
                 if (!scanner.nextLine().toLowerCase().startsWith("y")) break;
 
                 System.out.print("Enter medication name: ");
                 String medication = scanner.nextLine();
-                prescriptions.put(medication, PrescriptionStatus.PENDING);
+                prescriptions.add(new AppointmentControl.Prescription(medication, PrescriptionStatus.PENDING));
             }
 
             // Record the outcome
@@ -579,6 +576,7 @@ public class DoctorControl implements MenuInterface{
             System.out.println("Please enter a valid number.");
         }
     }
+
 
     private List<Appointment.AppointmentSlot> getThisWeekSlots() {
         LocalDateTime now = LocalDateTime.now();
