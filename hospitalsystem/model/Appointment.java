@@ -5,12 +5,11 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class Appointment implements Comparable<Appointment> {
-    private String appointmentID;
-    private Patient patient;
-    private Doctor doctor;
-    private AppointmentSlot slot;
+    private final String appointmentID;
+    private final Patient patient;
+    private final Doctor doctor;
+    private final AppointmentSlot slot;
     private AppointmentStatus status;
-    private boolean isAvailable;
     private AppointmentOutcome outcome;
 
     @Override
@@ -24,7 +23,6 @@ public class Appointment implements Comparable<Appointment> {
         this.doctor = doctor;
         this.slot = slot;
         this.status = AppointmentStatus.PENDING;
-        this.isAvailable = true;
         this.outcome = new AppointmentOutcome(this, "", new HashMap<>(), "", "");
     }
 
@@ -45,10 +43,6 @@ public class Appointment implements Comparable<Appointment> {
         return slot;
     }
 
-    public void setSlot(AppointmentSlot slot) {
-        this.slot = slot;
-    }
-
     public AppointmentStatus getStatus() {
         return status;
     }
@@ -63,14 +57,6 @@ public class Appointment implements Comparable<Appointment> {
 
     public void setOutcome(AppointmentOutcome outcome) {
         this.outcome = outcome;
-    }
-
-    public boolean isAvailable() {
-        return isAvailable;
-    }
-
-    public void setAvailable(boolean isAvailable) {
-        this.isAvailable = isAvailable;
     }
 
     public HashMap<String, PrescriptionStatus> getPrescriptions() {
@@ -113,14 +99,14 @@ public class Appointment implements Comparable<Appointment> {
         public String toString() {
             return getDate() + ' ' + getTime();
         }
-    } 
+    }
 
     // Non-static inner class
     public class AppointmentOutcome {
-        private Appointment appointment;
-        private Prescription prescription; 
-        private String serviceType; //Required by assignment. Do we make it an enum?
-        private String recordedDate; //Required by assignment
+        private final Appointment appointment;
+        private HashMap<String, PrescriptionStatus> prescriptions;
+        private String serviceType;
+        private String recordedDate;
         private String consultationNotes;
 
         public AppointmentOutcome(Appointment appointment, String consultationNotes, HashMap<String, PrescriptionStatus> prescriptions, String recordedDate, String serviceType) {
@@ -149,6 +135,14 @@ public class Appointment implements Comparable<Appointment> {
 
         public String getServiceType(){
             return this.serviceType;
+        }
+
+        public void setRecordedDate(String newRecordedDate){
+            this.recordedDate = newRecordedDate;
+        }
+
+        public void setServiceType(String newServiceType){
+            this.serviceType = newServiceType;
         }
 
         public void setPrescriptions(HashMap<String, PrescriptionStatus> prescriptions) {

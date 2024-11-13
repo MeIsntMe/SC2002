@@ -1,7 +1,7 @@
 package hospitalsystem.model;
 
 public abstract class User {
-    private String userID;
+    private final String userID;
     private String password;
     private String name; 
     private String gender; 
