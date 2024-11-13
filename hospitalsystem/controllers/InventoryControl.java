@@ -1,18 +1,16 @@
 package hospitalsystem.controllers;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
+import hospitalsystem.MainSystem;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
-import hospitalsystem.model.Batch;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
-
-import hospitalsystem.MainSystem;
 
 public class InventoryControl {
     
@@ -31,13 +29,22 @@ public class InventoryControl {
         System.out.println("-------------------------------------------------------------------------------");
         for (Map.Entry<String, Medicine> entry : inventoryMap.entrySet()) {
             Medicine med = entry.getValue();
-            for (Batch batch : med.getBatches()) {
+            for (Medicine.Batch batch : med.getBatches()) { 
                 System.out.printf("%-20s %-15d %-20s %-20d%n", 
                     med.getMedicineName(), batch.getQuantity(), batch.getExpirationDate(), med.getLowStockAlert());
             }
             System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.isLowStock() ? " **LOW STOCK ALERT**" : ""));
             System.out.println();
         }
+    }
+
+    // Getter for inventoryMap
+    public Map<String, Medicine> getInventoryMap() {
+        return inventoryMap;
+    }
+    // Getter for requestMap
+    public Map<String, ReplenishmentRequest> getRequestMap() {
+        return requestMap;
     }
 
     public static void addMedicine(Scanner sc) {
