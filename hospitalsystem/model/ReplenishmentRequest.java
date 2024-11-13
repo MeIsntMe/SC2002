@@ -17,6 +17,11 @@ public class ReplenishmentRequest {
         this.status = RequestStatus.PENDING; // Default status to pending approval
     }
 
+    // Overloaded constructor without expiration date
+    public ReplenishmentRequest(String medicineName, int requestedQuantity) {
+        this(medicineName, requestedQuantity, null);  // Set expirationDate as null
+    }
+    
     // Getters and setters
     public String getMedicineName() {
         return medicineName;
