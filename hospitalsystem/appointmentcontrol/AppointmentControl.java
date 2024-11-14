@@ -17,8 +17,6 @@ import java.util.stream.Collectors;
 
 public class AppointmentControl {
 
-    // ONLY HAVE THE FUNCTIONS THAT WILL BE INHERITED BY ALL THE SUBCLASSES 
-    
     // Utility methods for managing appointments
     public static List<Appointment> getAppointmentsByDoctorID(String doctorID) {
         return Database.appointmentMap.values().stream()
@@ -37,18 +35,6 @@ public class AppointmentControl {
     public static Appointment getAppointmentByAppointmentID(String appointmentID) {
         return Database.appointmentMap.get(appointmentID);
     }
-
-    public static boolean bookSlot(String appointmentID) {
-        Appointment appointment = Database.appointmentMap.get(appointmentID);
-        if (appointment != null) {
-            appointment.setStatus(AppointmentStatus.BOOKED);
-            Database.appointmentMap.put(appointmentID, appointment);
-            appointment.getDoctor().addAppointment(appointment);
-            return true;
-        }
-        return false;
-    }
-
     public static boolean cancelSlot(String appointmentID) {
         Appointment appointment = Database.appointmentMap.get(appointmentID);
         if (appointment != null && !appointment.getIsAvailable()) {
@@ -61,12 +47,45 @@ public class AppointmentControl {
         return false;
     }
 
-    public static void recordOutcome(String appointmentID, String consultationNotes, List<Prescription> prescriptions) {
+    
+    public static List<Appointment> getAvailableSlots(Doctor doctor) {
+        return Database.appointmentMap.values().stream()
+                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
+                .filter(Appointment::getIsAvailable)
+                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
+                .toList();
+    }
+
+    public static List<Appointment> getUnavailableSlots(Doctor doctor) {
+        return Database.appointmentMap.values().stream()
+                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
+                .filter(apt -> !apt.getIsAvailable() && apt.getStatus() == AppointmentStatus.UNAVAILABLE)
+                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
+                .toList();
+    }
+
+    public static List<Appointment> getPendingAppointments(Doctor doctor) {
+        return Database.appointmentMap.values().stream()
+                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
+                .filter(apt -> apt.getStatus() == AppointmentStatus.PENDING && !apt.getIsAvailable())
+                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
+                .toList();
+    }
+
+    public static List<Appointment> getBookedAppointments(Doctor doctor) {
+        return Database.appointmentMap.values().stream()
+                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
+                .filter(apt -> apt.getStatus() == AppointmentStatus.BOOKED)
+                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
+                .toList();
+    }
+
+    public static void recordOutcome(String appointmentID, String consultationNotes, Prescription prescription) {
         Appointment appointment = Database.appointmentMap.get(appointmentID);
         if (appointment != null) {
             appointment.setConsultationNotes(consultationNotes);
 
-            appointment.setPrescriptions(prescriptions);
+            appointment.setPrescription(prescription);
 
             appointment.setStatus(AppointmentStatus.COMPLETED);
             Database.appointmentMap.put(appointmentID, appointment);
@@ -74,47 +93,7 @@ public class AppointmentControl {
     }
 
     // Generate available slots for a week
-    public static List<AppointmentSlot> generateWeeklySlots(Doctor doctor) {
-        List<AppointmentSlot> slots = new ArrayList<>();
-
-        // Get next Monday
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime nextMonday = now.plusDays(1);
-        while (nextMonday.getDayOfWeek().getValue() != 1) {  // 1 = Monday
-            nextMonday = nextMonday.plusDays(1);
-        }
-
-        int[][] times = {{9, 0}, {10, 30}, {13, 0}, {14, 30}};
-
-        for (int i = 0; i < 5; i++) { // Monday to Friday
-            LocalDateTime currentDay = nextMonday.plusDays(i);
-            for (int[] time : times) {
-                // Create slot using the current day but with specified time
-                AppointmentSlot slot = new AppointmentSlot(
-                        currentDay.getYear(),
-                        currentDay.getMonthValue(),
-                        currentDay.getDayOfMonth(),
-                        time[0],
-                        time[1]
-                );
-                slots.add(slot);
-
-                // Create a new appointment for this slot
-                String appointmentID = generateAppointmentID(doctor.getID(), slot);
-                Appointment appointment = new Appointment(appointmentID, null, doctor, slot);
-                appointment.setStatus(AppointmentStatus.PENDING);
-                appointment.setIsAvailable(true);
-                // Add to global appointments map
-                Database.appointmentMap.put(appointmentID, appointment);
-            }
-        }
-
-        // Update doctor's available slots
-        doctor.setAvailableSlots(slots);
-
-        System.out.println("Generated " + slots.size() + " slots for next week for doctor " + doctor.getID());
-        return slots;
-    }
+    
 
     public static String generateAppointmentID(String doctorID, AppointmentSlot slot) {
         LocalDateTime dt = slot.getDateTime();
@@ -127,10 +106,6 @@ public class AppointmentControl {
                 dt.getMinute()
         );
     }
-
-    
-
-    
 
     public static void updateSlotAvailability(String doctorID, AppointmentSlot slot, boolean makeAvailable) {
         // Find the appointment for this slot
@@ -252,7 +227,7 @@ public class AppointmentControl {
         System.out.println("=====================================");
         for (AppointmentOutcome outcome:appointmentOutcomes){
             System.out.println("Appointment Date: " + outcome.getRecordedDate());
-            System.out.println("Service Type: " + outcome.getServiceType());
+            System.out.println("Serce Type: " + outcome.getServiceType());
             
             System.out.println("Prescriptions:");
             HashMap<String, PrescriptionStatus> prescriptions = outcome.getPrescriptions();
@@ -271,20 +246,5 @@ public class AppointmentControl {
 
 
     // Optional: Method to backup before saving
-    public static void backupAndSave() {  // Removed path parameter
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String backupPath = CSV_PATH.replace(".csv", "_backup_" + timestamp + ".csv");
-
-        File originalFile = new File(CSV_PATH);
-        if (originalFile.exists()) {
-            try {
-                Files.copy(originalFile.toPath(), new File(backupPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Backup created: " + backupPath);
-            } catch (IOException e) {
-                System.out.println("Warning: Could not create backup: " + e.getMessage());
-            }
-        }
- 
-        saveAppointmentsToCSV();
-    }
+    
 }

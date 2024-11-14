@@ -2,6 +2,7 @@ package hospitalsystem.model;
 
 import hospitalsystem.enums.PrescriptionStatus;
 import java.util.HashMap;
+import java.util.List;
 
 public class Prescription {
     private final HashMap<Medicine, Integer> medicineList = new HashMap<>(); //Prescription key: medicine name, point to quantity 
@@ -11,10 +12,13 @@ public class Prescription {
     private final String doctorID;               // Doctor that assigned prescription
 
     // Constructor
-    public Prescription(String medicineName, String doctorID, String patientID, int dosage, PrescriptionStatus status) {
+    public Prescription(List<MedicineSet> prescribedMedicine, String doctorID, String patientID, PrescriptionStatus status) {
         this.patientID = patientID;
         this.status = PrescriptionStatus.PENDING;
         this.doctorID = doctorID;
+        for (MedicineSet set:prescribedMedicine){
+            medicineList.put(set.getMedicine(), set.getQuantity());
+        }
     }
 
     // Getters and Setters methods 
@@ -51,5 +55,23 @@ public class Prescription {
     public String toString() {
         return "Prescription [Prescribed Medicine: " + medicineListToString() + ", Patient ID: " + patientID +
                 ", Doctor ID: " + doctorID + ", Status: " + status + "]";
+    }
+
+    public static class MedicineSet{
+        final private Medicine medicine;
+        final private int quantity;
+
+        public MedicineSet(Medicine medicine, int quantity){
+            this.medicine = medicine;
+            this.quantity = quantity;
+        }
+
+        public Medicine getMedicine() {
+            return medicine;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
     }
 }

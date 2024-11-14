@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Appointment implements Comparable<Appointment> {
     private final String appointmentID;
-    private final Patient patient;
+    private Patient patient;
     private final Doctor doctor;
     private final AppointmentSlot slot;
     private AppointmentStatus status;
@@ -54,6 +54,11 @@ public class Appointment implements Comparable<Appointment> {
     public boolean getIsAvailable(){
         return this.isAvailable;
     }
+
+    public void setPatient(Patient patient){
+        this.patient = patient;
+    }
+
     public void setIsAvailable(boolean newValue){
         this.isAvailable = newValue;
     }
@@ -70,12 +75,12 @@ public class Appointment implements Comparable<Appointment> {
         this.outcome = outcome;
     }
 
-    public List<Prescription> getPrescriptions() {
-        return this.outcome.getPrescriptions();
+    public Prescription getPrescription() {
+        return this.outcome.getPrescription();
     }
 
-    public void setPrescriptions(List<Prescription> prescriptions) {
-        this.outcome.setPrescriptions(prescriptions);
+    public void setPrescription(Prescription prescription) {
+        this.outcome.setPrescription(prescription);
     }
 
     public String getConsultationNotes() {
@@ -84,6 +89,19 @@ public class Appointment implements Comparable<Appointment> {
 
     public void setConsultationNotes(String consultationNotes) {
         this.outcome.setConsultationNotes(consultationNotes);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Appointment Details {");
+        sb.append("\n  Appointment ID: ").append(appointmentID);
+        sb.append("\n  Doctor ID: ").append(doctor.getID());
+        sb.append("\n  Slot: ").append(slot.toString());
+        sb.append("\n  Status: ").append(status);
+        sb.append("\n}");
+        
+        return sb.toString();
     }
 
     // Static nested class representing appointment slots
@@ -115,21 +133,21 @@ public class Appointment implements Comparable<Appointment> {
     // Non-static inner class
     public class AppointmentOutcome {
         private final Appointment appointment;
-        private List<Prescription> prescriptions;
+        private Prescription prescription;
         private String serviceType;
         private String recordedDate;
         private String consultationNotes;
 
-        public AppointmentOutcome(Appointment appointment, String consultationNotes, List<Prescription> prescriptions, String recordedDate, String serviceType) {
+        public AppointmentOutcome(Appointment appointment, String consultationNotes, Prescription prescription, String recordedDate, String serviceType) {
             this.appointment = appointment;
             this.consultationNotes = consultationNotes;
-            this.prescriptions = prescriptions;
+            this.prescription = prescription;
             this.recordedDate = recordedDate;
             this.serviceType = serviceType;
         }
 
-        public List<Prescription> getPrescriptions() {
-            return prescriptions;
+        public Prescription getPrescription() {
+            return prescription;
         }
 
         public String getConsultationNotes() {
@@ -156,8 +174,8 @@ public class Appointment implements Comparable<Appointment> {
             this.serviceType = newServiceType;
         }
 
-        public void setPrescriptions(List<Prescription> prescriptions) {
-            this.prescriptions = prescriptions;
+        public void setPrescription(Prescription prescription) {
+            this.prescription = prescription;
         }
 
         public void setConsultationNotes(String consultationNotes) {

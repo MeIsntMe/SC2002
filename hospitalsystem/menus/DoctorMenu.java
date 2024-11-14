@@ -1,14 +1,15 @@
 package hospitalsystem.menus;
 
 import hospitalsystem.HMS;
-import hospitalsystem.model.*;
-import hospitalsystem.enums.*;
-import hospitalsystem.data.Database;
-import hospitalsystem.usercontrol.DoctorUserControl;
 import hospitalsystem.appointmentcontrol.DoctorAppointmentControl;
-import java.util.Scanner;
-import java.util.List;
+import hospitalsystem.data.Database;
+import hospitalsystem.enums.*;
+import hospitalsystem.model.*;
+import hospitalsystem.usercontrol.DoctorUserControl;
+import hospitalsystem.usercontrol.PatientUserControl;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 
 public class DoctorMenu implements MenuInterface {
@@ -76,6 +77,56 @@ public class DoctorMenu implements MenuInterface {
         }
     }
 
+
+
+    private Patient handleViewPatientRecord() {
+        System.out.print("Enter Patient ID: ");
+        String patientId = scanner.nextLine();
+        Patient patient = (Patient)Database.patientsMap.get(patientId);
+        if (patient == null) {
+            System.out.println("Patient not found.");
+            return null;
+        }
+        System.out.println(PatientUserControl.getMedicalRecordString(patient));
+        return patient;
+    }
+    //helper function
+
+    private void handleUpdatePatientRecord() {
+        Patient patient = handleViewPatientRecord();
+        if (patient == null) {
+            return;
+        }
+
+        System.out.println("What would you like to update?");
+        System.out.println("1. Blood Type");
+        System.out.println("2. Gender");
+        System.out.println("3. Return to Main Menu");
+
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            switch (choice) {
+                case 1:
+                    System.out.printf("Current Blood Type: " + patient.getBloodType() +"\n");
+                    BloodType newBloodType = DoctorUserControl.selectBloodType();
+                    DoctorUserControl.updateBloodType(patient, newBloodType);
+                    break;
+                case 2:
+                    System.out.printf("Current Gender: " + patient.getGender()+"\n");
+                    System.out.printf("Please enter new gender: ");
+                    String gender = scanner.next();
+                    DoctorUserControl.updateGender(patient, gender);
+                    break;
+                case 3:
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
+    }
+
     private void handleSetAvailability() {
         System.out.println("\n=== Managing Doctor Availability ===");
         System.out.println("1. Generate slots for next week");
@@ -106,7 +157,7 @@ public class DoctorMenu implements MenuInterface {
         }
     }
     private void handleMarkSlotUnavailable() {
-        List<Appointment> availableSlots = DoctorUserControl.getAvailableSlots(doctor);
+        List<Appointment> availableSlots = DoctorAppointmentControl.getAvailableSlots(doctor);
         DoctorUserControl.displayAvailableSlots(availableSlots);
 
         if (availableSlots.isEmpty()) {
@@ -132,7 +183,7 @@ public class DoctorMenu implements MenuInterface {
     }
 
     private void handleMarkSlotAvailable() {
-        List<Appointment> unavailableSlots = DoctorUserControl.getUnavailableSlots(doctor);
+        List<Appointment> unavailableSlots = DoctorAppointmentControl.getUnavailableSlots(doctor);
         DoctorUserControl.displayUnavailableSlots(unavailableSlots);
 
         if (unavailableSlots.isEmpty()) {
@@ -158,7 +209,7 @@ public class DoctorMenu implements MenuInterface {
     }
 
     private void handleAppointmentRequests() {
-        List<Appointment> pendingAppointments = DoctorUserControl.getPendingAppointments(doctor);
+        List<Appointment> pendingAppointments = DoctorAppointmentControl.getPendingAppointments(doctor);
 
         if (pendingAppointments.isEmpty()) {
             System.out.println("No pending appointment requests.");
@@ -194,7 +245,7 @@ public class DoctorMenu implements MenuInterface {
     }
 
     private void handleRecordOutcome() {
-        List<Appointment> bookedAppointments = DoctorUserControl.getBookedAppointments(doctor);
+        List<Appointment> bookedAppointments = DoctorAppointmentControl.getBookedAppointments(doctor);
 
         if (bookedAppointments.isEmpty()) {
             System.out.println("No appointments to record outcomes for.");
@@ -222,8 +273,8 @@ public class DoctorMenu implements MenuInterface {
                 notes.append(line).append("\n");
             }
 
-            // Get prescriptions
-            List<Prescription> prescriptions = new ArrayList<>();
+            // Get prescription
+            ArrayList<Prescription.MedicineSet> prescribedMedicineList = new ArrayList<>();
             while (true) {
                 System.out.print("Add prescription? (y/n): ");
                 if (!scanner.nextLine().toLowerCase().startsWith("y")) break;
@@ -242,18 +293,17 @@ public class DoctorMenu implements MenuInterface {
                 }
 
                 // Create prescription
-                Prescription prescription = DoctorAppointmentControl.createPrescription(
-                        medicineName,
-                        doctor.getID(),
-                        selectedAppointment.getPatient().getID(),
+                Prescription.MedicineSet prescribedMedicine = DoctorAppointmentControl.createMedicineSet(
+                        medicine,
                         quantity
                 );
-
-                DoctorAppointmentControl.addMedicineToPrescription(prescription, medicine, quantity);
-                prescriptions.add(prescription);
+                
+                prescribedMedicineList.add(prescribedMedicine);
             }
 
-            DoctorUserControl.recordOutcome(selectedAppointment, notes.toString(), prescriptions);
+            Prescription prescription = new Prescription(prescribedMedicineList, doctor.getID(), selectedAppointment.getPatient().getID(), PrescriptionStatus.PENDING);
+
+            DoctorUserControl.recordOutcome(selectedAppointment, notes.toString(), prescription);
 
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");

@@ -2,6 +2,7 @@ package hospitalsystem.appointmentcontrol;
 
 import hospitalsystem.data.Database;
 import hospitalsystem.model.*;
+import hospitalsystem.model.Appointment.AppointmentSlot;
 import hospitalsystem.enums.*;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,6 +44,48 @@ public class DoctorAppointmentControl extends AppointmentControl {
     }
 
     // Manage doctor's slots
+    public static List<AppointmentSlot> generateWeeklySlots(Doctor doctor) {
+        List<AppointmentSlot> slots = new ArrayList<>();
+
+        // Get next Monday
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime nextMonday = now.plusDays(1);
+        while (nextMonday.getDayOfWeek().getValue() != 1) {  // 1 = Monday
+            nextMonday = nextMonday.plusDays(1);
+        }
+
+        int[][] times = {{9, 0}, {10, 30}, {13, 0}, {14, 30}};
+
+        for (int i = 0; i < 5; i++) { // Monday to Friday
+            LocalDateTime currentDay = nextMonday.plusDays(i);
+            for (int[] time : times) {
+                // Create slot using the current day but with specified time
+                AppointmentSlot slot = new AppointmentSlot(
+                        currentDay.getYear(),
+                        currentDay.getMonthValue(),
+                        currentDay.getDayOfMonth(),
+                        time[0],
+                        time[1]
+                );
+                slots.add(slot);
+
+                // Create a new appointment for this slot
+                String appointmentID = generateAppointmentID(doctor.getID(), slot);
+                Appointment appointment = new Appointment(appointmentID, null, doctor, slot);
+                appointment.setStatus(AppointmentStatus.PENDING);
+                appointment.setIsAvailable(true);
+                // Add to global appointments map
+                Database.appointmentMap.put(appointmentID, appointment);
+            }
+        }
+
+        // Update doctor's available slots
+        doctor.setAvailableSlots(slots);
+
+        System.out.println("Generated " + slots.size() + " slots for next week for doctor " + doctor.getID());
+        return slots;
+    }
+
     public static void markSlotUnavailable(Doctor doctor, Appointment appointment) {
         appointment.setIsAvailable(false);
         appointment.setStatus(AppointmentStatus.UNAVAILABLE);
@@ -72,9 +115,9 @@ public class DoctorAppointmentControl extends AppointmentControl {
     }
 
     // Record appointment outcomes
-    public static void recordOutcome(Appointment appointment, String notes, List<Prescription> prescriptions) {
+    public static void recordOutcome(Appointment appointment, String notes, Prescription prescription) {
         appointment.setConsultationNotes(notes);
-        appointment.setPrescriptions(prescriptions);
+        appointment.setPrescription(prescription);
         appointment.setStatus(AppointmentStatus.COMPLETED);
         Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
         Database.saveAppointmentsToCSV();
@@ -145,8 +188,8 @@ public class DoctorAppointmentControl extends AppointmentControl {
     }
 
     // Create a new prescription
-    public static Prescription createPrescription(String medicineName, String doctorID, String patientID, int dosage) {
-        return new Prescription(medicineName, doctorID, patientID, dosage, PrescriptionStatus.PENDING);
+    public static Prescription.MedicineSet createMedicineSet(Medicine medicine, int quantity) {
+        return new Prescription.MedicineSet(medicine, quantity);
     }
 
     // Add medicine to prescription
@@ -157,7 +200,7 @@ public class DoctorAppointmentControl extends AppointmentControl {
     // Add a prescription to appointment
     public static void addPrescriptionToAppointment(Appointment appointment, Medicine medicine, int quantity) {
         Prescription prescription = createPrescription(
-                medicine.getMedicineName(),
+                medicine,
                 appointment.getDoctor().getID(),
                 appointment.getPatient().getID(),
                 quantity

@@ -10,8 +10,8 @@ public class MedicalRecord {
     private String dOB;
     private String gender;
     private String phoneNumber;
-    private String emailAdress;
-    private String bloodType;
+    private String email;
+    private BloodType bloodType;
     private ArrayList<AppointmentOutcome> appointmentOutcomes;
 
     //Requires update when appointment is finished
@@ -25,7 +25,7 @@ public class MedicalRecord {
         }
     }
 
-    public String getId() {
+    public String getID() {
         return id;
     }
     
@@ -45,8 +45,8 @@ public class MedicalRecord {
         return phoneNumber;
     }
     
-    public String getEmailAddress() {
-        return emailAdress;
+    public String getEmail() {
+        return email;
     }
     
     public String getBloodType() {
@@ -74,7 +74,7 @@ public class MedicalRecord {
     }
     
     public void setEmailAddress(String emailAddress) {
-        this.emailAdress = emailAddress;
+        this.email = emailAddress;
     }
     
     public void setBloodType(String bloodType) {
@@ -84,5 +84,4 @@ public class MedicalRecord {
     public void setAppointmentOutcomes(ArrayList<AppointmentOutcome> newAppointmentOutcomes) {
         this.appointmentOutcomes = newAppointmentOutcomes;
     }
-
 }

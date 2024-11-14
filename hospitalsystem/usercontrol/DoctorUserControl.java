@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class DoctorUserControl extends UserControl {
 
-    Scanner sc = new Scanner(System.in);
+    static Scanner sc = new Scanner(System.in);
 
     // Display patient madical records
     public void displayUserDetails() {
@@ -46,16 +46,11 @@ public class DoctorUserControl extends UserControl {
                 System.out.println("Consultation Notes: " + apt.getConsultationNotes());
 
                 System.out.println("Prescriptions:");
-                List<Prescription> prescriptions = apt.getPrescriptions();
-                if (prescriptions.isEmpty()) {
-                    System.out.println("No prescriptions found for this appointment.");
-                } else {
-                    for (Prescription prescription : prescriptions) {
-                        System.out.println("- Medicine: " + prescription.getMedicineList().keySet());
-                        System.out.println("  Quantity: " + prescription.getMedicineList().values());
-                        System.out.println("  Status: " + prescription.getStatus());
-                    }
-                }
+                Prescription prescriptions = apt.getPrescription();
+                
+                System.out.println("- Medicine: " + prescription.getMedicineList().keySet());
+                System.out.println("  Quantity: " + prescription.getMedicineList().values());
+        
                 System.out.println("----------------------------------------");
             }
         }
@@ -189,38 +184,6 @@ public class DoctorUserControl extends UserControl {
         System.out.println("Slot marked as unavailable successfully.");
     }
 
-    public static List<Appointment> getAvailableSlots(Doctor doctor) {
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .filter(Appointment::getIsAvailable)
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-    }
-
-    public static List<Appointment> getUnavailableSlots(Doctor doctor) {
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .filter(apt -> !apt.getIsAvailable() && apt.getStatus() == AppointmentStatus.UNAVAILABLE)
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-    }
-
-    public static List<Appointment> getPendingAppointments(Doctor doctor) {
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .filter(apt -> apt.getStatus() == AppointmentStatus.PENDING && !apt.getIsAvailable())
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-    }
-
-    public static List<Appointment> getBookedAppointments(Doctor doctor) {
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .filter(apt -> apt.getStatus() == AppointmentStatus.BOOKED)
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-    }
-
     public static void displayAvailableSlots(List<Appointment> slots) {
         System.out.println("\nAvailable Slots (PENDING, CANCELLED):");
         for (int i = 0; i < slots.size(); i++) {
@@ -338,11 +301,49 @@ public class DoctorUserControl extends UserControl {
         System.out.println("Appointment declined.");
     }
 
-    public static void recordOutcome(Appointment appointment, String notes, List<Prescription> prescriptions) {
+    public static void recordOutcome(Appointment appointment, String notes, Prescription prescription) {
         appointment.setConsultationNotes(notes);
-        appointment.setPrescriptions(prescriptions);
+        appointment.setPrescription(prescription);
         appointment.setStatus(AppointmentStatus.COMPLETED);
         Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
         System.out.println("Appointment outcome recorded successfully.");
+    }
+
+    public static void updateBloodType(Patient patient, BloodType bloodType) {
+        patient.setBloodType(bloodType);
+    }
+
+    public static void setGender(Patient patient, String gender){
+        patient.setGender(gender);
+    }
+
+    public static BloodType selectBloodType() {
+        // Display the options with numbers
+        System.out.println("Select a Blood Type to change to:");
+        BloodType[] bloodTypes = BloodType.values();
+        for (int i = 0; i < bloodTypes.length; i++) {
+            System.out.println((i + 1) + ". " + bloodTypes[i].getDisplayName());
+        }
+
+        BloodType selectedBloodType = null;
+        while (selectedBloodType == null) {
+            System.out.print("Choice: ");
+            if (sc.hasNextInt()) {
+                int choice = sc.nextInt();
+
+                // Check if the choice is within a valid range
+                if (choice > 0 && choice <= bloodTypes.length) {
+                    selectedBloodType = bloodTypes[choice - 1];
+                } else {
+                    System.out.println("Invalid selection. Please enter a number between 1 and " + bloodTypes.length + ".");
+                }
+            } else {
+                System.out.println("Invalid input. Please enter a number.");
+                sc.next(); // Clear the invalid input
+            }
+        }
+
+        System.out.println("You selected: " + selectedBloodType.getDisplayName());
+        return selectedBloodType;
     }
 }
