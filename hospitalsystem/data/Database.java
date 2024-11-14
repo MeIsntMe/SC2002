@@ -67,7 +67,8 @@ public class Database {
                 String email = patientData[6].trim();
                 String password = patientData.length > 6 ? patientData[7].trim() : "password"; 
 
-                Patient patient = new Patient(patientID, name, DOB, age, gender, bloodType, email, password); 
+                //have to change
+                Patient patient = new Patient(patientID, name, phoneNumber, DOB, age, gender, bloodType, email, password); 
                 patientsMap.put(patientID, patient);
             }
         } catch (FileNotFoundException e) {

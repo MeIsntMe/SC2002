@@ -94,6 +94,7 @@ public class Appointment implements Comparable<Appointment> {
         StringBuilder sb = new StringBuilder();
         sb.append("Appointment Details {");
         sb.append("\n  Appointment ID: ").append(appointmentID);
+        sb.append("\n  Patient ID: ").append(patient.getID());
         sb.append("\n  Doctor ID: ").append(doctor.getID());
         sb.append("\n  Slot: ").append(slot.toString());
         sb.append("\n  Status: ").append(status);
@@ -178,6 +179,16 @@ public class Appointment implements Comparable<Appointment> {
 
         public void setConsultationNotes(String consultationNotes) {
             this.consultationNotes = consultationNotes;
+        }
+
+        @Override
+        public String toString() {
+            return "Outcome {" +
+                    "Prescription=" + (prescription != null ? prescription.toString() : "No prescription") +
+                    ", Service Type=" + serviceType +
+                    ", Recorded Date=" + recordedDate +
+                    ", Consultation Notes='" + consultationNotes +
+                    '}';
         }
     }
 }

@@ -9,21 +9,9 @@ import hospitalsystem.model.User;
 import java.util.Scanner;
 
 
-public abstract class UserControl {
+public abstract class UserControl{
 
     Scanner sc = new Scanner(System.in);
-
-    // Abstract method
-    // Implemented by DoctorUserControl: Display patient details (medical record)
-    // Implemented by AdminUserControl: Display staff details 
-    // Implemented by PatientUserControl: Display own details (medical record)
-    public abstract void displayUserDetails(User user);
-
-    // Abstract method
-    // Implemented by DoctorUserControl: Update patient medical record
-    // Implemented by AdminUserControl: Update staff details  
-    // Implemented by PatientUserControl: Update own personal details 
-    public abstract void updateUserDetails(User user);
  
     public static void updateStaffDetails(Scanner sc) {
         System.out.println("=========================================");
