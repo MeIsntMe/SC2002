@@ -20,8 +20,8 @@ public class AdminUserControl extends UserControl {
     
     Scanner sc = new Scanner(System.in);
 
-    // Displays staff list and filters
-    public void displayUserDetails() {
+    // Handles display staff list 
+    public void displayStaffList() {
 
         // Prompt for role filter
         UserType role = getStaffRoleInput(sc);
@@ -65,17 +65,20 @@ public class AdminUserControl extends UserControl {
             System.out.printf("Filtered %s List:", role.toString().toLowerCase());
             System.out.printf("%-10s %-20s %-10s %-5s%n", "ID", "Name", "Gender", "Age"); // Headers
             System.out.println("----------------------------------------------------");
-            
-            for (User staff : filteredStaff) {
-                System.out.printf("%-10s %-20s %-10s %-5d%n", 
-                        staff.getID(), staff.getName(), staff.getGender(), staff.getAge());
-            }
+            for (User staff : filteredStaff) 
+                displayUserDetails(staff);
         }
     }
 
-    // Updates staff details 
-    public void updateUserDetails() {
+    // Displays staff details (in single row format)
+    public void displayUserDetails(User staff) {
+        System.out.printf("%-10s %-20s %-10s %-5d%n", 
+            staff.getID(), staff.getName(), staff.getGender(), staff.getAge());
+    }
 
+    // Handles update staff details 
+    public void updateStaffDetails(){
+        
         // Prompt for role and ID 
         UserType role = getStaffRoleInput(sc);
         System.out.print("Enter the staff ID: ");
@@ -98,6 +101,10 @@ public class AdminUserControl extends UserControl {
         System.out.printf("ID: %s, Name: %s, Gender: %s, Age: %d%n",
                 staff.getID(), staff.getName(), staff.getGender(), staff.getAge());
 
+    }
+
+    // Updates indiv staff details 
+    public void updateUserDetails(User staff) {
         boolean done = false;
         while (!done) {
             System.out.println("Enter field to update (1-3): 1. Age | 2. Password | 3. Done");

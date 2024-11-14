@@ -3,6 +3,7 @@ package hospitalsystem.usercontrol;
 import hospitalsystem.appointmentcontrol.DoctorAppointmentControl;
 import hospitalsystem.data.Database;
 import hospitalsystem.model.*;
+import hospitalsystem.model.Prescription.MedicineSet;
 import hospitalsystem.enums.*;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -15,15 +16,20 @@ public class DoctorUserControl extends UserControl {
 
     static Scanner sc = new Scanner(System.in);
 
-    // Display patient madical records
-    public void displayUserDetails() {
-
+    //Handles display patient medical records 
+    public void displayMedicalRecords(patient) {
+        
         // Find Patient by ID
         System.out.print("Enter Patient ID: ");
         String patientId = sc.nextLine();
         Patient patient = findPatientById(patientId);  
         if (patient == null) return;
 
+        displayUserDetails(patient);
+    }
+
+    // Displays indiv patient's medical records
+    public void displayUserDetails(User patient) {
         // Display Medical Record 
         System.out.println("Medical Record for Patient: " + patient.getName());
         System.out.println("Patient ID: " + patient.getID());
@@ -66,12 +72,20 @@ public class DoctorUserControl extends UserControl {
         }
     }
 
-    // Update patient medical record 
-    public void updateUserDetails() {
+    // Handles update patient medical record 
+    public void updateMedicalRecord() {
+
+        // Find patient by ID 
         System.out.print("Enter Patient ID: ");
         String patientId = sc.nextLine();
         Patient patient = DoctorUserControl.findPatientById(patientId);
         if (patient == null) return;
+
+        updateUserDetails(patient);
+    }
+
+    // Update patient medical record: GRACELYNN DO 
+    public void updateUserDetails(User patient) {
 
         // Enter details of new appointment
         System.out.println("Enter consultation notes (press Enter twice to finish):");
@@ -83,7 +97,7 @@ public class DoctorUserControl extends UserControl {
         List<Prescription> prescriptions = new ArrayList<>();
         while (true) {
             System.out.print("Add prescription? (y/n): ");
-            if (!sc.nextLine().toLowerCase().startsWith("y")) break;
+            if (!sc.nextLine().toLowerCase().startsWith("n")) break;
 
             System.out.print("Enter medication name: ");
             String medication = sc.nextLine();
@@ -91,8 +105,13 @@ public class DoctorUserControl extends UserControl {
             System.out.print("Enter dosage: ");
             int dosage = Integer.parseInt(sc.nextLine());
 
-            Prescription prescription = new Prescription(medication, doctor.getID(), patient.getID(), dosage, PrescriptionStatus.PENDING);
+            System.out.print("Enter doctor ID: ");
+            String doctorID = sc.nextLine();
+
+            Prescription prescription = new Prescription(medication, doctorID, patient.getID(), dosage, PrescriptionStatus.PENDING);
             prescriptions.add(prescription);
+
+            Prescription(List<MedicineSet> prescribedMedicine, String doctorID, String patientID, PrescriptionStatus status)
         }
 
         // Update medical record
