@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Scanner;
 import hospitalsystem.model.Prescription;
 import hospitalsystem.appointmentcontrol.AppointmentControl;
+import hospitalsystem.data.Database;
 import hospitalsystem.enums.PrescriptionStatus;
+import hospitalsystem.model.Appointment;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.Medicine.Batch;
@@ -198,9 +200,11 @@ public class PharmacistMenu implements MenuInterface {
     private void updatePrescriptionStatus(Scanner sc) {
         System.out.print("Enter Appointment ID to update prescription status: ");
         String appointmentID = sc.nextLine();
+
+        Appointment appointment = Database.appointmentMap.get(appointmentID);
         
-        List<Prescription> prescriptions = AppointmentControl.getAppointmentPrescriptions(appointmentID);
-        if (prescriptions.isEmpty()) {
+        Prescription prescription = appointment.getPrescription();
+        if (prescription.getMedicineList().isEmpty()) {
             System.out.println("No prescriptions found for this appointment.");
             return;
         }
