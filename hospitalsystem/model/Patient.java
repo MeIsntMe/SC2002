@@ -1,10 +1,7 @@
 package hospitalsystem.model;
-import hospitalsystem.apptcontrol.AppointmentControl;
-import hospitalsystem.menus.*;
+import hospitalsystem.appointmentcontrol.AppointmentControl;
 
 import java.time.LocalDate;
-import hospitalsystem.controllers.*;
-import hospitalsystem.appointmentcontrol.AppointmentControl;
 import hospitalsystem.enums.BloodType;
 import java.util.List;
 
@@ -24,8 +21,6 @@ public class Patient extends User{
         this.medicalRecord = new MedicalRecord(this);
         this.appointments = AppointmentControl.getAppointmentsByPatientID(this.getID());
     }
-
-    public Patient(String HospitalID, String name){}
 
     public LocalDate getDOB() {
         return DOB;

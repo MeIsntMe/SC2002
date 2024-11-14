@@ -1,8 +1,7 @@
 package hospitalsystem.usercontrol;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -22,7 +21,7 @@ public class AdminUserControl extends UserControl {
     Scanner sc = new Scanner(System.in);
 
     // Displays staff list and filters
-    public void displayDetails() {
+    public void displayUserDetails() {
 
         // Prompt for role filter
         UserType role = getStaffRoleInput(sc);
@@ -34,16 +33,19 @@ public class AdminUserControl extends UserControl {
             case PHARMACIST -> staffCollection = Database.pharmsMap.values();
             case ADMINISTRATOR -> staffCollection = Database.adminsMap.values();
             case PATIENT -> { 
-                System.out.println("Invalid staff role specified.");
+                System.out.println("Invalid staff role specified. Patients are not staff.");
                 return;}
+            case null -> {
+                System.out.println("Invalid staff role specified.");
+                return;} 
         }
     
         // Prompt for optional filters
-        System.out.print("Enter gender (male/female, or leave blank): ");
+        System.out.print("Enter gender (male/female), or leave blank to skip): ");
         String gender = sc.nextLine().trim();
-        System.out.print("Enter minimum age (or leave blank): ");
+        System.out.print("Enter minimum age (or leave blank to skip): ");
         String minAgeInput = sc.nextLine().trim();
-        System.out.print("Enter maximum age (or leave blank): ");
+        System.out.print("Enter maximum age (or leave blank to skip): ");
         String maxAgeInput = sc.nextLine().trim();
     
         Integer minAge = minAgeInput.isEmpty() ? null : Integer.parseInt(minAgeInput);
@@ -72,7 +74,7 @@ public class AdminUserControl extends UserControl {
     }
 
     // Updates staff details 
-    public void updateDetails() {
+    public void updateUserDetails() {
 
         // Prompt for role and ID 
         UserType role = getStaffRoleInput(sc);
@@ -132,9 +134,9 @@ public class AdminUserControl extends UserControl {
             String name = sc.nextLine();
             System.out.print("Enter gender: ");
             String gender = sc.nextLine();
+
+            // Set default details 
             String password = "password";
-            String nil = "";
-            BloodType bloodtype = 
             int age = 0;
 
             // Auto-generate ID
@@ -143,7 +145,10 @@ public class AdminUserControl extends UserControl {
             // Create and add user
             switch (role) {
                 case PATIENT: 
-                    Patient patient = new Patient(userID, name, nil, age, gender, nil, nil, password);
+                    LocalDate DOB = LocalDate.of(2000, 1, 1);
+                    String email = "";
+                    BloodType bloodType = BloodType.UNDEFINED; //default
+                    Patient patient = new Patient(userID, name, DOB, age, gender, bloodType, email, password);
                     Database.patientsMap.put(userID, patient);
                     break;
                 case DOCTOR: 
@@ -152,7 +157,7 @@ public class AdminUserControl extends UserControl {
                     break; 
                 case PHARMACIST: 
                     Pharmacist pharm = new Pharmacist(userID, name, age, gender, password);
-                    Database.pharmsMap.put(userID, doc);
+                    Database.pharmsMap.put(userID, pharm);
                     break; 
                 case ADMINISTRATOR:
                     Administrator admin = new Administrator(userID, name, age, gender, password);
@@ -193,6 +198,8 @@ public class AdminUserControl extends UserControl {
                 prefix = "A";
                 userMap = Database.adminsMap;
                 break;
+            case null: 
+                return ("");
             }
 
         // Find next available ID in that map
@@ -208,7 +215,7 @@ public class AdminUserControl extends UserControl {
     }
 
     // Remove staff
-    public static void removeStaff(Scanner sc){
+    public static void removeUser(Scanner sc){
         while (true) {
 
             // Prompt for role and ID

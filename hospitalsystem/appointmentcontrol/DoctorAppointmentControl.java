@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DoctorApptControl extends AppointmentControl {
+public class DoctorAppointmentControl extends AppointmentControl {
 
     // Get doctor's specific appointments
     public static List<Appointment> getAvailableSlots(Doctor doctor) {

@@ -1,19 +1,9 @@
 package hospitalsystem.usercontrol;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.InputMismatchException;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
-import hospitalsystem.HMS;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.UserType;
-import hospitalsystem.model.Administrator;
-import hospitalsystem.model.Doctor;
-import hospitalsystem.model.Patient;
-import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
 
 
@@ -21,37 +11,17 @@ public abstract class UserControl {
 
     Scanner sc = new Scanner(System.in);
 
-    public abstract void displayDetails();
+    // Abstract method
+    // Implemented by DoctorUserControl: Display patient medical records 
+    // Implemented by AdminUserControl: Display staff details list 
+    // Implemented by PatientUserControl: Display own medical records 
+    public abstract void displayUserDetails();
 
-    public abstract void updateDetails();
-
-    // MANAGE STAFF MENU
-    public static void manageStaffMenu(Scanner sc) {
-        while (true) {            
-            System.out.println("=========================================");
-            System.out.println("Staff Management: ");
-            System.out.println("1. Add staff");
-            System.out.println("2. Remove staff");
-            System.out.println("3. Update staff details"); // TO DO: WHAT IS THIS
-            System.out.println("4. Display filtered list of staff");
-            System.out.println("5. Exit Staff Management");
-            System.out.print("Enter choice: ");
-
-            try{
-                int choice = sc.nextInt();
-                switch (choice) {
-                    case 1 -> addStaff(sc);
-                    case 2 -> removeStaff(sc);
-                    case 3 -> updateStaffDetails(sc);
-                    case 4 -> displayStaffFiltered(sc);
-                    case 5 -> {sc.close(); return;}
-                    default -> System.out.println("Invalid input! Please enter a number between 1-5 ");
-                }
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input! Please enter a number between 1-5");
-            }
-        }
-    }
+    // Abstract method
+    // Implemented by DoctorUserControl: Update patient medical records 
+    // Implemented by AdminUserControl: Update staff details  
+    // Implemented by PatientUserControl: Update own personal details 
+    public abstract void updateUserDetails();
  
     public static void updateStaffDetails(Scanner sc) {
         System.out.println("=========================================");

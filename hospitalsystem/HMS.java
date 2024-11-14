@@ -3,10 +3,14 @@ package hospitalsystem;
 import java.util.Scanner;
 
 import hospitalsystem.data.Database;
-import hospitalsystem.usercontrol.UserControl;
+import hospitalsystem.usercontrol.AdminUserControl;
 import hospitalsystem.model.User;
 import hospitalsystem.enums.UserType;
-import hospitalsystem.menus.*;
+import hospitalsystem.menus.AdminMenu;
+import hospitalsystem.menus.DoctorMenu;
+import hospitalsystem.menus.PatientMenu;
+import hospitalsystem.menus.PharmacistMenu;
+import hospitalsystem.menus.MenuInterface;
 
 public class HMS {
 
@@ -28,10 +32,10 @@ public class HMS {
                         role = login(scanner);
                         MenuInterface control;
                         switch (role) {
-                            case PATIENT -> control = new PatientControl(currentUser);
-                            case DOCTOR -> control = new DoctorControl(currentUser);
-                            case PHARMACIST -> control = new PharmacistControl(currentUser);
-                            case ADMINISTRATOR -> control = new AdminControl(currentUser);
+                            case PATIENT -> control = new PatientMenu(currentUser);
+                            case DOCTOR -> control = new DoctorMenu(currentUser);
+                            case PHARMACIST -> control = new PharmacistMenu(currentUser);
+                            case ADMINISTRATOR -> control = new AdminMenu(currentUser);
                             case null -> {control = null;}
                         }
                         if (control != null) 
@@ -52,7 +56,7 @@ public class HMS {
         //Returns UserType if login successful, else returns null 
 
         // Get login details 
-        UserType role = UserControl.getRoleInput(sc);
+        UserType role = AdminUserControl.getRoleInput(sc);
         System.out.print("Enter user ID: ");
         String inputID = sc.nextLine();
         System.out.print("Enter password: ");

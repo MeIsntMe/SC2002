@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-public class PatientControl implements MenuInterface {
+public class PatientMenu implements MenuInterface {
     
     // Instance variables 
     private static Scanner sc;
@@ -34,7 +34,7 @@ public class PatientControl implements MenuInterface {
     Doctor selectedDoctor;
 
     //Constructor
-    public PatientControl(User currentUser) { 
+    public PatientMenu(User currentUser) { 
         if (!(currentUser instanceof Patient)) {
             throw new IllegalArgumentException("User must be a Doctor");
         }

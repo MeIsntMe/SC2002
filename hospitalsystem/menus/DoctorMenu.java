@@ -5,7 +5,7 @@ import hospitalsystem.model.*;
 import hospitalsystem.enums.*;
 import hospitalsystem.data.Database;
 import hospitalsystem.usercontrol.DoctorUserControl;
-import hospitalsystem.appointmentcontrol.DoctorApptControl;
+import hospitalsystem.appointmentcontrol.DoctorAppointmentControl;
 import java.util.Scanner;
 import java.util.List;
 import java.util.ArrayList;
@@ -74,52 +74,6 @@ public class DoctorMenu implements MenuInterface {
                 scanner.nextLine();
             }
         }
-    }
-
-    private void handleViewPatientRecord() {
-        System.out.print("Enter Patient ID: ");
-        String patientId = scanner.nextLine();
-        Patient patient = DoctorUserControl.findPatientById(patientId);
-        if (patient != null) {
-            DoctorUserControl.displayPatientMedicalRecord(patient);
-        } else {
-            System.out.println("Patient not found.");
-        }
-    }
-
-    private void handleUpdatePatientRecord() {
-        System.out.print("Enter Patient ID: ");
-        String patientId = scanner.nextLine();
-        Patient patient = DoctorUserControl.findPatientById(patientId);
-        if (patient == null) {
-            System.out.println("Patient not found.");
-            return;
-        }
-
-        System.out.println("Enter consultation notes (press Enter twice to finish):");
-        StringBuilder notes = new StringBuilder();
-        String line;
-        while (!(line = scanner.nextLine()).isEmpty()) {
-            notes.append(line).append("\n");
-        }
-
-        List<Prescription> prescriptions = new ArrayList<>();
-        while (true) {
-            System.out.print("Add prescription? (y/n): ");
-            if (!scanner.nextLine().toLowerCase().startsWith("y")) break;
-
-            System.out.print("Enter medication name: ");
-            String medication = scanner.nextLine();
-
-            System.out.print("Enter dosage: ");
-            int dosage = Integer.parseInt(scanner.nextLine());
-
-            Prescription prescription = new Prescription(medication, doctor.getID(), patient.getID(), dosage, PrescriptionStatus.PENDING);
-            prescriptions.add(prescription);
-        }
-
-        DoctorUserControl.updatePatientRecord(patient, doctor, notes.toString(), prescriptions);
-        Database.saveAppointmentsToCSV(); // Save changes to CSV
     }
 
     private void handleSetAvailability() {
@@ -288,14 +242,14 @@ public class DoctorMenu implements MenuInterface {
                 }
 
                 // Create prescription
-                Prescription prescription = DoctorApptControl.createPrescription(
+                Prescription prescription = DoctorAppointmentControl.createPrescription(
                         medicineName,
                         doctor.getID(),
                         selectedAppointment.getPatient().getID(),
                         quantity
                 );
 
-                DoctorApptControl.addMedicineToPrescription(prescription, medicine, quantity);
+                DoctorAppointmentControl.addMedicineToPrescription(prescription, medicine, quantity);
                 prescriptions.add(prescription);
             }
 

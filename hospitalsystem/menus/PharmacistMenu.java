@@ -17,12 +17,12 @@ import java.time.LocalDate;
 import hospitalsystem.model.ReplenishmentRequest;
 
 
-public class PharmacistControl implements MenuInterface {
+public class PharmacistMenu implements MenuInterface {
 
     private final Pharmacist pharmacist;
 
     // Constructor
-    public PharmacistControl(User currentUser) { 
+    public PharmacistMenu(User currentUser) { 
         if (!(currentUser instanceof Pharmacist)) {
             throw new IllegalArgumentException("User must be a Doctor");
         }

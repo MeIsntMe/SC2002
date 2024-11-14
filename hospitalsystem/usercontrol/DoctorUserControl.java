@@ -1,35 +1,37 @@
 package hospitalsystem.usercontrol;
 
-import hospitalsystem.appointmentcontrol.DoctorApptControl;
+import hospitalsystem.appointmentcontrol.DoctorAppointmentControl;
 import hospitalsystem.data.Database;
 import hospitalsystem.model.*;
 import hospitalsystem.enums.*;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Scanner;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.stream.Collectors;
 
-public class DoctorUserControl {
+public class DoctorUserControl extends UserControl {
 
-    public static Patient findPatientById(String patientId) {
-        User user = Database.patientsMap.get(patientId);
-        if (user instanceof Patient) {
-            return (Patient) user;
-        }
-        return null;
-    }
+    Scanner sc = new Scanner(System.in);
 
-    public static void displayPatientMedicalRecord(Patient patient) {
+    // Display patient madical records
+    public void displayUserDetails() {
+
+        // Find Patient by ID
+        System.out.print("Enter Patient ID: ");
+        String patientId = sc.nextLine();
+        Patient patient = findPatientById(patientId);  
+        if (patient == null) return;
+
+        // Display Medical Record 
         System.out.println("Medical Record for Patient: " + patient.getName());
         System.out.println("Patient ID: " + patient.getID());
         System.out.println("Date of Birth: " + patient.getDOB());
         System.out.println("Age: " + patient.getAge());
         System.out.println("Gender: " + patient.getGender());
         System.out.println("Blood Type: " + patient.getBloodType());
-
-        List<Appointment> patientAppointments = getPatientAppointments(patient);
+        List<Appointment> patientAppointments = getPatientAppointments(patient); //change this: use Patient's appointment getting method  already has own list of appointments 
 
         if (patientAppointments.isEmpty()) {
             System.out.println("No appointments found for the patient.");
@@ -54,12 +56,56 @@ public class DoctorUserControl {
                         System.out.println("  Status: " + prescription.getStatus());
                     }
                 }
-
                 System.out.println("----------------------------------------");
             }
         }
     }
 
+    public static Patient findPatientById(String patientId) {
+        Patient patient = (Patient) Database.patientsMap.get(patientId);
+        if (patient != null) {
+            return patient;
+        } else {
+            System.out.println("Patient not found.");
+            return null;
+        }
+    }
+
+    // Update patient medical record 
+    public void updateUserDetails() {
+        System.out.print("Enter Patient ID: ");
+        String patientId = sc.nextLine();
+        Patient patient = DoctorUserControl.findPatientById(patientId);
+        if (patient == null) return;
+
+        // Enter details of new appointment
+        System.out.println("Enter consultation notes (press Enter twice to finish):");
+        StringBuilder notes = new StringBuilder();
+        String line;
+        while (!(line = sc.nextLine()).isEmpty()) {
+            notes.append(line).append("\n");
+        }
+        List<Prescription> prescriptions = new ArrayList<>();
+        while (true) {
+            System.out.print("Add prescription? (y/n): ");
+            if (!sc.nextLine().toLowerCase().startsWith("y")) break;
+
+            System.out.print("Enter medication name: ");
+            String medication = sc.nextLine();
+
+            System.out.print("Enter dosage: ");
+            int dosage = Integer.parseInt(sc.nextLine());
+
+            Prescription prescription = new Prescription(medication, doctor.getID(), patient.getID(), dosage, PrescriptionStatus.PENDING);
+            prescriptions.add(prescription);
+        }
+
+        // Update medical record
+        DoctorUserControl.updatePatientRecord(patient, doctor, notes.toString(), prescriptions);
+        Database.saveAppointmentsToCSV(); // Save changes to CSV
+    }
+
+    //move everything into DoctorAppointmentControl 
     private static List<Appointment> getPatientAppointments(Patient patient) {
         return Database.appointmentMap.values().stream()
                 .filter(apt -> apt.getPatient().getID().equals(patient.getID()))
@@ -106,7 +152,7 @@ public class DoctorUserControl {
 
     public static void generateNextWeekSlots(Doctor doctor) {
         // Generate slots using AppointmentControl's logic
-        List<Appointment.AppointmentSlot> slots = DoctorApptControl.generateWeeklySlots(doctor);
+        List<Appointment.AppointmentSlot> slots = DoctorAppointmentControl.generateWeeklySlots(doctor);
 
         // Find the maximum existing appointment ID
         int maxID = Database.appointmentMap.keySet().stream()

@@ -1,7 +1,5 @@
 package hospitalsystem.model;
 
-import hospitalsystem.*;
-import hospitalsystem.menus.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,8 +35,4 @@ public class Doctor extends User {
         this.upcomingAppointments.remove(appointment);
     }
 
-    public static void displayMenu() {
-        DoctorControl control = new DoctorControl(HMS.currentUser);
-        control.displayMenu();
-    }
 }

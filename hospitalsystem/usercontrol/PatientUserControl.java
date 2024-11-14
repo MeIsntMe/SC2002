@@ -30,7 +30,7 @@ public class PatientUserControl extends UserControl {
 
     // Display patient medical records 
     @Override
-    public void displayDetails(){
+    public void displayUserDetails(){
         MedicalRecord mr = patient.getMedicalRecord();
         ArrayList<AppointmentOutcome> appointmentOutcomes = mr.getAppointmentOutcomes();
         int lastSlot = appointmentOutcomes.size()-1;
@@ -68,7 +68,7 @@ public class PatientUserControl extends UserControl {
     }
 
     // Update patient personal information  
-    public void updateDetails(){
+    public void updateUserDetails(){
         while(true){
             System.out.println("What would you like to update?");
             System.out.println("1. Age");
@@ -83,13 +83,12 @@ public class PatientUserControl extends UserControl {
                     int newAge;
                     try{
                         newAge = sc.nextInt();
+                        sc.nextLine();
+                        patient.setAge(newAge);
+                        System.out.println("Age Updated");
                     } catch (Exception e){
-                        System.out.println("Invalid input. Please input a number.")
-                    }
-                    sc.nextLine();
-                    patient.setAge(newAge);
-                    System.out.println("Age Updated");
-                    break;
+                        System.out.println("Invalid input. Please input a number.");
+                    } break;
                 case 2: 
                     System.out.println("Please enter your new email: ");
                     String newEmail = sc.nextLine();
@@ -97,7 +96,7 @@ public class PatientUserControl extends UserControl {
                     System.out.println("Email Updated");
                     break;
                 case 3: 
-                    return;
+                    break;
                 default:
                     System.out.println("Invalid choice. Please try again.");
                     continue;
