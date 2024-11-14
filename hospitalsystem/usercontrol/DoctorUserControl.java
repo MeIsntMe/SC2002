@@ -20,7 +20,7 @@ public class DoctorUserControl extends UserControl {
         this.currentDoctor = doctor;
     }
 
-    @Override
+
     public void displayUserDetails(User user) {
         if (!(user instanceof Patient)) {
             System.out.println("Error: Can only display details for Patient users.");
@@ -31,7 +31,7 @@ public class DoctorUserControl extends UserControl {
         displayPatientMedicalRecord(patient);
     }
 
-    @Override
+
     public void updateUserDetails(User user) {
         if (!(user instanceof Patient)) {
             System.out.println("Error: Can only update details for Patient users.");

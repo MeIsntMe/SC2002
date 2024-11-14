@@ -53,24 +53,30 @@ public class Database {
     private static final String INVENTORY_CSV_PATH = "hospitalsystem/data/Medicine_List.csv";
     // Methods to load from CSV into Hashmap 
 
-    public static void loadPatientfromCSV (String filePath) {
+    public static void loadPatientfromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
-            scanner.nextLine(); // Skip the first line
+            scanner.nextLine(); // Skip the header
             while (scanner.hasNextLine()) {
-                String patientData[] = scanner.nextLine().split(",");
-                String patientID = patientData[0].trim();
-                String name = patientData[1].trim();
-                LocalDate DOB = LocalDate.parse(patientData[2].trim());
-                int age = Integer.valueOf(patientData[3].trim());
-                String gender = patientData[4].trim().toLowerCase();
-                BloodType bloodType = BloodType.valueOf(patientData[5].trim());
-                String email = patientData[6].trim();
-                String password = patientData.length > 6 ? patientData[7].trim() : "password"; 
+                String[] patientData = scanner.nextLine().split(",");
+                try {
+                    String patientID = patientData[0].trim();
+                    String name = patientData[1].trim();
+                    String phoneNumber = patientData[2].trim();
+                    LocalDate DOB = LocalDate.parse(patientData[3].trim());
+                    int age = Integer.parseInt(patientData[4].trim());
+                    String gender = patientData[5].trim().toLowerCase();
+                    BloodType bloodType = BloodType.valueOf(patientData[6].trim());
+                    String email = patientData[7].trim();
+                    String password = patientData.length > 8 ? patientData[8].trim() : "password";
 
-                //have to change
-                Patient patient = new Patient(patientID, name, phoneNumber, DOB, age, gender, bloodType, email, password); 
-                patientsMap.put(patientID, patient);
+                    Patient patient = new Patient(patientID, name, phoneNumber, DOB, age, gender, bloodType, email, password);
+                    patientsMap.put(patientID, patient);
+                } catch (Exception e) {
+                    System.out.println("Error processing patient line: " + String.join(",", patientData));
+                    System.out.println("Error details: " + e.getMessage());
+                }
             }
+            System.out.println("Successfully loaded " + patientsMap.size() + " patients");
         } catch (FileNotFoundException e) {
             System.out.println("An error has occurred\n" + e.getMessage());
         }
@@ -78,33 +84,40 @@ public class Database {
 
     public static void loadStaffFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
-            scanner.nextLine(); // Skip the first line
+            scanner.nextLine(); // Skip the header
             while (scanner.hasNextLine()) {
-                String staffData[] = scanner.nextLine().split(",");
-                String staffID = staffData[0].trim();
-                String name = staffData[1].trim();
-                UserType role = UserType.valueOf(staffData[2].trim().toUpperCase());
-                String gender = staffData[3].trim();
-                int age = Integer.valueOf(staffData[4].trim());
-                String password = staffData.length > 5 ? staffData[5].trim() : "password"; 
+                String[] staffData = scanner.nextLine().split(",");
+                try {
+                    String staffID = staffData[0].trim();
+                    String name = staffData[1].trim();
+                    UserType role = UserType.valueOf(staffData[2].trim().toUpperCase());
+                    String gender = staffData[3].trim();
+                    int age = Integer.parseInt(staffData[4].trim());
+                    String password = staffData.length > 5 ? staffData[5].trim() : "password";
 
-                switch (role) {
-                    case DOCTOR: 
-                        Doctor doc = new Doctor(staffID, name, gender, age, password);
-                        doctorsMap.put(staffID, doc);
-                        break; 
-                    case ADMINISTRATOR: 
-                        Administrator admin = new Administrator(staffID, name, gender, age, password);
-                        adminsMap.put(staffID, admin);
-                        break; 
-                    case PHARMACIST: 
-                        Pharmacist pharm = new Pharmacist(staffID, name, gender, age, password);
-                        pharmsMap.put(staffID, pharm);
-                        break;
-                    case PATIENT:
-                        break; //csv does not contain patient
+                    switch (role) {
+                        case DOCTOR:
+                            Doctor doc = new Doctor(staffID, name, age, gender, password);
+                            doctorsMap.put(staffID, doc);
+                            break;
+                        case ADMINISTRATOR:
+                            Administrator admin = new Administrator(staffID, name, age, gender, password);
+                            adminsMap.put(staffID, admin);
+                            break;
+                        case PHARMACIST:
+                            Pharmacist pharm = new Pharmacist(staffID, name, age, gender, password);
+                            pharmsMap.put(staffID, pharm);
+                            break;
+                        case PATIENT:
+                            break; // CSV does not contain patients
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error processing staff line: " + String.join(",", staffData));
+                    System.out.println("Error details: " + e.getMessage());
                 }
             }
+            System.out.println("Successfully loaded " +
+                    (doctorsMap.size() + adminsMap.size() + pharmsMap.size()) + " staff members");
         } catch (FileNotFoundException e) {
             System.out.println("An error has occurred\n" + e.getMessage());
         }
@@ -112,29 +125,32 @@ public class Database {
 
     public static void loadInventoryFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
-            scanner.nextLine(); // Skip the header line if there is one
+            scanner.nextLine(); // Skip the header
             while (scanner.hasNextLine()) {
                 String[] inventoryData = scanner.nextLine().split(",");
-                String medicineName = inventoryData[0].trim();
-                int initialStock = Integer.parseInt(inventoryData[1].trim());
-                int lowStockAlert = Integer.parseInt(inventoryData[2].trim());
-                LocalDate expirationDate = LocalDate.parse(inventoryData[3].trim());
+                try {
+                    String medicineName = inventoryData[0].trim();
+                    int initialStock = Integer.parseInt(inventoryData[1].trim());
+                    int lowStockAlert = Integer.parseInt(inventoryData[2].trim());
+                    LocalDate expirationDate = LocalDate.parse(inventoryData[3].trim());
 
-                // Check if the medicine exists; if not, create a new one
-                Medicine medicine = inventoryMap.get(medicineName);
-                if (medicine == null) {
-                    medicine = new Medicine(medicineName, lowStockAlert);
-                    inventoryMap.put(medicineName, medicine);
+                    // Create or update medicine
+                    Medicine medicine = inventoryMap.get(medicineName);
+                    if (medicine == null) {
+                        medicine = new Medicine(medicineName, lowStockAlert);
+                        inventoryMap.put(medicineName, medicine);
+                    }
+
+                    // Add batch with quantity and expiration date
+                    medicine.addBatch(initialStock, expirationDate);
+                } catch (Exception e) {
+                    System.out.println("Error processing inventory line: " + String.join(",", inventoryData));
+                    System.out.println("Error details: " + e.getMessage());
                 }
-                
-                // Add batch to the medicine
-                medicine.addBatch(initialStock, expirationDate);
             }
-            System.out.println("Inventory loaded successfully from CSV.");
+            System.out.println("Successfully loaded " + inventoryMap.size() + " medicines");
         } catch (FileNotFoundException e) {
             System.out.println("CSV file not found: " + e.getMessage());
-        } catch (NumberFormatException e) {
-            System.out.println("Error parsing number from CSV: " + e.getMessage());
         }
     }
 
@@ -419,7 +435,7 @@ public class Database {
                             String line = String.format("%s,%d,%d",
                                     escapeCSV(medicine.getMedicineName()),
                                     totalStock,
-                                    medicine.getLowStockAlert()
+                                    medicine.getIsLowStock()
                             );
                             bw.write(line);
                             bw.newLine();
