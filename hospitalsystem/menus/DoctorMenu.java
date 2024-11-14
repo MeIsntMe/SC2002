@@ -103,14 +103,19 @@ public class DoctorMenu implements MenuInterface {
             notes.append(line).append("\n");
         }
 
-        List<AppointmentControl.Prescription> prescriptions = new ArrayList<>();
+        List<Prescription> prescriptions = new ArrayList<>();
         while (true) {
             System.out.print("Add prescription? (y/n): ");
             if (!scanner.nextLine().toLowerCase().startsWith("y")) break;
 
             System.out.print("Enter medication name: ");
             String medication = scanner.nextLine();
-            prescriptions.add(new AppointmentControl.Prescription(medication, PrescriptionStatus.PENDING));
+
+            System.out.print("Enter dosage: ");
+            int dosage = Integer.parseInt(scanner.nextLine());
+
+            Prescription prescription = new Prescription(medication, doctor.getID(), patient.getID(), dosage, PrescriptionStatus.PENDING);
+            prescriptions.add(prescription);
         }
 
         DoctorUserControl.updatePatientRecord(patient, doctor, notes.toString(), prescriptions);
