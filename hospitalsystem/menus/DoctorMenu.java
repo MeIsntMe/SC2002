@@ -89,7 +89,6 @@ public class DoctorMenu implements MenuInterface {
         DoctorUserControl.displayUserDetails(user);
         return user;
     }
-    //helper function
 
     private void handleUpdatePatientRecord() {
         User user = handleViewPatientRecord();
@@ -128,6 +127,7 @@ public class DoctorMenu implements MenuInterface {
             System.out.println("Please enter a valid number.");
         }
     }
+    
     private void handleMarkSlotUnavailable() {
         List<Appointment> availableSlots = DoctorAppointmentControl.getAvailableSlots(doctor);
         DoctorUserControl.displayAvailableSlots(availableSlots);

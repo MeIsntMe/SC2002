@@ -1,12 +1,11 @@
 package hospitalsystem.usercontrol;
 
+import hospitalsystem.appointmentcontrol.AppointmentControl;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.UserType;
-import hospitalsystem.model.Appointment.AppointmentOutcome;
 import hospitalsystem.model.MedicalRecord;
 import hospitalsystem.model.Patient;
 import hospitalsystem.model.User;
-import java.util.List;
 import java.util.Scanner;
 
 
@@ -106,26 +105,9 @@ public abstract class UserControl {
         sb.append("\n  Phone Number: ").append(mr.getPhoneNumber());
         sb.append("\n  Email Address: ").append(mr.getEmail());
         sb.append("\n  Blood Type: ").append(mr.getBloodType());
-        sb.append("\n}").append(getAppointmentOutcomesString(patient, "  "));
+        sb.append("\n}").append(AppointmentControl.getAppointmentOutcomesString(patient, "  "));
 
         return sb.toString();
     }
 
-    public static String getAppointmentOutcomesString(Patient patient, String gap){
-        StringBuilder sb = new StringBuilder();
-        sb.append(gap).append("Appointment Outcomes: ");
-
-        // Assuming patient.getCompletedAppointments() returns a List<AppointmentOutcome>
-        List<AppointmentOutcome> outcomes = patient.getMedicalRecord().getAppointmentOutcomes();
-        
-        if (outcomes != null && !outcomes.isEmpty()) {
-            for (AppointmentOutcome outcome : outcomes) {
-                sb.append(gap).append("\n  ").append(outcome); // Uses outcome's toString method
-            }
-        } else {
-            sb.append(gap).append("\n  No completed appointments.");
-        }
-
-        return sb.toString();
-    }
 }

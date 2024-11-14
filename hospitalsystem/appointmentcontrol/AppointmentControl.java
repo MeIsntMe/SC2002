@@ -1,19 +1,12 @@
 package hospitalsystem.appointmentcontrol;
 
-import hospitalsystem.*;
+import hospitalsystem.data.*;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
-import hospitalsystem.data.*;
-import hospitalsystem.inventorycontrol.*;
-import hospitalsystem.usercontrol.*;
-import hospitalsystem.menus.*;
-import hospitalsystem.model.Appointment.*;
-import java.io.*;
-import java.nio.file.*;
+import hospitalsystem.model.Appointment.AppointmentOutcome;
+import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AppointmentControl {
 
@@ -47,7 +40,6 @@ public class AppointmentControl {
         return false;
     }
 
-    
     public static List<Appointment> getAvailableSlots(Doctor doctor) {
         return Database.appointmentMap.values().stream()
                 .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
@@ -80,21 +72,6 @@ public class AppointmentControl {
                 .toList();
     }
 
-    public static void recordOutcome(String appointmentID, String consultationNotes, Prescription prescription) {
-        Appointment appointment = Database.appointmentMap.get(appointmentID);
-        if (appointment != null) {
-            appointment.setConsultationNotes(consultationNotes);
-
-            appointment.setPrescription(prescription);
-
-            appointment.setStatus(AppointmentStatus.COMPLETED);
-            Database.appointmentMap.put(appointmentID, appointment);
-        }
-    }
-
-    // Generate available slots for a week
-    
-
     public static String generateAppointmentID(String doctorID, AppointmentSlot slot) {
         LocalDateTime dt = slot.getDateTime();
         return String.format("APT_%s_%d%02d%02d%02d%02d",
@@ -107,94 +84,10 @@ public class AppointmentControl {
         );
     }
 
-    public static void updateSlotAvailability(String doctorID, AppointmentSlot slot, boolean makeAvailable) {
-        // Find the appointment for this slot
-        Appointment appointment = Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctorID) &&
-                        apt.getSlot().getDateTime().equals(slot.getDateTime()))
-                .findFirst()
-                .orElse(null);
-
-        if (appointment != null) {
-            appointment.setIsAvailable(makeAvailable);
-            if (!makeAvailable) {
-                appointment.setStatus(AppointmentStatus.BOOKED);
-            } else {
-                appointment.setStatus(AppointmentStatus.PENDING);
-            }
-            Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
-        }
+    public static boolean updatePrescriptionStatus(Prescription prescription, PrescriptionStatus newStatus) {
+        prescription.setStatus(newStatus);
+        return true;
     }
-
-    //unused
-    private static List<Prescription> parsePrescriptions(String prescriptionStr) {
-        List<Prescription> prescriptions = new ArrayList<>();
-        if (prescriptionStr == null || prescriptionStr.isEmpty()) {
-            return prescriptions;
-        }
-
-        String[] prescriptionPairs = prescriptionStr.split(";");
-        for (String pair : prescriptionPairs) {
-            String[] parts = pair.split(":");
-            if (parts.length == 2) {
-                String medicine = parts[0].trim();
-                PrescriptionStatus status = PrescriptionStatus.valueOf(parts[1].trim());
-                prescriptions.add(new Prescription(medicine, status));
-            }
-        }
-        return prescriptions;
-    }
-
-    public static List<Prescription> getAppointmentPrescriptions(String appointmentID) {
-        Appointment appointment = Database.appointmentMap.get(appointmentID);
-        if (appointment != null) {
-            HashMap<String, PrescriptionStatus> prescriptionMap = appointment.getPrescriptions();
-            return prescriptionMap.entrySet().stream()
-                    .map(entry -> new Prescription(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
-        }
-        return new ArrayList<>();
-    }
-
-    public static boolean updatePrescriptionStatus(String appointmentID, String medicineName, PrescriptionStatus newStatus) {
-        Appointment appointment = Database.appointmentMap.get(appointmentID);
-        if (appointment != null) {
-            HashMap<String, PrescriptionStatus> prescriptions = appointment.getPrescriptions();
-            if (prescriptions.containsKey(medicineName)) {
-                prescriptions.put(medicineName, newStatus);
-                appointment.setPrescriptions(prescriptions);
-                Database.appointmentMap.put(appointmentID, appointment);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean addPrescription(String appointmentID, String medicineName, PrescriptionStatus status) {
-        Appointment appointment = Database.appointmentMap.get(appointmentID);
-        if (appointment != null) {
-            HashMap<String, PrescriptionStatus> prescriptions = appointment.getPrescriptions();
-            prescriptions.put(medicineName, status);
-            appointment.setPrescriptions(prescriptions);
-            Database.appointmentMap.put(appointmentID, appointment);
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean removePrescription(String appointmentID, String medicineName) {
-        Appointment appointment = Database.appointmentMap.get(appointmentID);
-        if (appointment != null) {
-            HashMap<String, PrescriptionStatus> prescriptions = appointment.getPrescriptions();
-            if (prescriptions.remove(medicineName) != null) {
-                appointment.setPrescriptions(prescriptions);
-                Database.appointmentMap.put(appointmentID, appointment);
-                return true;
-            }
-        }
-        return false;
-    }
-
     
 
     public static boolean addAppointment(int slotIndex, Doctor doctor, Patient patient){
@@ -219,32 +112,22 @@ public class AppointmentControl {
         }
     }
 
-    public static void displayPastAppointmentOutcomes(Patient patient){
-        ArrayList<AppointmentOutcome> appointmentOutcomes = patient.getMedicalRecord().getAppointmentOutcomes();
-        int lastSlot = appointmentOutcomes.size()-1;
-        System.out.println("=====================================");
-        System.out.println("      Past Appointment Outcomes      ");
-        System.out.println("=====================================");
-        for (AppointmentOutcome outcome:appointmentOutcomes){
-            System.out.println("Appointment Date: " + outcome.getRecordedDate());
-            System.out.println("Serce Type: " + outcome.getServiceType());
-            
-            System.out.println("Prescriptions:");
-            HashMap<String, PrescriptionStatus> prescriptions = outcome.getPrescriptions();
-            for (String prescriptionName : prescriptions.keySet()) {
-                System.out.println(" - " + prescriptionName + ": " + prescriptions.get(prescriptionName));
+    public static String getAppointmentOutcomesString(Patient patient, String gap){
+        StringBuilder sb = new StringBuilder();
+        sb.append(gap).append("Appointment Outcomes: ");
+
+        // Assuming patient.getCompletedAppointments() returns a List<AppointmentOutcome>
+        List<AppointmentOutcome> outcomes = patient.getMedicalRecord().getAppointmentOutcomes();
+        
+        if (outcomes != null && !outcomes.isEmpty()) {
+            for (AppointmentOutcome outcome : outcomes) {
+                sb.append(gap).append("\n  ").append(outcome); // Uses outcome's toString method
             }
-            
-            System.out.println("Consultation Notes: ");
-            System.out.println(outcome.getConsultationNotes());
-            if (outcome != appointmentOutcomes.get(lastSlot)){
-                System.out.println("-----");
-            }
+        } else {
+            sb.append(gap).append("\n  No completed appointments.");
         }
-        System.out.println("=====================================");
+
+        return sb.toString();
     }
-
-
-    // Optional: Method to backup before saving
     
 }

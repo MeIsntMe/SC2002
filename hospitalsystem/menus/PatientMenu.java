@@ -75,7 +75,7 @@ public class PatientMenu implements MenuInterface {
                 
                     case 8:
                         //Display past appointment outcomes
-                        AppointmentControl.displayPastAppointmentOutcomes(this.patient);
+                        handleDisplayPastAppointmentOutcomes();
                         break;
                 
                     case 9:
@@ -193,4 +193,9 @@ public class PatientMenu implements MenuInterface {
         handleCancelAppointment();
         handleScheduleAppointment();
     }
+
+    public void handleDisplayPastAppointmentOutcomes(){
+        System.out.println(AppointmentControl.getAppointmentOutcomesString(patient, ""));
+    }
+
 }
