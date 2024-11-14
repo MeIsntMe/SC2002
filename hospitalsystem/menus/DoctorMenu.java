@@ -14,10 +14,12 @@ import java.util.Scanner;
 public class DoctorMenu implements MenuInterface {
     private final Doctor doctor;
     private final Scanner scanner;
+    private final DoctorUserControl doctorUserControl;
 
     public DoctorMenu(User user) {
         this.doctor = (Doctor) user;
         this.scanner = new Scanner(System.in);
+        this.doctorUserControl = new DoctorUserControl(doctor);
     }
 
     @Override
@@ -46,7 +48,7 @@ public class DoctorMenu implements MenuInterface {
                         handleUpdatePatientRecord();
                         break;
                     case 3:
-                        DoctorUserControl.displayPersonalSchedule(doctor);
+                        DoctorAppointmentControl.displayPersonalSchedule(doctor);
                         break;
                     case 4:
                         handleSetAvailability();
@@ -55,7 +57,7 @@ public class DoctorMenu implements MenuInterface {
                         handleAppointmentRequests();
                         break;
                     case 6:
-                        DoctorUserControl.displayUpcomingAppointments(doctor);
+                        DoctorAppointmentControl.displayUpcomingAppointments(doctor);
                         break;
                     case 7:
                         handleRecordOutcome();
@@ -76,26 +78,22 @@ public class DoctorMenu implements MenuInterface {
         }
     }
 
-
-
-    private User handleViewPatientRecord() {
+    private void handleViewPatientRecord() {
         System.out.print("Enter Patient ID: ");
         String patientId = scanner.nextLine();
-        User user = Database.patientsMap.get(patientId);
-        if (user == null) {
-            System.out.println("User not found.");
-            return null;
+        Patient patient = DoctorUserControl.findPatientById(patientId);
+        if (patient != null) {
+            doctorUserControl.displayUserDetails(patient);
         }
-        DoctorUserControl.displayUserDetails(user);
-        return user;
     }
 
     private void handleUpdatePatientRecord() {
-        User user = handleViewPatientRecord();
-        if (user == null) {
-            return;
+        System.out.print("Enter Patient ID: ");
+        String patientId = scanner.nextLine();
+        Patient patient = DoctorUserControl.findPatientById(patientId);
+        if (patient != null) {
+            doctorUserControl.updateUserDetails(patient);
         }
-        DoctorUserControl.updateUserDetails(user);
     }
 
     private void handleSetAvailability() {
@@ -109,8 +107,7 @@ public class DoctorMenu implements MenuInterface {
             int choice = Integer.parseInt(scanner.nextLine());
             switch (choice) {
                 case 1:
-                    DoctorUserControl.generateNextWeekSlots(doctor);
-                    Database.saveAppointmentsToCSV();
+                    DoctorAppointmentControl.generateNextWeekSlots(doctor);
                     break;
                 case 2:
                     handleMarkSlotUnavailable();
@@ -127,10 +124,10 @@ public class DoctorMenu implements MenuInterface {
             System.out.println("Please enter a valid number.");
         }
     }
-    
+
     private void handleMarkSlotUnavailable() {
         List<Appointment> availableSlots = DoctorAppointmentControl.getAvailableSlots(doctor);
-        DoctorUserControl.displayAvailableSlots(availableSlots);
+        DoctorAppointmentControl.displayAvailableSlots(availableSlots);
 
         if (availableSlots.isEmpty()) {
             System.out.println("No available slots to mark as unavailable.");
@@ -146,9 +143,7 @@ public class DoctorMenu implements MenuInterface {
                 return;
             }
 
-            DoctorUserControl.markSlotUnavailable(doctor, availableSlots.get(choice - 1));
-            Database.saveAppointmentsToCSV();
-
+            DoctorAppointmentControl.markSlotUnavailable(doctor, availableSlots.get(choice - 1));
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
         }
@@ -156,7 +151,7 @@ public class DoctorMenu implements MenuInterface {
 
     private void handleMarkSlotAvailable() {
         List<Appointment> unavailableSlots = DoctorAppointmentControl.getUnavailableSlots(doctor);
-        DoctorUserControl.displayUnavailableSlots(unavailableSlots);
+        DoctorAppointmentControl.displayUnavailableSlots(unavailableSlots);
 
         if (unavailableSlots.isEmpty()) {
             System.out.println("No unavailable slots to mark as available.");
@@ -172,9 +167,7 @@ public class DoctorMenu implements MenuInterface {
                 return;
             }
 
-            DoctorUserControl.markSlotAvailable(doctor, unavailableSlots.get(choice - 1));
-            Database.saveAppointmentsToCSV();
-
+            DoctorAppointmentControl.markSlotAvailable(doctor, unavailableSlots.get(choice - 1));
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
         }
@@ -188,7 +181,7 @@ public class DoctorMenu implements MenuInterface {
             return;
         }
 
-        DoctorUserControl.displayPendingAppointments(pendingAppointments);
+        DoctorAppointmentControl.displayPendingAppointments(pendingAppointments);
 
         System.out.print("Enter appointment number to process (0 to cancel): ");
         try {
@@ -204,13 +197,10 @@ public class DoctorMenu implements MenuInterface {
             String response = scanner.nextLine().trim().toLowerCase();
 
             if (response.startsWith("y")) {
-                DoctorUserControl.acceptAppointment(doctor, selectedAppointment);
+                DoctorAppointmentControl.acceptAppointment(doctor, selectedAppointment);
             } else {
-                DoctorUserControl.declineAppointment(doctor, selectedAppointment);
+                DoctorAppointmentControl.declineAppointment(doctor, selectedAppointment);
             }
-
-            Database.saveAppointmentsToCSV();
-
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
         }
@@ -224,7 +214,7 @@ public class DoctorMenu implements MenuInterface {
             return;
         }
 
-        DoctorUserControl.displayBookedAppointments(bookedAppointments);
+        DoctorAppointmentControl.displayBookedAppointments(bookedAppointments);
 
         System.out.print("Enter appointment number (0 to cancel): ");
         try {
@@ -257,26 +247,23 @@ public class DoctorMenu implements MenuInterface {
                 System.out.print("Enter quantity: ");
                 int quantity = Integer.parseInt(scanner.nextLine());
 
-                // Check if medicine exists in inventory
                 Medicine medicine = Database.inventoryMap.get(medicineName);
                 if (medicine == null) {
                     System.out.println("Medicine not found in inventory.");
                     continue;
                 }
 
-                // Create prescription
-                Prescription.MedicineSet prescribedMedicine = DoctorAppointmentControl.createMedicineSet(
-                        medicine,
-                        quantity
-                );
-                
-                prescribedMedicineList.add(prescribedMedicine);
+                prescribedMedicineList.add(new Prescription.MedicineSet(medicine, quantity));
             }
 
-            Prescription prescription = new Prescription(prescribedMedicineList, doctor.getID(), selectedAppointment.getPatient().getID(), PrescriptionStatus.PENDING);
+            Prescription prescription = new Prescription(
+                    prescribedMedicineList,
+                    doctor.getID(),
+                    selectedAppointment.getPatient().getID(),
+                    PrescriptionStatus.PENDING
+            );
 
-            DoctorUserControl.recordOutcome(selectedAppointment, notes.toString(), prescription);
-
+            DoctorAppointmentControl.recordOutcome(selectedAppointment, notes.toString(), prescription);
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
         }
