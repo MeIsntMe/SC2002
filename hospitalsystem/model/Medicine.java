@@ -2,7 +2,6 @@ package hospitalsystem.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -72,52 +71,6 @@ public class Medicine {
     @Override
     public String toString(){
         return medicineName;
-    }
-
-
-    //Shift to pharmacistControl
-    // Method to add a new batch to the medicine
-    public void addBatch(int quantity, LocalDate expirationDate) {
-        batches.add(new Batch(quantity, expirationDate));
-        batches.sort(Comparator.comparing(Batch::getExpirationDate));
-        System.out.println("Added batch of " + quantity + " units for " + medicineName + ", expires on " + expirationDate);
-    }
-
-    // Get batches nearing expiration
-    public List<Batch> getNearingExpirationBatches(int weeksBeforeExpiration) {
-        List<Batch> nearingExpiration = new ArrayList<>();
-        LocalDate today = LocalDate.now();
-        for (Batch batch : batches) {
-            if (batch.getExpirationDate().isBefore(today.plusWeeks(weeksBeforeExpiration))) {
-                nearingExpiration.add(batch);
-            }
-        }
-        return nearingExpiration;
-    }
-
-    // Dispense a specified quantity, prioritizing batches closest to expiration
-    public boolean dispense(int quantity) {
-        Iterator<Batch> iterator = batches.iterator();
-        int batchQuantity;
-        while (iterator.hasNext() && quantity > 0) {
-            Batch batch = iterator.next();
-            batchQuantity = batch.getQuantity();
-            if (batchQuantity <= quantity) {
-                quantity -= batchQuantity;
-                iterator.remove();
-                System.out.println("Used up batch of " + medicineName + " with expiration date: " + batch.getExpirationDate());
-            } else {
-                batch.setQuantity(batchQuantity - quantity);
-                System.out.println("Dispensed " + quantity + " units from batch of " + medicineName + " with expiration date: " + batch.getExpirationDate());
-                quantity = 0;
-            }
-        }
-
-        if (quantity > 0) {
-            System.out.println("Insufficient stock to dispense " + quantity + " units of " + medicineName);
-            return false;
-        }
-        return true;
     }
 
     // Nested Batch class within Medicine

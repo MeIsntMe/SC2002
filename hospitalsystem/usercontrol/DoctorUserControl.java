@@ -313,7 +313,7 @@ public class DoctorUserControl extends UserControl {
         patient.setBloodType(bloodType);
     }
 
-    public static void setGender(Patient patient, String gender){
+    public static void updateGender(Patient patient, String gender){
         patient.setGender(gender);
     }
 
