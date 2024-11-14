@@ -13,63 +13,191 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class DoctorUserControl extends UserControl {
+    private static final Scanner sc = new Scanner(System.in);
+    private final Doctor currentDoctor;
 
-    static Scanner sc = new Scanner(System.in);
-
-    //Handles display patient medical records 
-    public void displayMedicalRecords(patient) {
-        
-        // Find Patient by ID
-        System.out.print("Enter Patient ID: ");
-        String patientId = sc.nextLine();
-        Patient patient = findPatientById(patientId);  
-        if (patient == null) return;
-
-        displayUserDetails(patient);
+    public DoctorUserControl(Doctor doctor) {
+        this.currentDoctor = doctor;
     }
 
-    // Displays indiv patient's medical records
-    public void displayUserDetails(User patient) {
-        // Display Medical Record 
+    @Override
+    public void displayUserDetails(User user) {
+        if (!(user instanceof Patient)) {
+            System.out.println("Error: Can only display details for Patient users.");
+            return;
+        }
+
+        Patient patient = (Patient) user;
+        displayPatientMedicalRecord(patient);
+    }
+
+    @Override
+    public void updateUserDetails(User user) {
+        if (!(user instanceof Patient)) {
+            System.out.println("Error: Can only update details for Patient users.");
+            return;
+        }
+
+        Patient patient = (Patient) user;
+        System.out.println("1. Update Patient Details");
+        System.out.println("2. Update Medical Record");
+        System.out.print("Enter choice: ");
+
+        try {
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    updatePatientDetails(patient);
+                    break;
+                case 2:
+                    updateMedicalRecord(patient);
+                    break;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
+    }
+
+    private void displayPatientMedicalRecord(Patient patient) {
+        // Display basic patient info
         System.out.println("Medical Record for Patient: " + patient.getName());
         System.out.println("Patient ID: " + patient.getID());
         System.out.println("Date of Birth: " + patient.getDOB());
         System.out.println("Age: " + patient.getAge());
         System.out.println("Gender: " + patient.getGender());
         System.out.println("Blood Type: " + patient.getBloodType());
-        List<Appointment> patientAppointments = getPatientAppointments(patient); //change this: use Patient's appointment getting method  already has own list of appointments 
 
-        if (patientAppointments.isEmpty()) {
-            System.out.println("No appointments found for the patient.");
-        } else {
-            System.out.println("\nAppointment History:");
-            for (Appointment apt : patientAppointments) {
-                System.out.println("Appointment ID: " + apt.getAppointmentID());
-                System.out.println("Doctor: " + apt.getDoctor().getName());
-                System.out.println("Date: " + apt.getSlot().getDateTime().toLocalDate());
-                System.out.println("Time: " + apt.getSlot().getDateTime().toLocalTime());
-                System.out.println("Status: " + apt.getStatus());
-                System.out.println("Consultation Notes: " + apt.getConsultationNotes());
-
-                System.out.println("Prescriptions:");
-                Prescription prescriptions = apt.getPrescription();
-                
-                System.out.println("- Medicine: " + prescription.getMedicineList().keySet());
-                System.out.println("  Quantity: " + prescription.getMedicineList().values());
-        
-                System.out.println("----------------------------------------");
-            }
-    // Display patient madical records
-    static public void displayUserDetails(User user) {
-        Patient patient;
-        if (user instanceof Patient){
-            patient = (Patient) user;
-        }
-        else{
-            System.out.println("displayUserDetails only accepts Patient object.");
+        // Display appointment history
+        List<Appointment> appointments = patient.getAppointments();
+        if (appointments == null || appointments.isEmpty()) {
+            System.out.println("\nNo appointments found for the patient.");
             return;
         }
-        System.out.println(getMedicalRecordString(patient));
+
+        System.out.println("\nAppointment History:");
+        for (Appointment apt : appointments) {
+            System.out.println("----------------------------------------");
+            System.out.println("Appointment ID: " + apt.getAppointmentID());
+            System.out.println("Doctor: " + apt.getDoctor().getName());
+            System.out.println("Date: " + apt.getSlot().getDateTime().toLocalDate());
+            System.out.println("Time: " + apt.getSlot().getDateTime().toLocalTime());
+            System.out.println("Status: " + apt.getStatus());
+            System.out.println("Consultation Notes: " + apt.getConsultationNotes());
+
+            // Display prescriptions if any
+            Prescription prescription = apt.getPrescription();
+            if (prescription != null) {
+                System.out.println("Prescriptions:");
+                for (Medicine medicine : prescription.getMedicineList().keySet()) {
+                    System.out.println("- Medicine: " + medicine.getMedicineName());
+                    System.out.println("  Quantity: " + prescription.getMedicineList().get(medicine));
+                }
+            }
+        }
+    }
+
+    private void updateMedicalRecord(Patient patient) {
+        // Get consultation notes
+        System.out.println("Enter consultation notes (press Enter twice to finish):");
+        StringBuilder notes = new StringBuilder();
+        String line;
+        while (!(line = sc.nextLine()).isEmpty()) {
+            notes.append(line).append("\n");
+        }
+
+        // Get prescriptions
+        List<MedicineSet> prescribedMedicineList = new ArrayList<>();
+        while (true) {
+            System.out.print("Add prescription? (y/n): ");
+            if (!sc.nextLine().toLowerCase().startsWith("y")) break;
+
+            System.out.print("Enter medication name: ");
+            String medicineName = sc.nextLine();
+
+            System.out.print("Enter quantity: ");
+            int quantity = Integer.parseInt(sc.nextLine());
+
+            // Check if medicine exists in inventory
+            Medicine medicine = Database.inventoryMap.get(medicineName);
+            if (medicine == null) {
+                System.out.println("Medicine not found in inventory.");
+                continue;
+            }
+
+            prescribedMedicineList.add(new MedicineSet(medicine, quantity));
+        }
+
+        // Create new prescription
+        Prescription prescription = new Prescription(
+                prescribedMedicineList,
+                currentDoctor.getID(),
+                patient.getID(),
+                PrescriptionStatus.PENDING
+        );
+
+        // Create appointment for medical record update
+        String appointmentID = String.format("MR_%s_%d", patient.getID(), System.currentTimeMillis());
+        LocalDateTime now = LocalDateTime.now();
+
+        Appointment.AppointmentSlot slot = new Appointment.AppointmentSlot(
+                now.getYear(),
+                now.getMonthValue(),
+                now.getDayOfMonth(),
+                now.getHour(),
+                now.getMinute()
+        );
+
+        Appointment appointment = new Appointment(appointmentID, patient, currentDoctor, slot);
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        appointment.setIsAvailable(false);
+        appointment.setPrescription(prescription);
+        appointment.setConsultationNotes(notes.toString());
+
+        // Update database and patient records
+        Database.appointmentMap.put(appointmentID, appointment);
+        List<Appointment> patientAppointments = patient.getAppointments();
+        if (patientAppointments == null) {
+            patientAppointments = new ArrayList<>();
+        }
+        patientAppointments.add(appointment);
+        patient.setAppointments(patientAppointments);
+
+        Database.saveAppointmentsToCSV();
+        System.out.println("Medical record updated successfully.");
+    }
+
+    private void updatePatientDetails(Patient patient) {
+        System.out.println("What would you like to update?");
+        System.out.println("1. Blood Type");
+        System.out.println("2. Gender");
+        System.out.println("3. Return to Main Menu");
+
+        try {
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    System.out.printf("Current Blood Type: " + patient.getBloodType() +"\n");
+                    BloodType newBloodType = selectBloodType();
+                    updateBloodType(patient, newBloodType);
+                    System.out.println("Blood type updated successfully.");
+                    break;
+                case 2:
+                    System.out.printf("Current Gender: " + patient.getGender()+"\n");
+                    System.out.print("Please enter new gender: ");
+                    String gender = sc.next();
+                    updateGender(patient, gender);
+                    System.out.println("Gender updated successfully.");
+                    break;
+                case 3:
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
     }
 
     public static Patient findPatientById(String patientId) {
@@ -82,304 +210,15 @@ public class DoctorUserControl extends UserControl {
         }
     }
 
-    // Handles update patient medical record 
-    public void updateMedicalRecord() {
-
-        // Find patient by ID 
-        System.out.print("Enter Patient ID: ");
-        String patientId = sc.nextLine();
-        Patient patient = DoctorUserControl.findPatientById(patientId);
-        if (patient == null) return;
-
-        updateUserDetails(patient);
-    }
-
-    // Update patient medical record: GRACELYNN DO 
-    public void updateUserDetails(User patient) {
-
-        // Enter details of new appointment
-        System.out.println("Enter consultation notes (press Enter twice to finish):");
-        StringBuilder notes = new StringBuilder();
-        String line;
-        while (!(line = sc.nextLine()).isEmpty()) {
-            notes.append(line).append("\n");
-        }
-        List<Prescription> prescriptions = new ArrayList<>();
-        while (true) {
-            System.out.print("Add prescription? (y/n): ");
-            if (!sc.nextLine().toLowerCase().startsWith("n")) break;
-
-            System.out.print("Enter medication name: ");
-            String medication = sc.nextLine();
-
-            System.out.print("Enter dosage: ");
-            int dosage = Integer.parseInt(sc.nextLine());
-
-            System.out.print("Enter doctor ID: ");
-            String doctorID = sc.nextLine();
-
-            Prescription prescription = new Prescription(medication, doctorID, patient.getID(), dosage, PrescriptionStatus.PENDING);
-            prescriptions.add(prescription);
-
-            Prescription(List<MedicineSet> prescribedMedicine, String doctorID, String patientID, PrescriptionStatus status)
-    // Update patient patient details
-    static public void updateUserDetails(User user) {
-        Patient patient;
-        if (user instanceof Patient){
-            patient = (Patient) user;
-        }
-        else{
-            System.out.println("updateUserDetails only accepts Patient object.");
-            return;
-        }
-        System.out.println("What would you like to update?");
-        System.out.println("1. Blood Type");
-        System.out.println("2. Gender");
-        System.out.println("3. Return to Main Menu");
-
-        try {
-            int choice = Integer.parseInt(sc.nextLine());
-            switch (choice) {
-                case 1:
-                    System.out.printf("Current Blood Type: " + patient.getBloodType() +"\n");
-                    BloodType newBloodType = DoctorUserControl.selectBloodType();
-                    DoctorUserControl.updateBloodType(patient, newBloodType);
-                    break;
-                case 2:
-                    System.out.printf("Current Gender: " + patient.getGender()+"\n");
-                    System.out.printf("Please enter new gender: ");
-                    String gender = sc.next();
-                    DoctorUserControl.updateGender(patient, gender);
-                    break;
-                case 3:
-                    return;
-                default:
-                    System.out.println("Invalid choice.");
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Please enter a valid number.");
-        }
-    }
-
-    //move everything into DoctorAppointmentControl 
-    private static List<Appointment> getPatientAppointments(Patient patient) {
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getPatient().getID().equals(patient.getID()))
-                .sorted(Comparator.comparing(apt -> apt.getSlot().getDateTime()))
-                .collect(Collectors.toList());
-    }
-
-    public static void updatePatientRecord(Patient patient, Doctor doctor, String notes, List<Prescription> prescriptions) {
-        String appointmentID = String.format("MR_%s_%d", patient.getID(), System.currentTimeMillis());
-        LocalDateTime now = LocalDateTime.now();
-
-        // Create slot with current time
-        Appointment.AppointmentSlot slot = new Appointment.AppointmentSlot(
-                now.getYear(),
-                now.getMonthValue(),
-                now.getDayOfMonth(),
-                now.getHour(),
-                now.getMinute()
-        );
-
-        // Create and configure appointment
-        Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
-        appointment.setStatus(AppointmentStatus.COMPLETED);
-        appointment.setIsAvailable(false);
-
-        appointment.setPrescriptions(prescriptions);
-        appointment.setConsultationNotes(notes);
-
-        // Add to Database
-        Database.appointmentMap.put(appointmentID, appointment);
-        doctor.addAppointment(appointment);
-
-        // Update patient's appointments
-        List<Appointment> patientAppointments = patient.getAppointments();
-        if (patientAppointments == null) {
-            patientAppointments = new ArrayList<>();
-        }
-        patientAppointments.add(appointment);
-        patient.setAppointments(patientAppointments);
-
-        System.out.println("Medical record updated successfully.");
-        Database.saveAppointmentsToCSV();
-    }
-
-    public static void generateNextWeekSlots(Doctor doctor) {
-        // Generate slots using AppointmentControl's logic
-        List<Appointment.AppointmentSlot> slots = DoctorAppointmentControl.generateWeeklySlots(doctor);
-
-        // Find the maximum existing appointment ID
-        int maxID = Database.appointmentMap.keySet().stream()
-                .filter(id -> id.startsWith("APT"))
-                .mapToInt(id -> Integer.parseInt(id.substring(3)))
-                .max()
-                .orElse(0);
-
-        // Create new appointments for each generated slot and add them to the database and doctor's appointments
-        for (Appointment.AppointmentSlot slot : slots) {
-            String appointmentID = generateAppointmentID(++maxID);
-            Appointment appointment = new Appointment(appointmentID, null, doctor, slot);
-            appointment.setIsAvailable(true);
-            appointment.setStatus(AppointmentStatus.PENDING);
-
-            Database.appointmentMap.put(appointmentID, appointment);
-            doctor.addAppointment(appointment);
-        }
-
-        Database.saveAppointmentsToCSV();
-        System.out.println("Generated " + slots.size() + " slots for next week.");
-    }
-
-    //Helper for generateNextWeekSlots
-    private static String generateAppointmentID(int id) {
-        return "APT" + String.format("%03d", id);
-    }
-
-    public static void markSlotUnavailable(Doctor doctor, Appointment appointment) {
-        appointment.setIsAvailable(false);
-        appointment.setStatus(AppointmentStatus.UNAVAILABLE);
-        Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
-        Database.saveAppointmentsToCSV();
-        System.out.println("Slot marked as unavailable successfully.");
-    }
-
-    public static void displayAvailableSlots(List<Appointment> slots) {
-        System.out.println("\nAvailable Slots (PENDING, CANCELLED):");
-        for (int i = 0; i < slots.size(); i++) {
-            Appointment apt = slots.get(i);
-            if (apt.getStatus() == AppointmentStatus.PENDING || apt.getStatus() == AppointmentStatus.CANCELLED) {
-                System.out.printf("%d. %s - Status: %s\n", i + 1, apt.getSlot().toString(), apt.getStatus());
-            }
-        }
-    }
-
-    public static void displayUnavailableSlots(List<Appointment> slots) {
-        System.out.println("\nUnavailable Slots (UNAVAILABLE, BOOKED):");
-        for (int i = 0; i < slots.size(); i++) {
-            Appointment apt = slots.get(i);
-            if (apt.getStatus() == AppointmentStatus.UNAVAILABLE || apt.getStatus() == AppointmentStatus.BOOKED) {
-                System.out.printf("%d. %s - Status: %s\n", i + 1, apt.getSlot().toString(), apt.getStatus());
-            }
-        }
-    }
-
-    public static void displayPendingAppointments(List<Appointment> appointments) {
-        System.out.println("\nPending Appointment Requests (PENDING):");
-        for (int i = 0; i < appointments.size(); i++) {
-            Appointment apt = appointments.get(i);
-            if (apt.getStatus() == AppointmentStatus.PENDING) {
-                System.out.printf("%d. Patient: %s - Date: %s - Time: %02d:%02d - Status: %s\n",
-                        i + 1,
-                        apt.getPatient().getName(),
-                        apt.getSlot().getDateTime().toLocalDate(),
-                        apt.getSlot().getDateTime().getHour(),
-                        apt.getSlot().getDateTime().getMinute(),
-                        apt.getStatus());
-            }
-        }
-    }
-
-    public static void displayBookedAppointments(List<Appointment> appointments) {
-        System.out.println("\nBooked Appointments (BOOKED):");
-        for (int i = 0; i < appointments.size(); i++) {
-            Appointment apt = appointments.get(i);
-            if (apt.getStatus() == AppointmentStatus.BOOKED) {
-                System.out.printf("%d. Patient: %s - Date: %s - Time: %02d:%02d - Status: %s\n",
-                        i + 1,
-                        apt.getPatient().getName(),
-                        apt.getSlot().getDateTime().toLocalDate(),
-                        apt.getSlot().getDateTime().getHour(),
-                        apt.getSlot().getDateTime().getMinute(),
-                        apt.getStatus());
-            }
-        }
-    }
-
-    public static void displayPersonalSchedule(Doctor doctor) {
-        List<Appointment> allAppointments = new ArrayList<>(Database.appointmentMap.values());
-        List<Appointment> doctorAppointments = allAppointments.stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-
-        System.out.println("\nPersonal Schedule:");
-        for (Appointment apt : doctorAppointments) {
-            System.out.printf("- %s (%s) - %s\n",
-                    apt.getSlot().toString(),
-                    apt.getStatus(),
-                    apt.getIsAvailable() ? "Available" : "Unavailable");
-        }
-    }
-
-    public static void displayUpcomingAppointments(Doctor doctor) {
-        List<Appointment> upcomingAppointments = getUpcomingAppointments(doctor);
-
-        if (upcomingAppointments.isEmpty()) {
-            System.out.println("\nNo upcoming appointments found.");
-        } else {
-            System.out.println("\nUpcoming Appointments:");
-            for (int i = 0; i < upcomingAppointments.size(); i++) {
-                Appointment apt = upcomingAppointments.get(i);
-                System.out.printf("%d. Patient: %s - Date: %s - Time: %02d:%02d - Status: %s\n",
-                        i + 1,
-                        apt.getPatient().getName(),
-                        apt.getSlot().getDateTime().toLocalDate(),
-                        apt.getSlot().getDateTime().getHour(),
-                        apt.getSlot().getDateTime().getMinute(),
-                        apt.getStatus());
-            }
-        }
-    }
-
-    private static List<Appointment> getUpcomingAppointments(Doctor doctor) {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .filter(apt -> apt.getStatus() == AppointmentStatus.BOOKED)
-                .filter(apt -> apt.getSlot().getDateTime().isAfter(currentDateTime))
-                .sorted(Comparator.comparing(apt -> apt.getSlot().getDateTime()))
-                .collect(Collectors.toList());
-    }
-
-    public static void markSlotAvailable(Doctor doctor, Appointment appointment) {
-        appointment.setIsAvailable(true);
-        appointment.setStatus(AppointmentStatus.PENDING);
-        Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
-    }
-
-    public static void acceptAppointment(Doctor doctor, Appointment appointment) {
-        appointment.setStatus(AppointmentStatus.BOOKED);
-        Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
-        System.out.println("Appointment accepted successfully.");
-    }
-
-    public static void declineAppointment(Doctor doctor, Appointment appointment) {
-        appointment.setStatus(AppointmentStatus.CANCELLED);
-        appointment.setIsAvailable(true);
-        Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
-        System.out.println("Appointment declined.");
-    }
-
-    public static void recordOutcome(Appointment appointment, String notes, Prescription prescription) {
-        appointment.setConsultationNotes(notes);
-        appointment.setPrescription(prescription);
-        appointment.setStatus(AppointmentStatus.COMPLETED);
-        Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
-        System.out.println("Appointment outcome recorded successfully.");
-    }
-
-    public static void updateBloodType(Patient patient, BloodType bloodType) {
+    private static void updateBloodType(Patient patient, BloodType bloodType) {
         patient.setBloodType(bloodType);
     }
 
-    public static void updateGender(Patient patient, String gender){
+    private static void updateGender(Patient patient, String gender) {
         patient.setGender(gender);
     }
 
-    public static BloodType selectBloodType() {
-        // Display the options with numbers
+    private static BloodType selectBloodType() {
         System.out.println("Select a Blood Type to change to:");
         BloodType[] bloodTypes = BloodType.values();
         for (int i = 0; i < bloodTypes.length; i++) {
@@ -391,8 +230,6 @@ public class DoctorUserControl extends UserControl {
             System.out.print("Choice: ");
             if (sc.hasNextInt()) {
                 int choice = sc.nextInt();
-
-                // Check if the choice is within a valid range
                 if (choice > 0 && choice <= bloodTypes.length) {
                     selectedBloodType = bloodTypes[choice - 1];
                 } else {
@@ -400,7 +237,7 @@ public class DoctorUserControl extends UserControl {
                 }
             } else {
                 System.out.println("Invalid input. Please enter a number.");
-                sc.next(); // Clear the invalid input
+                sc.next();
             }
         }
 
