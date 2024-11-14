@@ -6,14 +6,99 @@ import java.util.Scanner;
 import java.time.LocalDate;
 
 import hospitalsystem.HMS;
+import hospitalsystem.data.Database;
 import hospitalsystem.enums.RequestStatus;
 import hospitalsystem.model.Medicine;
+import hospitalsystem.model.Medicine.Batch;
 import hospitalsystem.model.ReplenishmentRequest;
 
 public class AdminInventoryControl extends InventoryControl {
 
-    public AdminInventoryControl() {
-        super();
+    public static void manageStock(Scanner sc) {
+        System.out.println("Enter medicine to manage stock for: ");
+        String medicineName = sc.nextLine();
+
+        System.out.println("Stock management options:");
+        System.out.println("1. Add");
+        System.out.println("2. Remove");
+        System.out.println("Enter choice (1/2): ");
+        int choice = sc.nextInt(); 
+        
+        System.out.println()
+        
+        
+    }
+
+    public static void addNewMedicine(Scanner sc) {
+        while (true) {
+            
+            System.out.print("Enter name of medicine to add: ");
+            String medicineName = sc.nextLine();
+
+            // Check if medicine already exists  
+            if (Database.inventoryMap.containsKey(medicineName)) {
+                System.out.println("Medicine " + medicineName + " already exists in the inventory.");
+                continue;
+            }
+
+            // Create new medicine
+            System.out.print("Enter minumum stock level: ");
+            int minStockLevel = sc.nextInt();
+            System.out.print("Enter usage instructions: ");
+            String instructions = sc.nextLine();
+            Medicine newMedicine = new Medicine(medicineName, minStockLevel, instructions);
+            
+            // Add batch
+            addBatchToMedicine(medicineName, sc);
+            
+            // Option to repeat 
+            if (!HMS.repeat(sc)) break;
+        }
+    }
+
+    public static void addBatchToMedicine(String medicineName, Scanner sc) {
+        
+        Medicine medicine = Database.inventoryMap.get(medicineName);
+        int quantity;
+
+        // Prompt for batch quantity and ensure it meets minimum stock level
+        do {
+            System.out.print("Enter batch quantity for " + medicineName + ": ");
+            quantity = sc.nextInt();
+            if (quantity < medicine.getMinStockLevel()) {
+                System.out.println("Quantity is below the minimum stock level of " + medicine.getMinStockLevel() + ". Please enter a valid quantity.");
+            }
+        } while (quantity < medicine.getMinStockLevel());
+
+        // Prompt for expiration date
+        System.out.print("Enter batch expiration date (YYYY-MM-DD): ");
+        sc.nextLine(); // Consume newline
+        LocalDate expDate = LocalDate.parse(sc.nextLine());
+
+        // Create and add the new batch
+        Batch newBatch = medicine.new Batch(quantity, expDate);
+        medicine.getBatches().add(newBatch);
+        System.out.println("New batch of " + medicineName + " added successfully.");
+    }
+
+    public static void removeMedicine(Scanner sc) {
+        while (true) {
+            System.out.print("Enter name of medicine to remove: ");
+            String medicineName = sc.nextLine();
+            
+            // Check if medicine exists  
+            if (!Database.inventoryMap.containsKey(medicineName)) {
+                System.out.println("Medicine not found in inventory.");
+                continue;
+            }
+            
+            Database.inventoryMap.remove(medicineName);
+            System.out.println(medicineName + " has been removed from the inventory.");
+            
+            // Option to repeat
+            if (!HMS.repeat(sc)) break;
+
+        }
     }
 
     // MANAGE INVENTORY MENU (Admin specific)

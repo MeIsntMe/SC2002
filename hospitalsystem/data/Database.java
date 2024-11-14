@@ -45,7 +45,7 @@ public class Database {
     public static Map<String, ReplenishmentRequest> requestMap = new HashMap<>();   // medicineName -> ReplenishmentRequest
 
     public static HashMap<String, Appointment> appointmentMap = new HashMap<>();    // AppointmentID -> Appointment
-  
+    
     // CSV Variables
     private static final String APPOINTMENT_CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
     private static final String APPOINTMENT_CSV_PATH = "hospitalsystem/data/Appointment.csv";

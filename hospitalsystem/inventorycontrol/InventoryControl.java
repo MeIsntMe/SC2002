@@ -14,11 +14,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-
 public class InventoryControl {
+
+    /*
+     * pharmacist view inventory which displays list of medication and stock levels
+     * pharmacist submit replenishment request for low stock levels 
+     * admin update stock level of medicine 
+     * verify that medicine stock level is updated in inventory 
+     */
     
     public static void displayInventory() {
-
         if (!Database.inventoryMap.isEmpty()) {
             System.out.printf("%-20s %-15s %-20s %-20s%n", "Medicine Name", "Batch Quantity", "Expiration Date", "Low Stock Alert Level");
             System.out.println("-------------------------------------------------------------------------------");
@@ -28,7 +33,7 @@ public class InventoryControl {
                     System.out.printf("%-20s %-15d %-20s %-20d%n", 
                         med.getMedicineName(), batch.getQuantity(), batch.getExpirationDate(), med.getLowStockAlert());
                 }
-                System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.isLowStock() ? " **LOW STOCK ALERT**" : ""));
+                System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.getIsLowStock() ? " **LOW STOCK ALERT**" : ""));
                 System.out.println();
             }
         } else {
@@ -82,85 +87,6 @@ public class InventoryControl {
             return false;
         }
     }
-
-
-    public static void addMedicine(Scanner sc) {
-        boolean repeat;
-        do {
-            System.out.print("Enter name of medicine to add: ");
-            String medicineName = sc.nextLine();
-            System.out.print("Enter initial stock level for the batch: ");
-            int initialStock = sc.nextInt();
-            System.out.print("Enter low stock alert level: ");
-            int lowStockAlert = sc.nextInt();
-            System.out.print("Enter expiration date (YYYY-MM-DD): ");
-            LocalDate expirationDate = LocalDate.parse(sc.next().trim());
-            sc.nextLine();
-
-            // Check if the medicine already exists in the inventory; if not, create a new one
-            Medicine medicine = Database.inventoryMap.get(medicineName);
-            if (medicine == null) {
-                medicine = new Medicine(medicineName, lowStockAlert);
-                Database.inventoryMap.put(medicineName, medicine);
-            }
-
-            // Add the new batch with its quantity and expiration date
-            medicine.addBatch(initialStock, expirationDate);
-            System.out.printf("%s successfully added into inventory%n", medicineName);
-            
-            // Option to repeat the addition
-            repeat = HMS.repeat(sc);
-        } while (repeat);
-    }
-
-    public static void addMedicine(Scanner sc) {
-        while (true) {
-            System.out.print("Enter name of medicine to add: ");
-            String medicineName = sc.nextLine();
-            System.out.print("Enter initial stock level for the batch: ");
-            int initialStock = sc.nextInt();
-            System.out.print("Enter low stock alert level: ");
-            int lowStockAlert = sc.nextInt();
-            System.out.print("Enter expiration date (YYYY-MM-DD): ");
-            LocalDate expirationDate = LocalDate.parse(sc.next().trim());
-            sc.nextLine();
-
-            // Create new medicine if it does not already exist 
-            Medicine medicine = Database.inventoryMap.get(medicineName);
-            if (medicine == null) {
-                medicine = new Medicine(medicineName, lowStockAlert);
-                Database.inventoryMap.put(medicineName, medicine);
-            }
-
-            // Add the new batch with its quantity and expiration date
-            medicine.addBatch(initialStock, expirationDate);
-            System.out.printf("%s successfully added into inventory%n", medicineName);
-            
-            // Give option to repeat 
-            if (!HMS.repeat()) break;
-        }
-    }
-
-    public static void removeMedicine(Scanner sc) {
-        boolean repeat;
-        System.out.println("=========================================");  
-        System.out.println("Inventory Management > Remove Medicine");
-        do {
-            System.out.print("Enter name of medicine to remove: ");
-            String medicineName = sc.nextLine();
-            
-            if (Database.inventoryMap.containsKey(medicineName)) {
-                Database.inventoryMap.remove(medicineName);
-                System.out.println(medicineName + " has been removed from the inventory.");
-            } else {
-                System.out.println("Medicine not found in inventory: " + medicineName);
-            }
-            
-            // Option to repeat
-            repeat = HMS.getRepeatChoice(sc);
-        } while (repeat);
-    }
-
     public static void updateStockLevel(Scanner sc) {
         boolean repeat; 
         System.out.println("=========================================");  
