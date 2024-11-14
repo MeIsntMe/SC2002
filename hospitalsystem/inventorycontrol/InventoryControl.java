@@ -1,15 +1,11 @@
 package hospitalsystem.inventorycontrol;
 
-import hospitalsystem.HMS;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.RequestStatus;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -24,115 +20,113 @@ public class InventoryControl {
      */
     
     public static void displayInventory() {
-        if (!Database.inventoryMap.isEmpty()) {
-            System.out.printf("%-20s %-15s %-20s %-20s%n", "Medicine Name", "Batch Quantity", "Expiration Date", "Low Stock Alert Level");
-            System.out.println("-------------------------------------------------------------------------------");
-            for (Map.Entry<String, Medicine> entry : Database.inventoryMap.entrySet()) {
-                Medicine med = entry.getValue();
-                for (Medicine.Batch batch : med.getBatches()) { 
-                    System.out.printf("%-20s %-15d %-20s %-20d%n", 
-                        med.getMedicineName(), batch.getQuantity(), batch.getExpirationDate(), med.getLowStockAlert());
-                }
-                System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.getIsLowStock() ? " **LOW STOCK ALERT**" : ""));
-                System.out.println();
-            }
-        } else {
+        if (Database.inventoryMap.isEmpty()) {
             System.out.println("The inventory is currently empty.");
             return;
         }
+
+        // Printing only total quantities
+        System.out.printf("%-20s %-15s %-20s%n", "Medicine Name", "Total Quantity", "Low Stock Alert Level");
+        System.out.println("-------------------------------------------------------------------------------");
+        for (Map.Entry<String, Medicine> entry : Database.inventoryMap.entrySet()) {
+            Medicine med = entry.getValue();
+            System.out.printf("%-20s %-15s %-20s%n", med.getMedicineName(), med.getTotalQuantity(), (med.getIsLowStock() ? " **LOW STOCK ALERT**" : ""));
+            System.out.println();
+        }
     }
 
-    // Getter for inventoryMap
-    public Map<String, Medicine> getInventoryMap() {
-        return inventoryMap;
-    }
-    // Getter for requestMap
-    public Map<String, ReplenishmentRequest> getRequestMap() {
-        return requestMap;
+    public static void displayMedicineBatches(Scanner sc){
+
+        Medicine med = getMedicineInput(sc);
+
+        System.out.printf("%-20s %-15s %-20s %-20s%n", "Medicine Name", "Batch Quantity", "Expiration Date", "Low Stock Alert Level");
+        System.out.println("-------------------------------------------------------------------------------");
+        for (Medicine.Batch batch : med.getBatches()) { 
+            System.out.printf("%-20s %-15d %-20s %-20d%n", 
+                med.getMedicineName(), batch.getQuantity(), batch.getExpirationDate(), med.getMinStockLevel());
+        }
+        System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.getIsLowStock() ? " **LOW STOCK ALERT**" : ""));
     }
 
-    // Store a new replenishment request
-    public void addReplenishmentRequest(ReplenishmentRequest request) {
-        requestMap.put(request.getMedicineName(), request);
-        System.out.println("Replenishment request added for " + request.getMedicineName() +
-                           " with quantity " + request.getRequestedQuantity());
+    public static void displayAllRequests() {
+        if (Database.requestMap.isEmpty()) {
+            System.out.println("There are no replenishment requests.");
+            return;
+        }
+        // Print in table format  
+        System.out.println("Replenishment Request List: ");
+        System.out.printf("%-10s %-20s %-10s %-15s%n", "ID", "Medicine Name", "Requested Qty", "Status");
+        System.out.println("----------------------------------------------------------------------------");
+        for (Map.Entry<Integer, ReplenishmentRequest> entry : Database.requestMap.entrySet()) {
+            ReplenishmentRequest req = entry.getValue();
+            System.out.printf("%-10s %-20s %-15d %-15s%n", req.getRequestID(), req.getMedicineName(), req.getRequestedQuantity(), req.getStatus());
+        }
+        System.out.println(" ");
+    }
+
+    public static void displaySingleRequest(Scanner sc) {
+        ReplenishmentRequest req = getRequestInput(sc);
+        
+        System.out.printf("%-10s %-20s %-10s %-15s%n", "ID", "Medicine Name", "Requested Qty", "Status");
+        System.out.println("----------------------------------------------------------------------------");
+        System.out.printf("%-10s %-20s %-15d %-15s%n", req.getRequestID(), req.getMedicineName(), req.getRequestedQuantity(), req.getStatus());
+    }
+
+    public static Medicine getMedicineInput(Scanner sc) {
+        while (true) {
+            System.out.println("Enter medicine: ");
+            String medicineName = sc.nextLine();
+            
+            if (!Database.inventoryMap.containsKey(medicineName)) {
+                System.out.println( medicineName + " does not exist in the inventory."); 
+                continue;
+            } 
+            Medicine medicine = Database.inventoryMap.get(medicineName);
+            return medicine; 
+        }
+    }
+
+    public static ReplenishmentRequest getRequestInput(Scanner sc) {
+        while (true) {
+            System.out.println("Enter request ID: ");
+            try {
+                int requestID = sc.nextInt();
+                sc.nextLine();
+
+                if (!Database.requestMap.containsKey(requestID)) {
+                    System.out.println("Request ID " + requestID + " is invalid.");
+                    continue;
+                }
+                ReplenishmentRequest request = Database.requestMap.get(requestID);
+                return request; 
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a valid numerical ID.");
+            }
+        }
     }
 
     // Retrieve pending requests
     public Iterable<ReplenishmentRequest> getPendingRequests() {
-        return requestMap.values().stream()
+        return Database.requestMap.values().stream()
                 .filter(request -> request.getStatus() == RequestStatus.PENDING)
                 .toList();
     }
 
-    // Add a new batch with an expiration date for an approved replenishment request
-    public boolean addBatchToInventory(String medicineName, int quantity, LocalDate expirationDate) {
-        ReplenishmentRequest request = requestMap.get(medicineName);
-        if (request != null && request.getStatus() == RequestStatus.APPROVED) {
-            // Check if the medicine exists in the inventory
-            Medicine medicine = Database.inventoryMap.get(medicineName);
-            if (medicine == null) {
-                medicine = new Medicine(medicineName, 10); // Default low stock alert threshold
-                Database.inventoryMap.put(medicineName, medicine);
-            }
-
-            // Add a new batch with specified quantity and expiration date
-            medicine.addBatch(quantity, expirationDate);
-            requestMap.remove(medicineName);  // Remove the request once fulfilled
-            System.out.println("Added batch of " + quantity + " units for " + medicineName +
-                               " with expiration date " + expirationDate + ".");
-            return true;
-        } else {
-            System.out.println("Request for " + medicineName + " is not approved or does not exist.");
-            return false;
-        }
-    }
-    public static void updateStockLevel(Scanner sc) {
-        boolean repeat; 
-        System.out.println("=========================================");  
-        System.out.println("Inventory Management > Update Stock");
-        do {
-            System.out.print("Enter the name of the medicine to update: ");
-            String medicineName = sc.nextLine().trim();
-
-            // Check if medicine exists
-            if (Database.inventoryMap.containsKey(medicineName)) {
-                Medicine medicine = Database.inventoryMap.get(medicineName);
-                
-                // Prompt for new batch stock
-                System.out.println("Current total stock level for " + medicineName + " is " + medicine.getTotalQuantity());
-                System.out.println("Enter the new stock level for the new batch: ");
-                int newBatchStock = Integer.parseInt(sc.nextLine().trim());
-                System.out.print("Enter expiration date for the new batch (YYYY-MM-DD): ");
-                LocalDate expirationDate = LocalDate.parse(sc.nextLine().trim());
-
-                // Add the new batch
-                medicine.addBatch(newBatchStock, expirationDate);
-                System.out.println("New batch added to " + medicineName + " with quantity " + newBatchStock);
-            } else {
-                System.out.println("Medicine not found in inventory: " + medicineName);
-            }
-            
-            // Option to repeat
-            repeat = HMS.getRepeatChoice(sc);
-        }  while (repeat);
-    } 
-
     // Additional unchanged methods for checking stock, low stock, etc., from the original code
-    public int checkStock(String medicineName) {
+    public int displayStock(String medicineName) {
         Medicine medicine = Database.inventoryMap.get(medicineName);
         return medicine != null ? medicine.getTotalQuantity() : -1;
     }
 
     public boolean isLowStock(String medicineName) {
         Medicine medicine = Database.inventoryMap.get(medicineName);
-        return medicine != null && medicine.isLowStock();
+        return medicine != null && medicine.getIsLowStock();
     }
 
     public List<String> getLowStockMedications() {
         List<String> lowStockMedications = new ArrayList<>();
         for (Map.Entry<String, Medicine> entry : Database.inventoryMap.entrySet()) {
-            if (entry.getValue().isLowStock()) {
+            if (entry.getValue().getIsLowStock()) {
                 lowStockMedications.add(entry.getKey());
             }
         }

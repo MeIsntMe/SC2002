@@ -35,9 +35,9 @@ public class Database {
     public static Map<String, User> pharmsMap = new HashMap<>();    //userID -> Pharmacist
 
     public static Map<String, Medicine> inventoryMap = new HashMap<>();             // medicineName -> Medicine
-    public static Map<String, ReplenishmentRequest> requestMap = new HashMap<>();   // medicineName -> ReplenishmentRequest
+    public static Map<Integer, ReplenishmentRequest> requestMap = new HashMap<>();   // requestID -> ReplenishmentRequest
 
-    public static HashMap<String, Appointment> appointmentMap = new HashMap<>();    // AppointmentID -> Appointment
+    public static HashMap<String, Appointment> appointmentMap = new HashMap<>();    // appointmentID -> Appointment
     
     // CSV Variables
     private static final String APPOINTMENT_CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
