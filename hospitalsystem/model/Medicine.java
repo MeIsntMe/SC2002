@@ -38,7 +38,7 @@ public class Medicine {
         return batches;
     }
 
-    public int getLowStockAlert() {
+    public int getMinStockLevel() {
         return minimumStockLevel;
     }
 
