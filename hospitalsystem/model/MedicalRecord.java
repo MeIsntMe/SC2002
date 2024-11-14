@@ -49,7 +49,7 @@ public class MedicalRecord {
         return email;
     }
     
-    public String getBloodType() {
+    public BloodType getBloodType() {
         return bloodType;
     }
     
@@ -77,7 +77,7 @@ public class MedicalRecord {
         this.email = emailAddress;
     }
     
-    public void setBloodType(String bloodType) {
+    public void setBloodType(BloodType bloodType) {
         this.bloodType = bloodType;
     }
 

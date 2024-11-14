@@ -4,8 +4,6 @@ import hospitalsystem.enums.*;
 import hospitalsystem.model.Appointment.AppointmentOutcome;
 import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Appointment implements Comparable<Appointment> {
     private final String appointmentID;
@@ -27,7 +25,7 @@ public class Appointment implements Comparable<Appointment> {
         this.doctor = doctor;
         this.slot = slot;
         this.status = AppointmentStatus.PENDING;
-        this.outcome = new AppointmentOutcome(this, "", new ArrayList<>(), "", "");
+        this.outcome = new AppointmentOutcome(this, "", null, "", "");
     }
 
     // Getter and Setter methods

@@ -1,18 +1,11 @@
 package hospitalsystem.menus;
 
-import hospitalsystem.MainSystem;
 import hospitalsystem.appointmentcontrol.*;
 import hospitalsystem.data.Database;
-import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
-import hospitalsystem.model.Appointment.AppointmentOutcome;
-import hospitalsystem.model.Appointment.AppointmentSlot;
 import hospitalsystem.usercontrol.PatientUserControl;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 public class PatientMenu implements MenuInterface {
@@ -69,11 +62,11 @@ public class PatientMenu implements MenuInterface {
                         break;
                     case 5:
                         //Rescheduling
-                        reschduleAppointment();
+                        handleRescheduleAppointment();
                         break;               
                     case 6:
                         //Cancal appointment
-                        cancelAppointment();
+                        handleCancelAppointment();
                         break;
                     case 7:
                         //View scheduled appointments
@@ -239,6 +232,5 @@ public class PatientMenu implements MenuInterface {
     public void handleRescheduleAppointment(){
         handleCancelAppointment();
         handleScheduleAppointment();
-
     }
 }
