@@ -22,15 +22,8 @@ import hospitalsystem.enums.AppointmentStatus;
 import hospitalsystem.enums.BloodType;
 import hospitalsystem.enums.PrescriptionStatus;
 import hospitalsystem.enums.UserType;
-import hospitalsystem.model.Administrator;
-import hospitalsystem.model.Appointment;
+import hospitalsystem.model.*;
 import hospitalsystem.model.Appointment.AppointmentSlot;
-import hospitalsystem.model.Doctor;
-import hospitalsystem.model.Medicine;
-import hospitalsystem.model.Patient;
-import hospitalsystem.model.Pharmacist;
-import hospitalsystem.model.ReplenishmentRequest;
-import hospitalsystem.model.User;
 
 public class Database {
 
@@ -49,6 +42,15 @@ public class Database {
     // CSV Variables
     private static final String APPOINTMENT_CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
     private static final String APPOINTMENT_CSV_PATH = "hospitalsystem/data/Appointment.csv";
+
+    private static final String PATIENT_CSV_HEADER = "Patient ID,Name,Date of Birth,Gender,Blood Type,Contact Information";
+    private static final String PATIENT_CSV_PATH = "hospitalsystem/data/Patient_List.csv";
+
+    private static final String STAFF_CSV_HEADER = "Staff ID,Name,Role,Gender,Age";
+    private static final String STAFF_CSV_PATH = "hospitalsystem/data/Staff_List.csv";
+
+    private static final String INVENTORY_CSV_HEADER = "Medicine Name,Initial Stock,Low Stock Level Alert";
+    private static final String INVENTORY_CSV_PATH = "hospitalsystem/data/Medicine_List.csv";
     // Methods to load from CSV into Hashmap 
 
     public static void loadPatientfromCSV (String filePath) {
@@ -152,11 +154,10 @@ public class Database {
                     Doctor doctor = null;
                     Patient patient = null;
 
-                    if (doctorUser instanceof Doctor) 
+                    if (doctorUser instanceof Doctor)
                         doctor = (Doctor) doctorUser;
-                    if (patientUser instanceof Patient) 
+                    if (patientUser instanceof Patient)
                         patient = (Patient) patientUser;
-                    
 
                     if (doctor != null && patient != null) {
                         // Parse date/time components
@@ -179,18 +180,33 @@ public class Database {
 
                         // Handle prescriptions if they exist
                         if (appointmentData.length > 11 && !appointmentData[11].trim().isEmpty()) {
-                            HashMap<String, PrescriptionStatus> prescriptions = new HashMap<>();
+                            List<Prescription.MedicineSet> medicineSets = new ArrayList<>();
                             String[] prescriptionPairs = appointmentData[11].split(";");
 
                             for (String pair : prescriptionPairs) {
                                 String[] parts = pair.split(":");
                                 if (parts.length == 2) {
-                                    String medicine = parts[0].trim();
-                                    PrescriptionStatus status = PrescriptionStatus.valueOf(parts[1].trim());
-                                    prescriptions.put(medicine, status);
+                                    String medicineName = parts[0].trim();
+                                    int quantity = Integer.parseInt(parts[1].trim());
+
+                                    Medicine medicine = inventoryMap.get(medicineName);
+                                    if (medicine != null) {
+                                        medicineSets.add(new Prescription.MedicineSet(medicine, quantity));
+                                    } else {
+                                        System.out.println("Medicine not found: " + medicineName);
+                                    }
                                 }
                             }
-                            appointment.setPrescriptions(prescriptions);
+
+                            if (!medicineSets.isEmpty()) {
+                                Prescription prescription = new Prescription(
+                                        medicineSets,
+                                        doctor.getID(),
+                                        patient.getID(),
+                                        PrescriptionStatus.PENDING
+                                );
+                                appointment.setPrescription(prescription);
+                            }
                         }
 
                         // Add to maps and lists
@@ -225,13 +241,13 @@ public class Database {
         }
     }
 
-    private static String formatPrescriptions(HashMap<String, PrescriptionStatus> prescriptionMap) {
-        if (prescriptionMap == null || prescriptionMap.isEmpty()) {
+    private static String formatPrescription(Prescription prescription) {
+        if (prescription == null || prescription.getMedicineList().isEmpty()) {
             return "";
         }
 
-        return prescriptionMap.entrySet().stream()
-                .map(entry -> entry.getKey() + ":" + entry.getValue())
+        return prescription.getMedicineList().entrySet().stream()
+                .map(entry -> entry.getKey().getMedicineName() + ":" + entry.getValue())
                 .collect(Collectors.joining(";"));
     }
 
@@ -256,7 +272,7 @@ public class Database {
         LocalDateTime dateTime = slot.getDateTime();
 
         // Format prescriptions if they exist
-        String prescriptions = formatPrescriptions(appointment.getPrescriptions());
+        String prescriptions = formatPrescription(appointment.getPrescription());
 
         // Build the CSV line with proper escaping
         sb.append(escapeCSV(appointment.getAppointmentID())).append(",");
@@ -302,20 +318,119 @@ public class Database {
         }
     }
 
-    public static void backupAndSave() {  // Removed path parameter
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String backupPath = APPOINTMENT_CSV_PATH.replace(".csv", "_backup_" + timestamp + ".csv");
+    public static void savePatientToCSV() {
+        try (FileWriter fw = new FileWriter(PATIENT_CSV_PATH);
+             BufferedWriter bw = new BufferedWriter(fw)) {
 
-        File originalFile = new File(APPOINTMENT_CSV_PATH);
-        if (originalFile.exists()) {
-            try {
-                Files.copy(originalFile.toPath(), new File(backupPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Backup created: " + backupPath);
-            } catch (IOException e) {
-                System.out.println("Warning: Could not create backup: " + e.getMessage());
-            }
+            // Write header
+            bw.write(PATIENT_CSV_HEADER);
+            bw.newLine();
+
+            // Write patients sorted by ID for consistency
+            patientsMap.values().stream()
+                    .map(user -> (Patient) user)
+                    .sorted(Comparator.comparing(User::getID))
+                    .forEach(patient -> {
+                        try {
+                            String line = String.format("%s,%s,%s,%s,%s,%s",
+                                    escapeCSV(patient.getID()),
+                                    escapeCSV(patient.getName()),
+                                    patient.getDOB().toString(),
+                                    escapeCSV(patient.getGender()),
+                                    patient.getBloodType().toString(),
+                                    escapeCSV(patient.getEmail())
+                            );
+                            bw.write(line);
+                            bw.newLine();
+                        } catch (IOException e) {
+                            System.out.println("Error writing patient " + patient.getID() + ": " + e.getMessage());
+                        }
+                    });
+
+            System.out.println("Successfully saved " + patientsMap.size() + " patients to " + PATIENT_CSV_PATH);
+
+        } catch (IOException e) {
+            System.out.println("Error saving patients to CSV: " + e.getMessage());
         }
- 
-        saveAppointmentsToCSV();
+    }
+
+    public static void saveStaffToCSV() {
+        try (FileWriter fw = new FileWriter(STAFF_CSV_PATH);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+
+            // Write header
+            bw.write(STAFF_CSV_HEADER);
+            bw.newLine();
+
+            // Combine all staff maps and sort by ID
+            List<User> allStaff = new ArrayList<>();
+            allStaff.addAll(doctorsMap.values());
+            allStaff.addAll(adminsMap.values());
+            allStaff.addAll(pharmsMap.values());
+
+            allStaff.stream()
+                    .sorted(Comparator.comparing(User::getID))
+                    .forEach(staff -> {
+                        try {
+                            String role = "Doctor";
+                            if (staff instanceof Administrator) role = "Administrator";
+                            if (staff instanceof Pharmacist) role = "Pharmacist";
+
+                            String line = String.format("%s,%s,%s,%s,%d",
+                                    escapeCSV(staff.getID()),
+                                    escapeCSV(staff.getName()),
+                                    role,
+                                    escapeCSV(staff.getGender()),
+                                    staff.getAge()
+                            );
+                            bw.write(line);
+                            bw.newLine();
+                        } catch (IOException e) {
+                            System.out.println("Error writing staff " + staff.getID() + ": " + e.getMessage());
+                        }
+                    });
+
+            System.out.println("Successfully saved " + allStaff.size() + " staff members to " + STAFF_CSV_PATH);
+
+        } catch (IOException e) {
+            System.out.println("Error saving staff to CSV: " + e.getMessage());
+        }
+    }
+
+    public static void saveInventoryToCSV() {
+        try (FileWriter fw = new FileWriter(INVENTORY_CSV_PATH);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+
+            // Write header
+            bw.write(INVENTORY_CSV_HEADER);
+            bw.newLine();
+
+            // Write inventory sorted by medicine name
+            inventoryMap.values().stream()
+                    .sorted(Comparator.comparing(Medicine::getMedicineName))
+                    .forEach(medicine -> {
+                        try {
+                            // Calculate total stock from all batches
+                            int totalStock = medicine.getBatches().stream()
+                                    .mapToInt(batch -> batch.getQuantity())
+                                    .sum();
+
+                            String line = String.format("%s,%d,%d",
+                                    escapeCSV(medicine.getMedicineName()),
+                                    totalStock,
+                                    medicine.getLowStockAlert()
+                            );
+                            bw.write(line);
+                            bw.newLine();
+                        } catch (Exception e) {
+                            System.out.println("Error processing medicine " + medicine.getMedicineName() + ": " + e.getMessage());
+                        }
+                    });
+
+            System.out.println("Successfully saved inventory to " + INVENTORY_CSV_PATH);
+
+        } catch (IOException e) {
+            System.out.println("Error saving inventory to CSV: " + e.getMessage());
+        }
     }
 }
