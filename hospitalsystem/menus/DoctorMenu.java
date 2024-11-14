@@ -6,7 +6,6 @@ import hospitalsystem.data.Database;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import hospitalsystem.usercontrol.DoctorUserControl;
-import hospitalsystem.usercontrol.PatientUserControl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -79,52 +78,24 @@ public class DoctorMenu implements MenuInterface {
 
 
 
-    private Patient handleViewPatientRecord() {
+    private User handleViewPatientRecord() {
         System.out.print("Enter Patient ID: ");
         String patientId = scanner.nextLine();
-        Patient patient = (Patient)Database.patientsMap.get(patientId);
-        if (patient == null) {
-            System.out.println("Patient not found.");
+        User user = Database.patientsMap.get(patientId);
+        if (user == null) {
+            System.out.println("User not found.");
             return null;
         }
-        System.out.println(PatientUserControl.getMedicalRecordString(patient));
-        return patient;
+        DoctorUserControl.displayUserDetails(user);
+        return user;
     }
-    //helper function
 
     private void handleUpdatePatientRecord() {
-        Patient patient = handleViewPatientRecord();
-        if (patient == null) {
+        User user = handleViewPatientRecord();
+        if (user == null) {
             return;
         }
-
-        System.out.println("What would you like to update?");
-        System.out.println("1. Blood Type");
-        System.out.println("2. Gender");
-        System.out.println("3. Return to Main Menu");
-
-        try {
-            int choice = Integer.parseInt(scanner.nextLine());
-            switch (choice) {
-                case 1:
-                    System.out.printf("Current Blood Type: " + patient.getBloodType() +"\n");
-                    BloodType newBloodType = DoctorUserControl.selectBloodType();
-                    DoctorUserControl.updateBloodType(patient, newBloodType);
-                    break;
-                case 2:
-                    System.out.printf("Current Gender: " + patient.getGender()+"\n");
-                    System.out.printf("Please enter new gender: ");
-                    String gender = scanner.next();
-                    DoctorUserControl.updateGender(patient, gender);
-                    break;
-                case 3:
-                    return;
-                default:
-                    System.out.println("Invalid choice.");
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Please enter a valid number.");
-        }
+        DoctorUserControl.updateUserDetails(user);
     }
 
     private void handleSetAvailability() {
@@ -156,6 +127,7 @@ public class DoctorMenu implements MenuInterface {
             System.out.println("Please enter a valid number.");
         }
     }
+    
     private void handleMarkSlotUnavailable() {
         List<Appointment> availableSlots = DoctorAppointmentControl.getAvailableSlots(doctor);
         DoctorUserControl.displayAvailableSlots(availableSlots);

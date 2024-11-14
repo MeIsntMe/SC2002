@@ -59,7 +59,17 @@ public class DoctorUserControl extends UserControl {
         
                 System.out.println("----------------------------------------");
             }
+    // Display patient madical records
+    static public void displayUserDetails(User user) {
+        Patient patient;
+        if (user instanceof Patient){
+            patient = (Patient) user;
         }
+        else{
+            System.out.println("displayUserDetails only accepts Patient object.");
+            return;
+        }
+        System.out.println(getMedicalRecordString(patient));
     }
 
     public static Patient findPatientById(String patientId) {
@@ -112,11 +122,43 @@ public class DoctorUserControl extends UserControl {
             prescriptions.add(prescription);
 
             Prescription(List<MedicineSet> prescribedMedicine, String doctorID, String patientID, PrescriptionStatus status)
+    // Update patient patient details
+    static public void updateUserDetails(User user) {
+        Patient patient;
+        if (user instanceof Patient){
+            patient = (Patient) user;
         }
+        else{
+            System.out.println("updateUserDetails only accepts Patient object.");
+            return;
+        }
+        System.out.println("What would you like to update?");
+        System.out.println("1. Blood Type");
+        System.out.println("2. Gender");
+        System.out.println("3. Return to Main Menu");
 
-        // Update medical record
-        DoctorUserControl.updatePatientRecord(patient, doctor, notes.toString(), prescriptions);
-        Database.saveAppointmentsToCSV(); // Save changes to CSV
+        try {
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    System.out.printf("Current Blood Type: " + patient.getBloodType() +"\n");
+                    BloodType newBloodType = DoctorUserControl.selectBloodType();
+                    DoctorUserControl.updateBloodType(patient, newBloodType);
+                    break;
+                case 2:
+                    System.out.printf("Current Gender: " + patient.getGender()+"\n");
+                    System.out.printf("Please enter new gender: ");
+                    String gender = sc.next();
+                    DoctorUserControl.updateGender(patient, gender);
+                    break;
+                case 3:
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
     }
 
     //move everything into DoctorAppointmentControl 

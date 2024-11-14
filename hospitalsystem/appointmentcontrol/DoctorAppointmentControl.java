@@ -1,12 +1,11 @@
 package hospitalsystem.appointmentcontrol;
 
 import hospitalsystem.data.Database;
+import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import hospitalsystem.model.Appointment.AppointmentSlot;
-import hospitalsystem.enums.*;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DoctorAppointmentControl extends AppointmentControl {
 
@@ -168,25 +167,6 @@ public class DoctorAppointmentControl extends AppointmentControl {
         }
     }
 
-    // Helper method for medical record updates
-    public static String createMedicalRecordAppointment(Patient patient, Doctor doctor,
-                                                        String notes, List<Prescription> prescriptions) {
-        String appointmentID = String.format("MR_%s_%d", patient.getID(), System.currentTimeMillis());
-        LocalDateTime now = LocalDateTime.now();
-
-        Appointment.AppointmentSlot slot = new Appointment.AppointmentSlot(
-                now.getYear(), now.getMonthValue(), now.getDayOfMonth(),
-                now.getHour(), now.getMinute()
-        );
-
-        Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
-        appointment.setStatus(AppointmentStatus.COMPLETED);
-        appointment.setIsAvailable(false);
-
-        recordOutcome(appointment, notes, prescriptions);
-        return appointmentID;
-    }
-
     // Create a new prescription
     public static Prescription.MedicineSet createMedicineSet(Medicine medicine, int quantity) {
         return new Prescription.MedicineSet(medicine, quantity);
@@ -195,35 +175,5 @@ public class DoctorAppointmentControl extends AppointmentControl {
     // Add medicine to prescription
     public static void addMedicineToPrescription(Prescription prescription, Medicine medicine, int quantity) {
         prescription.getMedicineList().put(medicine, quantity);
-    }
-
-    // Add a prescription to appointment
-    public static void addPrescriptionToAppointment(Appointment appointment, Medicine medicine, int quantity) {
-        Prescription prescription = createPrescription(
-                medicine,
-                appointment.getDoctor().getID(),
-                appointment.getPatient().getID(),
-                quantity
-        );
-        addMedicineToPrescription(prescription, medicine, quantity);
-
-        List<Prescription> prescriptions = new ArrayList<>(appointment.getPrescriptions());
-        prescriptions.add(prescription);
-        appointment.setPrescriptions(prescriptions);
-
-        Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
-        Database.saveAppointmentsToCSV();
-    }
-
-    // Update prescription status
-    public static boolean updatePrescriptionStatus(Prescription prescription, PrescriptionStatus newStatus) {
-        prescription.setStatus(newStatus);
-        return true;
-    }
-
-    // Get prescriptions for an appointment
-    public static List<Prescription> getAppointmentPrescriptions(String appointmentID) {
-        Appointment appointment = Database.appointmentMap.get(appointmentID);
-        return appointment != null ? appointment.getPrescriptions() : new ArrayList<>();
     }
 }
