@@ -16,44 +16,16 @@ public class DoctorUserControl extends UserControl {
     static Scanner sc = new Scanner(System.in);
 
     // Display patient madical records
-    public void displayUserDetails() {
-
-        // Find Patient by ID
-        System.out.print("Enter Patient ID: ");
-        String patientId = sc.nextLine();
-        Patient patient = findPatientById(patientId);  
-        if (patient == null) return;
-
-        // Display Medical Record 
-        System.out.println("Medical Record for Patient: " + patient.getName());
-        System.out.println("Patient ID: " + patient.getID());
-        System.out.println("Date of Birth: " + patient.getDOB());
-        System.out.println("Age: " + patient.getAge());
-        System.out.println("Gender: " + patient.getGender());
-        System.out.println("Blood Type: " + patient.getBloodType());
-        List<Appointment> patientAppointments = getPatientAppointments(patient); //change this: use Patient's appointment getting method  already has own list of appointments 
-
-        if (patientAppointments.isEmpty()) {
-            System.out.println("No appointments found for the patient.");
-        } else {
-            System.out.println("\nAppointment History:");
-            for (Appointment apt : patientAppointments) {
-                System.out.println("Appointment ID: " + apt.getAppointmentID());
-                System.out.println("Doctor: " + apt.getDoctor().getName());
-                System.out.println("Date: " + apt.getSlot().getDateTime().toLocalDate());
-                System.out.println("Time: " + apt.getSlot().getDateTime().toLocalTime());
-                System.out.println("Status: " + apt.getStatus());
-                System.out.println("Consultation Notes: " + apt.getConsultationNotes());
-
-                System.out.println("Prescriptions:");
-                Prescription prescriptions = apt.getPrescription();
-                
-                System.out.println("- Medicine: " + prescription.getMedicineList().keySet());
-                System.out.println("  Quantity: " + prescription.getMedicineList().values());
-        
-                System.out.println("----------------------------------------");
-            }
+    static public void displayUserDetails(User user) {
+        Patient patient;
+        if (user instanceof Patient){
+            patient = (Patient) user;
         }
+        else{
+            System.out.println("displayUserDetails only accepts Patient object.");
+            return;
+        }
+        System.out.println(getMedicalRecordString(patient));
     }
 
     public static Patient findPatientById(String patientId) {
@@ -66,38 +38,43 @@ public class DoctorUserControl extends UserControl {
         }
     }
 
-    // Update patient medical record 
-    public void updateUserDetails() {
-        System.out.print("Enter Patient ID: ");
-        String patientId = sc.nextLine();
-        Patient patient = DoctorUserControl.findPatientById(patientId);
-        if (patient == null) return;
-
-        // Enter details of new appointment
-        System.out.println("Enter consultation notes (press Enter twice to finish):");
-        StringBuilder notes = new StringBuilder();
-        String line;
-        while (!(line = sc.nextLine()).isEmpty()) {
-            notes.append(line).append("\n");
+    // Update patient patient details
+    static public void updateUserDetails(User user) {
+        Patient patient;
+        if (user instanceof Patient){
+            patient = (Patient) user;
         }
-        List<Prescription> prescriptions = new ArrayList<>();
-        while (true) {
-            System.out.print("Add prescription? (y/n): ");
-            if (!sc.nextLine().toLowerCase().startsWith("y")) break;
-
-            System.out.print("Enter medication name: ");
-            String medication = sc.nextLine();
-
-            System.out.print("Enter dosage: ");
-            int dosage = Integer.parseInt(sc.nextLine());
-
-            Prescription prescription = new Prescription(medication, doctor.getID(), patient.getID(), dosage, PrescriptionStatus.PENDING);
-            prescriptions.add(prescription);
+        else{
+            System.out.println("updateUserDetails only accepts Patient object.");
+            return;
         }
+        System.out.println("What would you like to update?");
+        System.out.println("1. Blood Type");
+        System.out.println("2. Gender");
+        System.out.println("3. Return to Main Menu");
 
-        // Update medical record
-        DoctorUserControl.updatePatientRecord(patient, doctor, notes.toString(), prescriptions);
-        Database.saveAppointmentsToCSV(); // Save changes to CSV
+        try {
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    System.out.printf("Current Blood Type: " + patient.getBloodType() +"\n");
+                    BloodType newBloodType = DoctorUserControl.selectBloodType();
+                    DoctorUserControl.updateBloodType(patient, newBloodType);
+                    break;
+                case 2:
+                    System.out.printf("Current Gender: " + patient.getGender()+"\n");
+                    System.out.printf("Please enter new gender: ");
+                    String gender = sc.next();
+                    DoctorUserControl.updateGender(patient, gender);
+                    break;
+                case 3:
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
     }
 
     //move everything into DoctorAppointmentControl 

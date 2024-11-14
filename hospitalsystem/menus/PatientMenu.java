@@ -97,51 +97,11 @@ public class PatientMenu implements MenuInterface {
     }
 
     public void handleDisplayMedicalRecord(){
-        System.out.println(PatientUserControl.getMedicalRecordString(patient));
+        PatientUserControl.displayUserDetails(this.patient);
     }
 
     public void handleUpdatePersonalInformation(){
-        while(true){
-            int choice;
-            System.out.println("What would you like to update?");
-            System.out.println("1. Age");
-            System.out.println("2. Email");
-            System.out.println("3. Exit");
-            System.out.print("Enter choice: ");
-            try {
-                choice = Integer.parseInt(sc.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid number.");
-                continue;
-            }
-            switch (choice) {
-                case 1: 
-                    System.out.println("Please enter your updated age: ");
-                    int newAge = -1;
-                    try {
-                        newAge = Integer.parseInt(sc.nextLine());
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid input.");
-                    }
-                    PatientUserControl.updateAge(patient, newAge);
-                    break;
-                case 2: 
-                    System.out.println("Please enter your new email: ");
-                    String newEmail = sc.nextLine();
-                    PatientUserControl.updateEmail(patient, newEmail);
-                    System.out.println("Email Updated");
-                    break;
-                case 3:
-                    System.out.println("Please enter your new phoneNumber: ");
-                    String newPhoneNumber = sc.nextLine();
-                    PatientUserControl.updatePhoneNumber(patient, newPhoneNumber);
-                    break;
-                case 4: 
-                    break;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-        }
+        PatientUserControl.updateUserDetails(this.patient);
     }
 
     public List<Appointment> handleViewAppointmentSlots(){
