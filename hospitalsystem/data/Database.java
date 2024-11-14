@@ -129,20 +129,28 @@ public class Database {
             while (scanner.hasNextLine()) {
                 String[] inventoryData = scanner.nextLine().split(",");
                 try {
+                    // Parse basic medicine data
                     String medicineName = inventoryData[0].trim();
-                    int initialStock = Integer.parseInt(inventoryData[1].trim());
-                    int lowStockAlert = Integer.parseInt(inventoryData[2].trim());
-                    LocalDate expirationDate = LocalDate.parse(inventoryData[3].trim());
+                    int minimumStockLevel = Integer.parseInt(inventoryData[1].trim());
+                    String instructions = inventoryData[2].trim();
 
-                    // Create or update medicine
+                    // Parse batch data
+                    int initialStock = Integer.parseInt(inventoryData[3].trim());
+                    LocalDate expirationDate = LocalDate.parse(inventoryData[4].trim());
+
+                    // Create medicine if it doesn't exist
                     Medicine medicine = inventoryMap.get(medicineName);
                     if (medicine == null) {
-                        medicine = new Medicine(medicineName, lowStockAlert);
+                        medicine = new Medicine(medicineName, minimumStockLevel, instructions);
                         inventoryMap.put(medicineName, medicine);
                     }
 
-                    // Add batch with quantity and expiration date
-                    medicine.addBatch(initialStock, expirationDate);
+                    // Add batch to the medicine
+                    Medicine.Batch batch = medicine.new Batch(initialStock, expirationDate);
+                    List<Medicine.Batch> batches = new ArrayList<>(medicine.getBatches());
+                    batches.add(batch);
+                    medicine.setBatch(batches);
+
                 } catch (Exception e) {
                     System.out.println("Error processing inventory line: " + String.join(",", inventoryData));
                     System.out.println("Error details: " + e.getMessage());
