@@ -154,8 +154,9 @@ public class AdminUserControl extends UserControl {
                 case PATIENT: 
                     LocalDate DOB = LocalDate.of(2000, 1, 1);
                     String email = "";
+                    String phoneNumber = "";
                     BloodType bloodType = BloodType.UNDEFINED; //default
-                    Patient patient = new Patient(userID, name, DOB, age, gender, bloodType, email, password);
+                    Patient patient = new Patient(userID, name, phoneNumber, DOB, age, gender, bloodType, email, password);
                     Database.patientsMap.put(userID, patient);
                     break;
                 case DOCTOR: 

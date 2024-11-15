@@ -5,11 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -316,33 +313,6 @@ public class Database {
         return sb.toString();
     }
 
-    public static void saveAppointmentsToCSV() {
-        try (FileWriter fw = new FileWriter(APPOINTMENT_CSV_PATH);
-            BufferedWriter bw = new BufferedWriter(fw)) {
-
-            // Write header
-            bw.write(APPOINTMENT_CSV_HEADER);
-            bw.newLine();
-
-            // Write appointments sorted by ID for consistency
-            Database.appointmentMap.values().stream()
-                    .sorted(Comparator.comparing(Appointment::getAppointmentID))
-                    .forEach(appointment -> {
-                        try {
-                            bw.write(formatAppointmentToCSV(appointment));
-                            bw.newLine();
-                        } catch (IOException e) {
-                            System.out.println("Error writing appointment " + appointment.getAppointmentID() + ": " + e.getMessage());
-                        }
-                    });
-
-            System.out.println("Successfully saved " + Database.appointmentMap.size() + " appointments to " + APPOINTMENT_CSV_PATH);
-
-        } catch (IOException e) {
-            System.out.println("Error saving appointments to CSV: " + e.getMessage());
-        }
-    }
-
     public static void savePatientToCSV() {
         try (FileWriter fw = new FileWriter(PATIENT_CSV_PATH);
              BufferedWriter bw = new BufferedWriter(fw)) {
@@ -456,6 +426,33 @@ public class Database {
 
         } catch (IOException e) {
             System.out.println("Error saving inventory to CSV: " + e.getMessage());
+        }
+    }
+
+    public static void saveAppointmentsToCSV() {
+        try (FileWriter fw = new FileWriter(APPOINTMENT_CSV_PATH);
+            BufferedWriter bw = new BufferedWriter(fw)) {
+
+            // Write header
+            bw.write(APPOINTMENT_CSV_HEADER);
+            bw.newLine();
+
+            // Write appointments sorted by ID for consistency
+            Database.appointmentMap.values().stream()
+                    .sorted(Comparator.comparing(Appointment::getAppointmentID))
+                    .forEach(appointment -> {
+                        try {
+                            bw.write(formatAppointmentToCSV(appointment));
+                            bw.newLine();
+                        } catch (IOException e) {
+                            System.out.println("Error writing appointment " + appointment.getAppointmentID() + ": " + e.getMessage());
+                        }
+                    });
+
+            System.out.println("Successfully saved " + Database.appointmentMap.size() + " appointments to " + APPOINTMENT_CSV_PATH);
+
+        } catch (IOException e) {
+            System.out.println("Error saving appointments to CSV: " + e.getMessage());
         }
     }
 }

@@ -53,9 +53,13 @@ public class Prescription {
 
     @Override
     public String toString() {
-        return "Prescription [Prescribed Medicine: " + medicineListToString() + ", Patient ID: " + patientID +
-                ", Doctor ID: " + doctorID + ", Status: " + status + "]";
+        return 
+            "  - Prescribed Medicine: " + medicineListToString() + "\n" +
+            "  - Patient ID: " + patientID + "\n" +
+            "  - Doctor ID: " + doctorID + "\n" +
+            "  - Status: " + status + "\n";
     }
+
 
     public static class MedicineSet{
         final private Medicine medicine;

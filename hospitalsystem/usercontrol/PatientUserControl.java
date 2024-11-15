@@ -7,13 +7,7 @@ import java.util.Scanner;
 
 public class PatientUserControl extends UserControl {
     
-    // Instance variables 
-    private static Scanner sc;
-
-    public PatientUserControl(Scanner scanner) { 
-        this.sc = scanner;
-    }
-
+    Scanner sc = new Scanner(System.in);
 
     // Display patient medical records 
     static public void displayUserDetails(User user){
@@ -28,7 +22,7 @@ public class PatientUserControl extends UserControl {
         System.out.println(PatientUserControl.getMedicalRecordString(patient));
     }
 
-    static public void updateUserDetails(User user){
+    static public void updateUserDetails(User user, Scanner sc){
         Patient patient;
         if (user instanceof Patient){
             patient = (Patient) user;

@@ -1,8 +1,6 @@
 package hospitalsystem.model;
 
-import hospitalsystem.enums.*;
-import hospitalsystem.model.Appointment.AppointmentOutcome;
-import hospitalsystem.model.Appointment.AppointmentSlot;
+import hospitalsystem.enums.*; 
 import java.time.LocalDateTime;
 
 public class Appointment implements Comparable<Appointment> {
@@ -183,12 +181,11 @@ public class Appointment implements Comparable<Appointment> {
 
         @Override
         public String toString() {
-            return "Outcome {" +
-                    "Prescription=" + (prescription != null ? prescription.toString() : "No prescription") +
-                    ", Service Type=" + serviceType +
-                    ", Recorded Date=" + recordedDate +
-                    ", Consultation Notes='" + consultationNotes +
-                    '}';
+            return "Appointment Outcome:\n" +
+                "  - Prescription: " + (prescription != null ? "\n    " + prescription.toString().replace("\n", "\n    ") : "No prescription") + "\n" +
+                "  - Service Type: " + serviceType + "\n" +
+                "  - Recorded Date: " + recordedDate + "\n" +
+                "  - Consultation Notes: " + consultationNotes + "\n";
         }
     }
 }

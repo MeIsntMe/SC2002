@@ -82,13 +82,7 @@ public class AppointmentControl {
                 dt.getHour(),
                 dt.getMinute()
         );
-    }
-
-    public static boolean updatePrescriptionStatus(Prescription prescription, PrescriptionStatus newStatus) {
-        prescription.setStatus(newStatus);
-        return true;
-    }
-    
+    } 
 
     public static boolean addAppointment(int slotIndex, Doctor doctor, Patient patient){
         try {

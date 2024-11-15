@@ -4,7 +4,6 @@ import hospitalsystem.data.Database;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import hospitalsystem.model.Appointment.AppointmentSlot;
-import hospitalsystem.enums.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
