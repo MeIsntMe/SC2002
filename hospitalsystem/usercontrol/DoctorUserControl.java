@@ -1,24 +1,18 @@
 package hospitalsystem.usercontrol;
 
 import hospitalsystem.data.Database;
+import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import hospitalsystem.model.Prescription.MedicineSet;
-import hospitalsystem.enums.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.ArrayList;
 
 public class DoctorUserControl extends UserControl {
     private static final Scanner sc = new Scanner(System.in);
-    private final Doctor currentDoctor;
 
-    public DoctorUserControl(Doctor doctor) {
-        this.currentDoctor = doctor;
-    }
-
-
-    public void displayUserDetails(User user) {
+    static public void displayUserDetails(User user) {
         if (!(user instanceof Patient)) {
             System.out.println("Error: Can only display details for Patient users.");
             return;
@@ -29,7 +23,7 @@ public class DoctorUserControl extends UserControl {
     }
 
 
-    public void updateUserDetails(User user) {
+    static public void updateUserDetails(User user, Doctor doctor) {
         if (!(user instanceof Patient)) {
             System.out.println("Error: Can only update details for Patient users.");
             return;
@@ -47,7 +41,7 @@ public class DoctorUserControl extends UserControl {
                     updatePatientDetails(patient);
                     break;
                 case 2:
-                    updateMedicalRecord(patient);
+                    updateMedicalRecord(patient, doctor);
                     break;
                 default:
                     System.out.println("Invalid choice.");
@@ -57,7 +51,7 @@ public class DoctorUserControl extends UserControl {
         }
     }
 
-    private void displayPatientMedicalRecord(Patient patient) {
+    static private void displayPatientMedicalRecord(Patient patient) {
         // Display basic patient info
         System.out.println("Medical Record for Patient: " + patient.getName());
         System.out.println("Patient ID: " + patient.getID());
@@ -95,7 +89,7 @@ public class DoctorUserControl extends UserControl {
         }
     }
 
-    private void updateMedicalRecord(Patient patient) {
+    static private void updateMedicalRecord(Patient patient, Doctor doctor) {
         // Get consultation notes
         System.out.println("Enter consultation notes (press Enter twice to finish):");
         StringBuilder notes = new StringBuilder();
@@ -129,7 +123,7 @@ public class DoctorUserControl extends UserControl {
         // Create new prescription
         Prescription prescription = new Prescription(
                 prescribedMedicineList,
-                currentDoctor.getID(),
+                doctor.getID(),
                 patient.getID(),
                 PrescriptionStatus.PENDING
         );
@@ -146,7 +140,7 @@ public class DoctorUserControl extends UserControl {
                 now.getMinute()
         );
 
-        Appointment appointment = new Appointment(appointmentID, patient, currentDoctor, slot);
+        Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
         appointment.setStatus(AppointmentStatus.COMPLETED);
         appointment.setIsAvailable(false);
         appointment.setPrescription(prescription);
@@ -165,7 +159,7 @@ public class DoctorUserControl extends UserControl {
         System.out.println("Medical record updated successfully.");
     }
 
-    private void updatePatientDetails(Patient patient) {
+    static private void updatePatientDetails(Patient patient) {
         System.out.println("What would you like to update?");
         System.out.println("1. Blood Type");
         System.out.println("2. Gender");

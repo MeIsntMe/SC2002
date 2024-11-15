@@ -28,17 +28,6 @@ public class AppointmentControl {
     public static Appointment getAppointmentByAppointmentID(String appointmentID) {
         return Database.appointmentMap.get(appointmentID);
     }
-    public static boolean cancelSlot(String appointmentID) {
-        Appointment appointment = Database.appointmentMap.get(appointmentID);
-        if (appointment != null && !appointment.getIsAvailable()) {
-            appointment.setIsAvailable(true);
-            appointment.setStatus(AppointmentStatus.CANCELLED);
-            Database.appointmentMap.put(appointmentID, appointment);
-            appointment.getDoctor().removeAppointment(appointment);
-            return true;
-        }
-        return false;
-    }
 
     public static List<Appointment> getAvailableSlots(Doctor doctor) {
         return Database.appointmentMap.values().stream()
@@ -82,28 +71,6 @@ public class AppointmentControl {
                 dt.getHour(),
                 dt.getMinute()
         );
-    } 
-
-    public static boolean addAppointment(int slotIndex, Doctor doctor, Patient patient){
-        try {
-            List<AppointmentSlot> newSlots = doctor.getAvailableSlots();
-            AppointmentSlot selectedslot = newSlots.remove(slotIndex);
-            doctor.setAvailableSlots(newSlots);
-            Appointment newAppointment = new Appointment(AppointmentControl.generateAppointmentID(doctor.getID(), selectedslot), patient, doctor, selectedslot);
-            doctor.addAppointment(newAppointment);
-
-            List<Appointment> newAppointments = patient.getAppointments();
-            newAppointments.add(newAppointment);
-            patient.setAppointments(newAppointments);
-
-            Database.appointmentMap.put(patient.getID(), newAppointment);
-            Database.appointmentMap.put(doctor.getID(), newAppointment);
-
-            return true;
-        } catch (Exception e){
-            System.out.println("Error Occured: " + e);
-            return false;
-        }
     }
 
     public static String getAppointmentOutcomesString(Patient patient, String gap){

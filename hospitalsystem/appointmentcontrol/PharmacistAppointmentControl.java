@@ -1,10 +1,9 @@
 package hospitalsystem.appointmentcontrol;
 
 import hospitalsystem.HMS;
-import hospitalsystem.data.Database;
-import hospitalsystem.enums.PrescriptionStatus;
-import hospitalsystem.model.Appointment;
-import hospitalsystem.model.Prescription;
+import hospitalsystem.data.*;
+import hospitalsystem.enums.*;
+import hospitalsystem.model.*;
 import java.util.Scanner;
 
 public class PharmacistAppointmentControl extends AppointmentControl{
@@ -51,5 +50,10 @@ public class PharmacistAppointmentControl extends AppointmentControl{
             // Option to repeat 
             if (!HMS.repeat(sc)) return;
         }
+    }
+
+    public static boolean updatePrescriptionStatus(Prescription prescription, PrescriptionStatus newStatus) {
+        prescription.setStatus(newStatus);
+        return true;
     }
 } 

@@ -2,12 +2,11 @@ package hospitalsystem.usercontrol;
 
 import hospitalsystem.model.Patient;
 import hospitalsystem.model.User;
-
 import java.util.Scanner;
 
 public class PatientUserControl extends UserControl {
     
-    Scanner sc = new Scanner(System.in);
+    static private Scanner sc = new Scanner(System.in);
 
     // Display patient medical records 
     static public void displayUserDetails(User user){
@@ -22,7 +21,7 @@ public class PatientUserControl extends UserControl {
         System.out.println(PatientUserControl.getMedicalRecordString(patient));
     }
 
-    static public void updateUserDetails(User user, Scanner sc){
+    static public void updateUserDetails(User user){
         Patient patient;
         if (user instanceof Patient){
             patient = (Patient) user;

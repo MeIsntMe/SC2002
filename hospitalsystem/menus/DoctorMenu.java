@@ -14,12 +14,10 @@ import java.util.Scanner;
 public class DoctorMenu implements MenuInterface {
     private final Doctor doctor;
     private final Scanner scanner;
-    private final DoctorUserControl doctorUserControl;
 
     public DoctorMenu(User user) {
         this.doctor = (Doctor) user;
         this.scanner = new Scanner(System.in);
-        this.doctorUserControl = new DoctorUserControl(doctor);
     }
 
     @Override
@@ -82,7 +80,7 @@ public class DoctorMenu implements MenuInterface {
         String patientId = scanner.nextLine();
         Patient patient = DoctorUserControl.findPatientById(patientId);
         if (patient != null) {
-            doctorUserControl.displayUserDetails(patient);
+            DoctorUserControl.displayUserDetails(patient);
         }
     }
 
@@ -91,7 +89,7 @@ public class DoctorMenu implements MenuInterface {
         String patientId = scanner.nextLine();
         Patient patient = DoctorUserControl.findPatientById(patientId);
         if (patient != null) {
-            doctorUserControl.updateUserDetails(patient);
+            DoctorUserControl.updateUserDetails(patient, this.doctor);
         }
     }
 
