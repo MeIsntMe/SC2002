@@ -4,6 +4,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import hospitalsystem.HMS;
+import hospitalsystem.data.Database;
 import hospitalsystem.inventorycontrol.InventoryControl;
 import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Doctor;
@@ -45,7 +46,11 @@ public class AdminMenu implements MenuInterface {
                     case 2 -> //call appointment control
                     case 3 -> AdminInventoryControl.manageInventoryMenu();
                     case 4 -> AdminInventoryControl.approveRequests(scanner);
-                    case 5 -> {MainSystem.currentUser = null; return;}
+                    case 5 -> {
+                        Database.saveAllData();
+                        HMS.currentUser = null;
+                        return;
+                    }
                     default -> System.out.println("Invalid input! Please enter a number between 1-5 ");
                 }
             } catch (InputMismatchException e) {

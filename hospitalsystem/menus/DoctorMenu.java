@@ -64,6 +64,7 @@ public class DoctorMenu implements MenuInterface {
                         break;
                     case 8:
                         System.out.println("Logging out...");
+                        Database.saveAllData();
                         HMS.currentUser = null;
                         return;
                     default:

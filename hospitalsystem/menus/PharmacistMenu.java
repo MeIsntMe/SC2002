@@ -156,6 +156,7 @@ public class PharmacistMenu implements MenuInterface {
                 case 4 -> submitReplenishmentRequest(sc);
                 case 5 -> {
                     System.out.println("Logging out of Pharmacist Control.");
+                    Database.saveAllData();
                     return;
                 }
                 default -> System.out.println("Invalid input. Please select an option between 1 and 5.");

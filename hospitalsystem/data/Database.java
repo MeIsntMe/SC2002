@@ -48,9 +48,87 @@ public class Database {
 
     private static final String INVENTORY_CSV_HEADER = "Medicine Name,Initial Stock,Low Stock Level Alert";
     private static final String INVENTORY_CSV_PATH = "hospitalsystem/data/Medicine_List.csv";
-    // Methods to load from CSV into Hashmap 
 
-    public static void loadPatientfromCSV(String filePath) {
+    // Public interface methods for loading data
+    public static void loadAllData() {
+        loadStaffData();
+        loadPatientData();
+        loadInventoryData();
+        loadAppointmentData();
+    }
+
+    public static void loadStaffData() {
+        loadStaffFromCSV(STAFF_CSV_PATH);
+    }
+
+    public static void loadPatientData() {
+        loadPatientfromCSV(PATIENT_CSV_PATH);
+    }
+
+    public static void loadInventoryData() {
+        loadInventoryFromCSV(INVENTORY_CSV_PATH);
+    }
+
+    public static void loadAppointmentData() {
+        loadAppointmentsFromCSV(APPOINTMENT_CSV_PATH);
+    }
+
+    // Public interface methods for saving data
+    public static void saveAllData() {
+        System.out.println("Saving all data...");
+        try {
+            saveAppointmentData();
+            savePatientData();
+            saveStaffData();
+            saveInventoryData();
+            System.out.println("All data saved successfully!");
+        } catch (Exception e) {
+            System.out.println("Error saving data: " + e.getMessage());
+        }
+    }
+
+    public static void saveAppointmentData() {
+        try {
+            saveAppointmentsToCSV();
+            System.out.println("Appointments saved successfully.");
+        } catch (Exception e) {
+            System.out.println("Error saving appointments: " + e.getMessage());
+            throw e; // Re-throw to handle in calling method
+        }
+    }
+
+    public static void savePatientData() {
+        try {
+            savePatientToCSV();
+            System.out.println("Patient data saved successfully.");
+        } catch (Exception e) {
+            System.out.println("Error saving patient data: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public static void saveStaffData() {
+        try {
+            saveStaffToCSV();
+            System.out.println("Staff data saved successfully.");
+        } catch (Exception e) {
+            System.out.println("Error saving staff data: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    public static void saveInventoryData() {
+        try {
+            saveInventoryToCSV();
+            System.out.println("Inventory data saved successfully.");
+        } catch (Exception e) {
+            System.out.println("Error saving inventory data: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    // Private Methods to load from CSV into Hashmap
+    private static void loadPatientfromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the header
             while (scanner.hasNextLine()) {
@@ -79,7 +157,7 @@ public class Database {
         }
     }
 
-    public static void loadStaffFromCSV(String filePath) {
+    private static void loadStaffFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the header
             while (scanner.hasNextLine()) {
@@ -120,7 +198,7 @@ public class Database {
         }
     }
 
-    public static void loadInventoryFromCSV(String filePath) {
+    private static void loadInventoryFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the header
             while (scanner.hasNextLine()) {
@@ -159,7 +237,7 @@ public class Database {
         }
     }
 
-    public static void loadAppointmentsFromCSV(String filePath) {
+    private static void loadAppointmentsFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the first line
             while (scanner.hasNextLine()) {

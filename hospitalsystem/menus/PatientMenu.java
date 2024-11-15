@@ -81,6 +81,7 @@ public class PatientMenu implements MenuInterface {
                     case 9:
                         //logout
                         continueFlag = false;
+                        Database.saveAllData();
                         System.out.println("You have successfully logged out.");
                         break;
                 

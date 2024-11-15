@@ -36,7 +36,10 @@ public class HMS {
                             case DOCTOR -> control = new DoctorMenu(currentUser);
                             case PHARMACIST -> control = new PharmacistMenu(currentUser);
                             case ADMINISTRATOR -> control = new AdminMenu(currentUser);
-                            case null -> {control = null;}
+                            case null -> {
+                                control = null;
+                                clearLoadedData(); //Clear data
+                            }
                         }
                         if (control != null) 
                             control.displayMenu();
@@ -62,6 +65,9 @@ public class HMS {
         System.out.print("Enter password: ");
         String inputPassword = sc.nextLine();
 
+        // Load minimal staff data for verification
+        Database.loadStaffData();
+
         // Retrieve user from database by ID 
         User user = null;
         switch (role) {
@@ -75,6 +81,7 @@ public class HMS {
         if (user != null && user.getPassword().equals(inputPassword)) {
             System.out.printf("Login successful. Welcome %s!", currentUser.getName());
             currentUser = user;
+            loadRequiredData(role);
 
             // If first time log in, reset password 
             resetPassword(currentUser, sc);
@@ -82,6 +89,7 @@ public class HMS {
             return role;
         } else {
             System.out.println("Invalid ID or password.");
+            clearLoadedData(); // Clear loaded data on failed login
             return null;
         }
     }
@@ -113,5 +121,46 @@ public class HMS {
                 System.out.println("Invalid input. Please input 'y' or 'n'. ");
             }
         }
+    }
+
+    // Database handlers
+    private static void loadRequiredData(UserType userType) {
+        clearLoadedData(); // Clear the minimal staff data first
+
+        switch (userType) {
+            case DOCTOR:
+                Database.loadStaffData();
+                Database.loadPatientData();
+                Database.loadAppointmentData();
+                Database.loadInventoryData();
+                break;
+
+            case ADMINISTRATOR:
+                Database.loadStaffData();
+                Database.loadPatientData();
+                break;
+
+            case PHARMACIST:
+                Database.loadStaffData();
+                Database.loadPatientData();
+                Database.loadInventoryData();
+                Database.loadAppointmentData();
+                break;
+
+            case PATIENT:
+                Database.loadPatientData();
+                Database.loadStaffData();
+                Database.loadAppointmentData();
+                break;
+        }
+    }
+    private static void clearLoadedData() {
+        Database.patientsMap.clear();
+        Database.doctorsMap.clear();
+        Database.adminsMap.clear();
+        Database.pharmsMap.clear();
+        Database.inventoryMap.clear();
+        Database.appointmentMap.clear();
+        Database.requestMap.clear();
     }
 }
