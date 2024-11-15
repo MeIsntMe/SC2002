@@ -5,6 +5,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
+
+import hospitalsystem.HMS;
 import hospitalsystem.model.Prescription;
 import hospitalsystem.appointmentcontrol.AppointmentControl;
 import hospitalsystem.data.Database;
@@ -155,8 +157,7 @@ public class PharmacistMenu implements MenuInterface {
                 case 3 -> viewInventory();
                 case 4 -> submitReplenishmentRequest(sc);
                 case 5 -> {
-                    System.out.println("Logging out of Pharmacist Control.");
-                    Database.saveAllData();
+                    HMS.logout();
                     return;
                 }
                 default -> System.out.println("Invalid input. Please select an option between 1 and 5.");

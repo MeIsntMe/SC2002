@@ -94,6 +94,17 @@ public class HMS {
         }
     }
 
+    public static void logout() {
+        try {
+            Database.saveAllData(); // Save all changes before logout
+            clearLoadedData();
+            currentUser = null;
+            System.out.println("Logout successful!");
+        } catch (Exception e) {
+            System.out.println("Error during logout: " + e.getMessage());
+        }
+    }
+
     public static void resetPassword(User user, Scanner sc){
 
         // Check if first time log in

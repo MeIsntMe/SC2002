@@ -63,9 +63,7 @@ public class DoctorMenu implements MenuInterface {
                         handleRecordOutcome();
                         break;
                     case 8:
-                        System.out.println("Logging out...");
-                        Database.saveAllData();
-                        HMS.currentUser = null;
+                        HMS.logout();
                         return;
                     default:
                         System.out.println("Invalid choice, try again.");

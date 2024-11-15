@@ -1,5 +1,6 @@
 package hospitalsystem.menus;
 
+import hospitalsystem.HMS;
 import hospitalsystem.appointmentcontrol.*;
 import hospitalsystem.data.Database;
 import hospitalsystem.model.*;
@@ -81,8 +82,7 @@ public class PatientMenu implements MenuInterface {
                     case 9:
                         //logout
                         continueFlag = false;
-                        Database.saveAllData();
-                        System.out.println("You have successfully logged out.");
+                        HMS.logout();
                         break;
                 
                     default:
