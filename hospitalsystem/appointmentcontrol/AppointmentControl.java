@@ -13,7 +13,7 @@ import java.util.*;
  * This class implements common utility methods used across different user roles for
  * appointment retrieval, filtering, and management.
  *
- * @author Your Name
+ * @author Gracelynn, Leo
  * @version 1.0
  * @since 2024-03-16
  */

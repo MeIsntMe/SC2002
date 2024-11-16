@@ -9,7 +9,7 @@ import java.util.List;
  * Manages patient-specific appointment operations in the hospital system.
  * Provides functionality for patients to view and manage their appointments.
  *
- * @author Your Name
+ * @author Gracelynn
  * @version 1.0
  * @since 2024-03-16
  */

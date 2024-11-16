@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * This class provides functionality for handling doctor appointments, including slot generation,
  * appointment status management, and schedule viewing.
  *
- * @author Your Name
+ * @author Gracelynn, Leo
  * @version 1.0
  * @since 2024-03-16
  */
