@@ -16,7 +16,7 @@ import java.util.Scanner;
  * Provides core functionality for viewing and managing medication inventory,
  * including stock levels, batch tracking, and replenishment requests.
  *
- * @author Your Name
+ * @author Shaivi
  * @version 1.0
  * @since 2024-03-16
  */
@@ -229,5 +229,12 @@ public class InventoryControl {
         return true;
     }
 
+    /**
+     * Wrapper to display inventory and handle expired medicines.
+     */
+    public static void displayInventoryWithChecks() {
+        PharmacistInventoryControl.checkAndHandleExpiredMedicines();
+        displayInventory();
+    }
 
 }
