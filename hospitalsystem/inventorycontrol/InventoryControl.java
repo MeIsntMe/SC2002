@@ -6,6 +6,7 @@ import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -59,7 +60,7 @@ public class InventoryControl {
         System.out.println("----------------------------------------------------------------------------");
         for (Map.Entry<Integer, ReplenishmentRequest> entry : Database.requestMap.entrySet()) {
             ReplenishmentRequest req = entry.getValue();
-            System.out.printf("%-10s %-20s %-15d %-15s%n", req.getRequestID(), req.getMedicineName(), req.getRequestedQuantity(), req.getStatus());
+            System.out.printf("%-10s %-20s %-15d %-15s%n", req.getRequestID(), req.getMedicine().getMedicineName(), req.getRequestedQuantity(), req.getStatus());
         }
         System.out.println(" ");
     }
@@ -69,7 +70,7 @@ public class InventoryControl {
         
         System.out.printf("%-10s %-20s %-10s %-15s%n", "ID", "Medicine Name", "Requested Qty", "Status");
         System.out.println("----------------------------------------------------------------------------");
-        System.out.printf("%-10s %-20s %-15d %-15s%n", req.getRequestID(), req.getMedicineName(), req.getRequestedQuantity(), req.getStatus());
+        System.out.printf("%-10s %-20s %-15d %-15s%n", req.getRequestID(),  req.getMedicine().getMedicineName(), req.getRequestedQuantity(), req.getStatus());
     }
 
     public static Medicine getMedicineInput(Scanner sc) {
@@ -84,6 +85,10 @@ public class InventoryControl {
             Medicine medicine = Database.inventoryMap.get(medicineName);
             return medicine; 
         }
+    }
+
+    public boolean isMedicineInInventory(String medicineName) {
+        return Database.inventoryMap.containsKey(medicineName);
     }
 
     public static ReplenishmentRequest getRequestInput(Scanner sc) {
@@ -132,4 +137,36 @@ public class InventoryControl {
         }
         return lowStockMedications;
     }
+
+    public boolean reduceStock(String medicineName, int quantity) {
+        if (!Database.inventoryMap.containsKey(medicineName)) {
+            System.out.println("Medicine " + medicineName + " not found in inventory.");
+            return false;
+        }
+    
+        Medicine medicine = Database.inventoryMap.get(medicineName);
+        int remainingQuantity = quantity;
+        Iterator<Medicine.Batch> iterator = medicine.getBatches().iterator();
+    
+        while (iterator.hasNext() && remainingQuantity > 0) {
+            Medicine.Batch batch = iterator.next();
+            if (batch.getQuantity() <= remainingQuantity) {
+                remainingQuantity -= batch.getQuantity();
+                iterator.remove();
+            } else {
+                batch.setQuantity(batch.getQuantity() - remainingQuantity);
+                remainingQuantity = 0;
+            }
+        }
+    
+        if (remainingQuantity > 0) {
+            System.out.println("Insufficient stock to dispense " + quantity + " units of " + medicineName);
+            return false;
+        }
+    
+        System.out.println("Successfully dispensed " + quantity + " units of " + medicineName);
+        return true;
+    }
+    
+    
 }
