@@ -40,27 +40,35 @@ public class DoctorMenu implements MenuInterface {
 
                 switch (choice) {
                     case 1:
+                        // View Patient Medical Record
                         handleViewPatientRecord();
                         break;
                     case 2:
+                        // Update Patient Medical Record
                         handleUpdatePatientRecord();
                         break;
                     case 3:
+                        // View Personal Schedule
                         DoctorAppointmentControl.displayPersonalSchedule(doctor);
                         break;
                     case 4:
+                        // Set Availablity
                         handleSetAvailability();
                         break;
                     case 5:
+                        // Accept/Decline Appointments
                         handleAppointmentRequests();
                         break;
                     case 6:
+                        // View Upcoming Appointments
                         DoctorAppointmentControl.displayUpcomingAppointments(doctor);
                         break;
                     case 7:
+                        //Record Appointment Outcomes
                         handleRecordOutcome();
                         break;
                     case 8:
+                        // Logout
                         HMS.logout();
                         return;
                     default:
