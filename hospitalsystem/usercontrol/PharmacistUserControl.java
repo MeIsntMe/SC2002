@@ -22,9 +22,14 @@ import java.util.Scanner;
  * This class interacts directly with the system database to ensure
  * real-time accuracy of pharmaceutical records and inventory status.
  *
- * @author Your Name
+ * @author Shaivi
  * @version 1.0
  * @since 2024-03-16
+ */
+
+
+/**
+ * Handles the core logic and operations for pharmacists.
  */
 public class PharmacistUserControl {
 
@@ -133,91 +138,6 @@ public class PharmacistUserControl {
                     selectedMedicine.getMedicineName(), newStatus);
         } catch (IllegalArgumentException e) {
             System.out.println("Invalid status entered. Please use PENDING, DISPENSED, or REJECTED.");
-        }
-    }
-
-
-
-   /**
-     * Handles the process of submitting a replenishment request for a specific medication.
-     * Prompts the user to enter the medication name and quantity for replenishment.
-     * Validates if the medication exists in the inventory and ensures the entered quantity is valid.
-     * Creates a new replenishment request and adds it to the system's request map.
-     * After submission, displays all replenishment requests in a tabular format,
-     * including their status (e.g., PENDING, APPROVED, REJECTED).
-     *
-     * @param sc Scanner instance for capturing user input.
-     */
-    public static void submitReplenishmentRequest(Scanner sc) {
-        // Step 1: Submit a replenishment request
-        System.out.println("Enter the medication name to request replenishment: ");
-        String medicineName = sc.nextLine();
-    
-        if (!Database.inventoryMap.containsKey(medicineName)) {
-            System.out.println("Medicine " + medicineName + " does not exist in the inventory.");
-            return;
-        }
-    
-        Medicine medicine = Database.inventoryMap.get(medicineName);
-    
-        System.out.println("Enter the quantity for replenishment: ");
-        int quantity;
-        try {
-            quantity = Integer.parseInt(sc.nextLine());
-            if (quantity <= 0) {
-                System.out.println("Invalid quantity. Please enter a positive number.");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter a valid numerical quantity.");
-            return;
-        }
-    
-        // Generate a unique request ID
-        int requestID = Database.requestMap.size() + 1; // Simple auto-increment logic
-    
-        // Create a new replenishment request
-        ReplenishmentRequest request = new ReplenishmentRequest(requestID, medicine, quantity);
-        Database.requestMap.put(request.getRequestID(), request);
-    
-        System.out.printf("Replenishment request submitted for medicine: %s, quantity: %d%n", medicineName, quantity);
-    
-        // Step 2: View all replenishment requests
-        System.out.println("\nReplenishment Request Status:");
-        if (Database.requestMap.isEmpty()) {
-            System.out.println("No replenishment requests have been submitted.");
-        } else {
-            System.out.printf("%-10s %-20s %-15s %-15s%n", "Request ID", "Medicine Name", "Quantity", "Status");
-            System.out.println("-----------------------------------------------------------------");
-            for (ReplenishmentRequest req : Database.requestMap.values()) {
-                System.out.printf("%-10d %-20s %-15d %-15s%n",
-                        req.getRequestID(),
-                        req.getMedicine().getMedicineName(),
-                        req.getRequestedQuantity(),
-                        req.getStatus());
-            }
-        }
-    }
-    
-
-    // can remove since function already there in inventory control as displayinventory
-    /**
-     * Displays the inventory details for all medicines.
-     */
-    public static void viewInventory() {
-        if (Database.inventoryMap.isEmpty()) {
-            System.out.println("The inventory is currently empty.");
-            return;
-        }
-
-        System.out.printf("%-20s %-15s %-15s%n", "Medicine Name", "Total Quantity", "Low Stock Alert");
-        System.out.println("-------------------------------------------------------------");
-        for (Map.Entry<String, Medicine> entry : Database.inventoryMap.entrySet()) {
-            Medicine medicine = entry.getValue();
-            System.out.printf("%-20s %-15d %-15s%n",
-                    medicine.getMedicineName(),
-                    medicine.getTotalQuantity(),
-                    (medicine.getIsLowStock() ? "**LOW STOCK**" : ""));
         }
     }
 
