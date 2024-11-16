@@ -16,11 +16,40 @@ import hospitalsystem.model.Patient;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
 
+/**
+ * Administrative control class for managing all user-related operations in the hospital system.
+ * Provides comprehensive functionality for managing staff and patient accounts, including
+ * creation, modification, removal, and viewing of user records. Implements advanced
+ * filtering and search capabilities for user management.
+ *
+ * This class has elevated privileges and can manage all user types:
+ * - Patients
+ * - Doctors
+ * - Pharmacists
+ * - Administrators
+ *
+ * @author Your Name
+ * @version 1.0
+ * @since 2024-03-16
+ */
 public class AdminUserControl extends UserControl {
     
     Scanner sc = new Scanner(System.in);
 
-    // Handles display staff list 
+    /**
+     * Displays filtered staff list based on specified criteria with formatted output.
+     * Allows multi-criteria filtering:
+     * - By role (Doctor, Pharmacist, Administrator)
+     * - By gender
+     * - By age range (minimum and maximum)
+     *
+     * Results are displayed in a formatted table with columns:
+     * - ID
+     * - Name
+     * - Gender
+     * - Age
+     *
+     */
     public void displayStaffList() {
 
         // Prompt for role filter
@@ -70,13 +99,31 @@ public class AdminUserControl extends UserControl {
         }
     }
 
-    // Displays staff details (in single row format)
+    /**
+     * Displays formatted details for a single staff member.
+     * Output includes:
+     * - Staff ID
+     * - Name
+     * - Gender
+     * - Age
+     *
+     * @param staff Staff member whose details are to be displayed
+     */
     public void displayUserDetails(User staff) {
         System.out.printf("%-10s %-20s %-10s %-5d%n", 
             staff.getID(), staff.getName(), staff.getGender(), staff.getAge());
     }
 
-    // Handles update staff details 
+    /**
+     * Updates staff member details through interactive console interface.
+     * Process:
+     * 1. Prompts for staff role and ID
+     * 2. Displays current details
+     * 3. Allows selective field updates
+     * 4. Validates all inputs
+     * 5. Confirms changes
+     *
+     */
     public void updateStaffDetails(){
         
         // Prompt for role and ID 
@@ -103,7 +150,14 @@ public class AdminUserControl extends UserControl {
 
     }
 
-    // Updates indiv staff details 
+    /**
+     * Updates specific fields for an individual staff member.
+     * Updateable fields:
+     * - Age (must be positive integer)
+     * - Password (must meet security requirements)
+     *
+     * @param staff Staff member to update
+     */
     public void updateUserDetails(User staff) {
         boolean done = false;
         while (!done) {
@@ -131,7 +185,16 @@ public class AdminUserControl extends UserControl {
         }
     }
 
-    // Add staff
+    /**
+     * Creates and adds a new user to the system.
+     * Process:
+     * 1. Collects user type and basic information
+     * 2. Generates unique ID
+     * 3. Sets default values
+     * 4. Adds to appropriate database map
+     *
+     * @param sc Scanner for reading input
+     */
     public static void addUser(Scanner sc){
         while (true) {
 
@@ -179,7 +242,13 @@ public class AdminUserControl extends UserControl {
         } 
     }
 
-    // Generate Staff ID (supporting func)
+    /**
+     * Generates a unique ID for a new user based on their role.
+     * Format varies by role: P1xxx for patients, Dxxx for doctors, etc.
+     *
+     * @param role UserType determining ID format
+     * @return Generated unique identifier string
+     */
     private static String generateID(UserType role) {
         String prefix;
         int maxID = 0;
@@ -222,7 +291,16 @@ public class AdminUserControl extends UserControl {
         return String.format("%s%03d", prefix, nextID); 
     }
 
-    // Remove staff
+    /**
+     * Removes a user from the system.
+     * Process:
+     * 1. Validates user existence
+     * 2. Confirms removal
+     * 3. Removes from appropriate database map
+     * 4. Updates related records
+     *
+     * @param sc Scanner for reading input
+     */
     public static void removeUser(Scanner sc){
         while (true) {
 
@@ -248,13 +326,32 @@ public class AdminUserControl extends UserControl {
         }
     }
 
-    // Remove staff from HashMap (supporting func)
+    /**
+     * Removes a user from the specified map using their ID.
+     * Helper method for user removal process.
+     *
+     * @param userMap the map containing user records
+     * @param staffID the ID of the user to remove
+     * @return true if user was successfully removed, false if not found
+     */
     private static boolean removeFromMap(Map<String, ? extends User> userMap, String staffID) {
         return (userMap.remove(staffID) != null);
         // remove returns the removed value if it exists, or null if not found
     }
 
-    // Get role input 
+    /**
+     * Gets role input from user through interactive console.
+     * Provides numbered menu for role selection:
+     * 1. Patient
+     * 2. Doctor
+     * 3. Pharmacist
+     * 4. Admin
+     *
+     * Validates input and handles invalid selections.
+     *
+     * @param scanner Scanner object for reading user input
+     * @return selected UserType enum value
+     */
     public static UserType getRoleInput(Scanner scanner) {
         while (true) {
             System.out.println("Select role: 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
@@ -274,7 +371,20 @@ public class AdminUserControl extends UserControl {
         }
     }
 
-    // Get staff role input 
+    /**
+     * Gets staff role input from user through interactive console.
+     * Similar to getRoleInput but excludes Patient role.
+     * Provides numbered menu for role selection:
+     * 1. Doctor
+     * 2. Pharmacist
+     * 3. Administrator
+     *
+     * Validates input and handles invalid selections.
+     *
+     * @param sc Scanner object for reading user input
+     * @return selected UserType enum value
+     * @throws IllegalArgumentException if invalid role is selected repeatedly
+     */
     public static UserType getStaffRoleInput(Scanner sc) {
         while (true) {
             System.out.println("Select role (1-3): 1. Doctor | 2. Pharmacist | 3. Administrator");

@@ -8,11 +8,25 @@ import hospitalsystem.model.Patient;
 import hospitalsystem.model.User;
 import java.util.Scanner;
 
-
+/**
+ * Abstract base class for user management operations in the hospital system.
+ * Provides common functionality for managing different types of users including
+ * staff and patients.
+ *
+ * @author Your Name
+ * @version 1.0
+ * @since 2024-03-16
+ */
 public abstract class UserControl{
 
     Scanner sc = new Scanner(System.in);
- 
+
+    /**
+     * Updates staff member details through an interactive console interface.
+     * Allows modification of age and password for doctors, pharmacists, and administrators.
+     *
+     * @param sc Scanner object for reading user input
+     */
     public static void updateStaffDetails(Scanner sc) {
         System.out.println("=========================================");
         System.out.println("Staff Management > Update Staff Details");
@@ -65,6 +79,13 @@ public abstract class UserControl{
         }
     }
 
+    /**
+     * Gets staff role input from user through console interface.
+     * Validates input and returns appropriate UserType.
+     *
+     * @param scanner Scanner object for reading user input
+     * @return UserType selected by the user (DOCTOR, PHARMACIST, or ADMINISTRATOR)
+     */
     public static UserType getStaffRoleInput(Scanner scanner) {
         while (true) {
             System.out.println("Select role (1-3): 1. Doctor | 2. Pharmacist | 3. Administrator");
@@ -82,7 +103,14 @@ public abstract class UserControl{
             }
         }
     }
-    
+
+    /**
+     * Generates a formatted string representation of a patient's medical record.
+     * Includes personal information, medical history, and appointment outcomes.
+     *
+     * @param patient Patient whose medical record is to be formatted
+     * @return Formatted string containing medical record information
+     */
     public static String getMedicalRecordString(Patient patient){
         MedicalRecord mr = patient.getMedicalRecord();
         StringBuilder sb = new StringBuilder();

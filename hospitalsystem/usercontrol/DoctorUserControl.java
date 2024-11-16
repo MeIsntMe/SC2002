@@ -9,9 +9,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Manages doctor-specific user operations in the hospital system.
+ * Provides functionality for doctors to view and update patient medical records,
+ * manage prescriptions, and record consultation outcomes.
+ *
+ * Implements specialized medical record management including:
+ * - Patient medical history viewing
+ * - Consultation notes
+ * - Prescription management
+ * - Appointment outcome recording
+ *
+ * @author Your Name
+ * @version 1.0
+ * @since 2024-03-16
+ */
 public class DoctorUserControl extends UserControl {
     private static final Scanner sc = new Scanner(System.in);
 
+    /**
+     * Displays complete patient medical details and history.
+     * Shows:
+     * - Basic patient information
+     * - Medical history
+     * - Recent appointments
+     * - Current prescriptions
+     *
+     * @param user User object (must be Patient type)
+     */
     static public void displayUserDetails(User user) {
         if (!(user instanceof Patient)) {
             System.out.println("Error: Can only display details for Patient users.");
@@ -22,7 +47,18 @@ public class DoctorUserControl extends UserControl {
         displayPatientMedicalRecord(patient);
     }
 
-
+    /**
+     * Updates patient details and medical records with doctor authorization.
+     * Allows updates to:
+     * - Patient medical details
+     * - Consultation notes
+     * - Prescriptions
+     * - Medical record entries
+     *
+     * @param user User object (must be Patient type)
+     * @param doctor Doctor performing the update
+     * @throws NullPointerException if user or doctor is null
+     */
     static public void updateUserDetails(User user, Doctor doctor) {
         if (!(user instanceof Patient)) {
             System.out.println("Error: Can only update details for Patient users.");
@@ -51,6 +87,17 @@ public class DoctorUserControl extends UserControl {
         }
     }
 
+    /**
+     * Displays complete medical record for a patient.
+     * Includes:
+     * - Patient demographics
+     * - Medical history
+     * - Appointment history
+     * - Prescription history
+     * - Consultation notes
+     *
+     * @param patient Patient whose record is to be displayed
+     */
     static private void displayPatientMedicalRecord(Patient patient) {
         // Display basic patient info
         System.out.println("Medical Record for Patient: " + patient.getName());
@@ -89,6 +136,16 @@ public class DoctorUserControl extends UserControl {
         }
     }
 
+    /**
+     * Updates medical record with new consultation data.
+     * Creates new appointment record and includes:
+     * - Consultation notes
+     * - Prescriptions
+     * - Treatment recommendations
+     *
+     * @param patient Patient whose record is being updated
+     * @param doctor Doctor performing the update
+     */
     static private void updateMedicalRecord(Patient patient, Doctor doctor) {
         // Get consultation notes
         System.out.println("Enter consultation notes (press Enter twice to finish):");
@@ -159,6 +216,15 @@ public class DoctorUserControl extends UserControl {
         System.out.println("Medical record updated successfully.");
     }
 
+    /**
+     * Updates patient details with validation.
+     * Handles updates to:
+     * - Blood Type
+     * - Gender
+     * Includes input validation and confirmation.
+     *
+     * @param patient Patient whose details are being updated
+     */
     static private void updatePatientDetails(Patient patient) {
         System.out.println("What would you like to update?");
         System.out.println("1. Blood Type");
@@ -191,6 +257,12 @@ public class DoctorUserControl extends UserControl {
         }
     }
 
+    /**
+     * Finds a patient by their ID in the system.
+     *
+     * @param patientId ID of the patient to find
+     * @return Patient object if found, null otherwise
+     */
     public static Patient findPatientById(String patientId) {
         Patient patient = (Patient) Database.patientsMap.get(patientId);
         if (patient != null) {
@@ -201,14 +273,34 @@ public class DoctorUserControl extends UserControl {
         }
     }
 
+    /**
+     * Updates patient blood type in medical record.
+     * Requires doctor authorization.
+     *
+     * @param patient Patient whose blood type is to be updated
+     * @param bloodType New blood type value
+     */
     private static void updateBloodType(Patient patient, BloodType bloodType) {
         patient.setBloodType(bloodType);
     }
 
+    /**
+     * Updates patient gender in medical record.
+     * Requires doctor authorization.
+     *
+     * @param patient Patient whose gender is to be updated
+     * @param gender New gender value
+     */
     private static void updateGender(Patient patient, String gender) {
         patient.setGender(gender);
     }
 
+    /**
+     * Interactive blood type selection interface.
+     * Displays available blood types and handles selection.
+     *
+     * @return Selected BloodType enum value
+     */
     private static BloodType selectBloodType() {
         System.out.println("Select a Blood Type to change to:");
         BloodType[] bloodTypes = BloodType.values();

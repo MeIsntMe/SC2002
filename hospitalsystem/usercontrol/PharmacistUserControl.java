@@ -9,7 +9,22 @@ import java.util.Map;
 import java.util.Scanner;
 
 /**
- * Handles the core logic and operations for pharmacists.
+ * Handles pharmacist-specific operations in the hospital system.
+ * Provides functionality for managing prescriptions, viewing appointment outcomes,
+ * managing inventory, and handling replenishment requests.
+ *
+ * Key responsibilities include:
+ * - Prescription status management
+ * - Appointment outcome viewing
+ * - Inventory monitoring
+ * - Replenishment request handling
+ *
+ * This class interacts directly with the system database to ensure
+ * real-time accuracy of pharmaceutical records and inventory status.
+ *
+ * @author Your Name
+ * @version 1.0
+ * @since 2024-03-16
  */
 public class PharmacistUserControl {
 
@@ -133,7 +148,6 @@ public class PharmacistUserControl {
      *
      * @param sc Scanner instance for capturing user input.
      */
-    
     public static void submitReplenishmentRequest(Scanner sc) {
         // Step 1: Submit a replenishment request
         System.out.println("Enter the medication name to request replenishment: ");
