@@ -6,8 +6,24 @@ import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import java.util.Scanner;
 
+/**
+ * Manages pharmacist-specific appointment operations in the hospital system.
+ * Handles prescription management, dispensing, and related appointment functions.
+ *
+ * @author Your Name
+ * @version 1.0
+ * @since 2024-03-16
+ */
 public class PharmacistAppointmentControl extends AppointmentControl{
-    Scanner sc = new Scanner(System.in); 
+    /**
+     * Scanner object for reading user input.
+     */
+    Scanner sc = new Scanner(System.in);
+
+    /**
+     * Displays all appointments that have pending prescriptions.
+     * Prints appointment details and outcomes for prescriptions that need to be dispensed.
+     */
     public static void viewAppointmentsWithPendingPrescription(){
         
         boolean foundPendingPrescriptions = false; 
