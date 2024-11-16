@@ -22,21 +22,40 @@ import hospitalsystem.enums.UserType;
 import hospitalsystem.model.*;
 import hospitalsystem.model.Appointment.AppointmentSlot;
 
+/**
+ * Database management class for the hospital system.
+ * Handles all data persistence operations including loading from and saving to CSV files,
+ * and maintains in-memory data structures for various hospital system entities.
+ *
+ * This class provides centralized data management for:
+ * - Users (Patients, Doctors, Administrators, Pharmacists)
+ * - Medical Inventory
+ * - Appointments
+ * - Replenishment Requests
+ *
+ * @author Your Name
+ * @version 1.0
+ * @since 2024-03-16
+ */
 public class Database {
 
     // HashMaps
+    /** Maps user IDs to Patient objects */
+    public static Map<String, User> patientsMap = new HashMap<>();
+    /** Maps user IDs to Doctor objects */
+    public static Map<String, User> doctorsMap = new HashMap<>();
+    /** Maps user IDs to Administrator objects */
+    public static Map<String, User> adminsMap = new HashMap<>();
+    /** Maps user IDs to Pharmacist objects */
+    public static Map<String, User> pharmsMap = new HashMap<>();
+    /** Maps medicine names to Medicine objects */
+    public static Map<String, Medicine> inventoryMap = new HashMap<>();
+    /** Maps request IDs to ReplenishmentRequest objects */
+    public static Map<Integer, ReplenishmentRequest> requestMap = new HashMap<>();
+    /** Maps appointment IDs to Appointment objects */
+    public static HashMap<String, Appointment> appointmentMap = new HashMap<>();
 
-    public static Map<String, User> patientsMap = new HashMap<>();  //userID -> Patient
-    public static Map<String, User> doctorsMap = new HashMap<>();   //userID -> Doctor
-    public static Map<String, User> adminsMap = new HashMap<>();    //userID -> Administrator
-    public static Map<String, User> pharmsMap = new HashMap<>();    //userID -> Pharmacist
-
-    public static Map<String, Medicine> inventoryMap = new HashMap<>();             // medicineName -> Medicine
-    public static Map<Integer, ReplenishmentRequest> requestMap = new HashMap<>();   // requestID -> ReplenishmentRequest
-
-    public static HashMap<String, Appointment> appointmentMap = new HashMap<>();    // appointmentID -> Appointment
-    
-    // CSV Variables
+    // CSV Constants
     private static final String APPOINTMENT_CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
     private static final String APPOINTMENT_CSV_PATH = "hospitalsystem/data/Appointment.csv";
 
@@ -50,6 +69,10 @@ public class Database {
     private static final String INVENTORY_CSV_PATH = "hospitalsystem/data/Medicine_List.csv";
 
     // Public interface methods for loading data
+    /**
+     * Loads all data from CSV files into the system.
+     * This includes staff, patient, inventory, and appointment data.
+     */
     public static void loadAllData() {
         loadStaffData();
         loadPatientData();
@@ -57,23 +80,40 @@ public class Database {
         loadAppointmentData();
     }
 
+    /**
+     * Loads staff data from CSV into respective staff maps.
+     * Populates doctorsMap, adminsMap, and pharmsMap.
+     */
     public static void loadStaffData() {
         loadStaffFromCSV(STAFF_CSV_PATH);
     }
 
+    /**
+     * Loads patient data from CSV into patientsMap.
+     */
     public static void loadPatientData() {
         loadPatientfromCSV(PATIENT_CSV_PATH);
     }
 
+    /**
+     * Loads inventory data from CSV into inventoryMap.
+     */
     public static void loadInventoryData() {
         loadInventoryFromCSV(INVENTORY_CSV_PATH);
     }
 
+    /**
+     * Loads appointment data from CSV into appointmentMap.
+     */
     public static void loadAppointmentData() {
         loadAppointmentsFromCSV(APPOINTMENT_CSV_PATH);
     }
 
     // Public interface methods for saving data
+    /**
+     * Saves all system data to respective CSV files.
+     * Handles errors for each save operation independently.
+     */
     public static void saveAllData() {
         System.out.println("Saving all data...");
         try {
@@ -87,16 +127,24 @@ public class Database {
         }
     }
 
+    /**
+     * Saves current appointment data to CSV file.
+     * @throws RuntimeException if there is an error saving the data
+     */
     public static void saveAppointmentData() {
         try {
             saveAppointmentsToCSV();
             System.out.println("Appointments saved successfully.");
         } catch (Exception e) {
             System.out.println("Error saving appointments: " + e.getMessage());
-            throw e; // Re-throw to handle in calling method
+            throw e;
         }
     }
 
+    /**
+     * Saves current patient data to CSV file.
+     * @throws RuntimeException if there is an error saving the data
+     */
     public static void savePatientData() {
         try {
             savePatientToCSV();
@@ -107,6 +155,10 @@ public class Database {
         }
     }
 
+    /**
+     * Saves current staff data to CSV file.
+     * @throws RuntimeException if there is an error saving the data
+     */
     public static void saveStaffData() {
         try {
             saveStaffToCSV();
@@ -117,6 +169,10 @@ public class Database {
         }
     }
 
+    /**
+     * Saves current inventory data to CSV file.
+     * @throws RuntimeException if there is an error saving the data
+     */
     public static void saveInventoryData() {
         try {
             saveInventoryToCSV();
@@ -128,6 +184,12 @@ public class Database {
     }
 
     // Private Methods to load from CSV into Hashmap
+    /**
+     * Loads patient data from specified CSV file into patientsMap.
+     * Handles data validation and error logging.
+     *
+     * @param filePath path to the patient CSV file
+     */
     private static void loadPatientfromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the header
@@ -157,6 +219,12 @@ public class Database {
         }
     }
 
+    /**
+     * Loads staff data from specified CSV file into respective staff maps.
+     * Categorizes staff by role and handles data validation.
+     *
+     * @param filePath path to the staff CSV file
+     */
     private static void loadStaffFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the header
@@ -198,6 +266,12 @@ public class Database {
         }
     }
 
+    /**
+     * Loads inventory data from specified CSV file into inventoryMap.
+     * Handles batch information and stock levels.
+     *
+     * @param filePath path to the inventory CSV file
+     */
     private static void loadInventoryFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the header
@@ -237,6 +311,12 @@ public class Database {
         }
     }
 
+    /**
+     * Loads appointment data from specified CSV file into appointmentMap.
+     * Links appointments with doctors and patients, handles prescriptions.
+     *
+     * @param filePath path to the appointment CSV file
+     */
     private static void loadAppointmentsFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
             scanner.nextLine(); // Skip the first line
@@ -341,6 +421,13 @@ public class Database {
         }
     }
 
+    /**
+     * Formats prescription data for CSV storage.
+     * Converts prescription details into semicolon-separated string format.
+     *
+     * @param prescription the Prescription object to format
+     * @return formatted string representation of the prescription
+     */
     private static String formatPrescription(Prescription prescription) {
         if (prescription == null || prescription.getMedicineList().isEmpty()) {
             return "";
@@ -351,6 +438,13 @@ public class Database {
                 .collect(Collectors.joining(";"));
     }
 
+    /**
+     * Escapes special characters in CSV values.
+     * Handles commas, quotes, and newlines in data fields.
+     *
+     * @param value the string to escape
+     * @return escaped string safe for CSV storage
+     */
     private static String escapeCSV(String value) {
         if (value == null) {
             return "";
@@ -364,6 +458,13 @@ public class Database {
         return value;
     }
 
+    /**
+     * Formats appointment data for CSV storage.
+     * Converts all appointment details into comma-separated format.
+     *
+     * @param appointment the Appointment object to format
+     * @return formatted string representation of the appointment
+     */
     private static String formatAppointmentToCSV(Appointment appointment) {
         StringBuilder sb = new StringBuilder();
 
@@ -391,6 +492,10 @@ public class Database {
         return sb.toString();
     }
 
+    /**
+     * Saves current patient data to CSV file.
+     * Sorts patients by ID and writes data in specified format.
+     */
     public static void savePatientToCSV() {
         try (FileWriter fw = new FileWriter(PATIENT_CSV_PATH);
              BufferedWriter bw = new BufferedWriter(fw)) {
@@ -427,6 +532,10 @@ public class Database {
         }
     }
 
+    /**
+     * Saves current staff data to CSV file.
+     * Combines all staff types and sorts by ID before saving.
+     */
     public static void saveStaffToCSV() {
         try (FileWriter fw = new FileWriter(STAFF_CSV_PATH);
              BufferedWriter bw = new BufferedWriter(fw)) {
@@ -470,6 +579,10 @@ public class Database {
         }
     }
 
+    /**
+     * Saves current inventory data to CSV file.
+     * Includes stock levels and batch information.
+     */
     public static void saveInventoryToCSV() {
         try (FileWriter fw = new FileWriter(INVENTORY_CSV_PATH);
              BufferedWriter bw = new BufferedWriter(fw)) {
@@ -507,6 +620,10 @@ public class Database {
         }
     }
 
+    /**
+     * Saves current appointment data to CSV file.
+     * Includes all appointment details and related prescriptions.
+     */
     public static void saveAppointmentsToCSV() {
         try (FileWriter fw = new FileWriter(APPOINTMENT_CSV_PATH);
             BufferedWriter bw = new BufferedWriter(fw)) {

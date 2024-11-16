@@ -11,6 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+/**
+ * Base class for managing hospital inventory operations.
+ * Provides core functionality for viewing and managing medication inventory,
+ * including stock levels, batch tracking, and replenishment requests.
+ *
+ * @author Your Name
+ * @version 1.0
+ * @since 2024-03-16
+ */
 public class InventoryControl {
 
     /*
@@ -19,7 +28,11 @@ public class InventoryControl {
      * admin update stock level of medicine 
      * verify that medicine stock level is updated in inventory 
      */
-    
+
+    /**
+     * Displays complete inventory with medicine names and total quantities.
+     * Shows low stock alerts for medicines below their minimum stock level.
+     */
     public static void displayInventory() {
         if (Database.inventoryMap.isEmpty()) {
             System.out.println("The inventory is currently empty.");
@@ -36,6 +49,12 @@ public class InventoryControl {
         }
     }
 
+    /**
+     * Displays detailed batch information for a specific medicine.
+     * Shows quantity and expiration date for each batch.
+     *
+     * @param sc Scanner object for reading user input
+     */
     public static void displayMedicineBatches(Scanner sc){
 
         Medicine med = getMedicineInput(sc);
@@ -49,6 +68,10 @@ public class InventoryControl {
         System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.getIsLowStock() ? " **LOW STOCK ALERT**" : ""));
     }
 
+    /**
+     * Displays all replenishment requests in the system.
+     * Shows request ID, medicine name, requested quantity, and status.
+     */
     public static void displayAllRequests() {
         if (Database.requestMap.isEmpty()) {
             System.out.println("There are no replenishment requests.");
@@ -65,6 +88,11 @@ public class InventoryControl {
         System.out.println(" ");
     }
 
+    /**
+     * Displays detailed information for a specific replenishment request.
+     *
+     * @param sc Scanner object for reading user input
+     */
     public static void displaySingleRequest(Scanner sc) {
         ReplenishmentRequest req = getRequestInput(sc);
         
@@ -73,6 +101,12 @@ public class InventoryControl {
         System.out.printf("%-10s %-20s %-15d %-15s%n", req.getRequestID(),  req.getMedicine().getMedicineName(), req.getRequestedQuantity(), req.getStatus());
     }
 
+    /**
+     * Gets medicine input from user and validates against inventory.
+     *
+     * @param sc Scanner object for reading user input
+     * @return Medicine object if found in inventory
+     */
     public static Medicine getMedicineInput(Scanner sc) {
         while (true) {
             System.out.println("Enter medicine: ");
@@ -91,6 +125,12 @@ public class InventoryControl {
         return Database.inventoryMap.containsKey(medicineName);
     }
 
+    /**
+     * Gets replenishment request input from user and validates.
+     *
+     * @param sc Scanner object for reading user input
+     * @return ReplenishmentRequest object if found
+     */
     public static ReplenishmentRequest getRequestInput(Scanner sc) {
         while (true) {
             System.out.println("Enter request ID: ");
@@ -110,7 +150,11 @@ public class InventoryControl {
         }
     }
 
-    // Retrieve pending requests
+    /**
+     * Retrieves all pending replenishment requests.
+     *
+     * @return Iterable of pending ReplenishmentRequest objects
+     */
     public Iterable<ReplenishmentRequest> getPendingRequests() {
         return Database.requestMap.values().stream()
                 .filter(request -> request.getStatus() == RequestStatus.PENDING)
@@ -118,16 +162,33 @@ public class InventoryControl {
     }
 
     // Additional unchanged methods for checking stock, low stock, etc., from the original code
+    /**
+     * Displays current stock level for a specific medicine.
+     *
+     * @param medicineName name of the medicine to check
+     * @return current stock quantity, or -1 if medicine not found
+     */
     public int displayStock(String medicineName) {
         Medicine medicine = Database.inventoryMap.get(medicineName);
         return medicine != null ? medicine.getTotalQuantity() : -1;
     }
 
+    /**
+     * Checks if a specific medicine is below its minimum stock level.
+     *
+     * @param medicineName name of the medicine to check
+     * @return true if stock is below minimum level, false otherwise
+     */
     public boolean isLowStock(String medicineName) {
         Medicine medicine = Database.inventoryMap.get(medicineName);
         return medicine != null && medicine.getIsLowStock();
     }
 
+    /**
+     * Gets a list of all medicines that are below their minimum stock level.
+     *
+     * @return List of medicine names with low stock
+     */
     public List<String> getLowStockMedications() {
         List<String> lowStockMedications = new ArrayList<>();
         for (Map.Entry<String, Medicine> entry : Database.inventoryMap.entrySet()) {
@@ -143,11 +204,11 @@ public class InventoryControl {
             System.out.println("Medicine " + medicineName + " not found in inventory.");
             return false;
         }
-    
+
         Medicine medicine = Database.inventoryMap.get(medicineName);
         int remainingQuantity = quantity;
         Iterator<Medicine.Batch> iterator = medicine.getBatches().iterator();
-    
+
         while (iterator.hasNext() && remainingQuantity > 0) {
             Medicine.Batch batch = iterator.next();
             if (batch.getQuantity() <= remainingQuantity) {
@@ -158,15 +219,15 @@ public class InventoryControl {
                 remainingQuantity = 0;
             }
         }
-    
+
         if (remainingQuantity > 0) {
             System.out.println("Insufficient stock to dispense " + quantity + " units of " + medicineName);
             return false;
         }
-    
+
         System.out.println("Successfully dispensed " + quantity + " units of " + medicineName);
         return true;
     }
-    
-    
+
+
 }

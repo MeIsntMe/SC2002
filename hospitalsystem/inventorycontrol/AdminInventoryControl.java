@@ -11,8 +11,23 @@ import hospitalsystem.model.Medicine;
 import hospitalsystem.model.Medicine.Batch;
 import hospitalsystem.model.ReplenishmentRequest;
 
+/**
+ * Manages administrator-specific inventory operations.
+ * Provides functionality for stock management, including adding/removing stock,
+ * managing expired medicine, and handling replenishment requests.
+ *
+ * @author Your Name
+ * @version 1.0
+ * @since 2024-03-16
+ */
 public class AdminInventoryControl extends InventoryControl {
 
+    /**
+     * Interactive method for managing medicine stock levels.
+     * Allows administrators to add or remove stock quantities.
+     *
+     * @param sc Scanner object for reading user input
+     */
     public static void manageStock(Scanner sc) {
         while (true){
             Medicine medicine = getMedicineInput(sc);
@@ -43,6 +58,14 @@ public class AdminInventoryControl extends InventoryControl {
         }
     }
 
+    /**
+     * Adds new stock to a specific medicine batch.
+     * Creates a new batch with specified quantity and expiration date.
+     *
+     * @param medicine Medicine object to add stock to
+     * @param quantity Amount of stock to add
+     * @param sc Scanner object for reading expiration date input
+     */
     public static void addStock(Medicine medicine, int quantity, Scanner sc) {
         
             LocalDate expirationDate = null;
@@ -63,6 +86,13 @@ public class AdminInventoryControl extends InventoryControl {
             System.out.println(medicine.getMedicineName() + " stock updated.");
     }
 
+    /**
+     * Removes specified quantity of stock from medicine batches.
+     * Removes from oldest batches first and handles batch depletion.
+     *
+     * @param medicine Medicine object to remove stock from
+     * @param quantity Amount of stock to remove
+     */
     public static void removeStock(Medicine medicine, int quantity) {
         
         // Check if there is enough stock to remove
@@ -88,6 +118,10 @@ public class AdminInventoryControl extends InventoryControl {
         System.out.println("Stock updated.");
     }
 
+    /**
+     * Removes all expired medicine batches from inventory.
+     * Checks expiration dates against current date and removes expired stock.
+     */
     public static void removeExpiredStock(){
         System.out.println("Checking for expired medicine...");
         boolean hasExpiredStock = false; 
@@ -109,7 +143,13 @@ public class AdminInventoryControl extends InventoryControl {
             System.out.println("No expired medicine found.");
         }
     }
-    
+
+    /**
+     * Adds a new medicine to the inventory system.
+     * Collects medicine details and creates initial stock batch.
+     *
+     * @param sc Scanner object for reading medicine details
+     */
     public static void addNewMedicine(Scanner sc) {
         while (true) {
             
@@ -139,6 +179,11 @@ public class AdminInventoryControl extends InventoryControl {
         }
     }
 
+    /**
+     * Updates the low stock alert level for a specific medicine.
+     *
+     * @param sc Scanner object for reading new alert level
+     */
     public static void updateLowStockAlert(Scanner sc) {
         while (true){
             Medicine medicine = getMedicineInput(sc);
@@ -157,7 +202,13 @@ public class AdminInventoryControl extends InventoryControl {
             if (!HMS.repeat(sc)) break;
         }
     }
-    
+
+    /**
+     * Manages replenishment requests from pharmacists.
+     * Allows administrators to approve or reject requests and update stock accordingly.
+     *
+     * @param sc Scanner object for reading input
+     */
     public static void manageRequests(Scanner sc) {
         
         // View all requests
