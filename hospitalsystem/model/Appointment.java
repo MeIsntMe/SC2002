@@ -7,6 +7,7 @@ public class Appointment implements Comparable<Appointment> {
     private final String appointmentID;
     private Patient patient;
     private final Doctor doctor;
+    private Pharmacist pharmacist;
     private final AppointmentSlot slot;
     private AppointmentStatus status;
     private AppointmentOutcome outcome;
@@ -37,6 +38,13 @@ public class Appointment implements Comparable<Appointment> {
 
     public Doctor getDoctor() {
         return doctor;
+    }
+    public Pharmacist getPharmacist() {
+        return pharmacist;
+    }
+
+    public void setPharmacist(Pharmacist pharmacist) {
+        this.pharmacist = pharmacist;
     }
 
     public AppointmentSlot getSlot() {
