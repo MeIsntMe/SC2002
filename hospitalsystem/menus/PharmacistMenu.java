@@ -4,19 +4,13 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import hospitalsystem.HMS;
+import hospitalsystem.data.Database;
 import hospitalsystem.inventorycontrol.InventoryControl;
+import hospitalsystem.inventorycontrol.PharmacistInventoryControl;
 import hospitalsystem.usercontrol.PharmacistUserControl;
 
 public class PharmacistMenu implements MenuInterface {
-    // can remove this 
-    //private final PharmacistUserControl pharmacistUserControl;
-
-    // Constructor
-    public PharmacistMenu() {
-        // can remove this as all methods are static
-        //this.pharmacistUserControl = new PharmacistUserControl();
-    }
-
+    
     /**
      * Displays the Pharmacist Menu and processes user choices.
      */
@@ -28,15 +22,15 @@ public class PharmacistMenu implements MenuInterface {
             System.out.println("Pharmacist Menu:");
             System.out.println("1. View Appointment Outcome Records");
             System.out.println("2. Update Prescription Status");
-            System.out.println("3. View Medication Inventory");
+            System.out.println("3. View and Update Medication Inventory");
             System.out.println("4. Submit Replenishment Request");
-            System.out.println("5. Logout");
+            System.out.println("5. Check and Handle Expired Medicines");
+            System.out.println("6. Logout");
             System.out.println("=========================================");
-            System.out.print("Enter your choice (1-5): ");
+            System.out.print("Enter your choice (1-6): ");
 
             try {
-                int choice = sc.nextInt();
-                sc.nextLine(); // Consume newline
+                int choice = Integer.parseInt(sc.nextLine());
 
                 switch (choice) {
                     case 1:
@@ -49,18 +43,21 @@ public class PharmacistMenu implements MenuInterface {
                         InventoryControl.displayInventory();
                         break;
                     case 4:
-                        PharmacistUserControl.submitReplenishmentRequest(sc);
+                        PharmacistInventoryControl.submitReplenishmentRequest(sc);
                         break;
                     case 5:
-                        System.out.println("You have successfully logged out.");
+                        PharmacistInventoryControl.checkAndHandleExpiredMedicines();
+                        break;
+                    case 6:
                         HMS.logout();
                         return;
                     default:
                         System.out.println("Invalid choice! Please select a valid option.");
                 }
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input! Please enter a number between 1 and 5.");
-                sc.nextLine(); // Clear the invalid input
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number between 1 and 6.");
+            } catch (Exception e) {
+                System.out.println("An unexpected error occurred: " + e.getMessage());
             }
         }
     }
