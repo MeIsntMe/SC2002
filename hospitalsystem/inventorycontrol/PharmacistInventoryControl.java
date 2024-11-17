@@ -1,11 +1,9 @@
 package hospitalsystem.inventorycontrol;
 
-import java.util.InputMismatchException;
+import hospitalsystem.data.*;
+import hospitalsystem.model.*;
+import java.util.Iterator;
 import java.util.Scanner;
-
-import hospitalsystem.data.Database;
-import hospitalsystem.model.Medicine;
-import hospitalsystem.model.ReplenishmentRequest;
 
 /**
  * Manages pharmacist-specific inventory operations.
@@ -77,10 +75,10 @@ public class PharmacistInventoryControl extends InventoryControl {
         boolean foundExpired = false;
 
         for (Medicine medicine : Database.inventoryMap.values()) {
-            Iterator<Batch> iterator = medicine.getBatches().iterator();
+            Iterator<Medicine.Batch> iterator = medicine.getBatches().iterator();
 
             while (iterator.hasNext()) {
-                Batch batch = iterator.next();
+                Medicine.Batch batch = iterator.next();
                 if (batch.isExpired()) {
                     foundExpired = true;
                     System.out.println("Removing expired batch of " + medicine.getMedicineName() +

@@ -1,15 +1,14 @@
 package hospitalsystem.inventorycontrol;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-
 import hospitalsystem.HMS;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.RequestStatus;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.Medicine.Batch;
 import hospitalsystem.model.ReplenishmentRequest;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 
 /**
  * Manages administrator-specific inventory operations.
@@ -236,7 +235,7 @@ public class AdminInventoryControl extends InventoryControl {
                     System.out.println("Request approved.");
                     
                     // Add stock 
-                    Medicine med = Database.inventoryMap.get(request.getMedicineName());
+                    Medicine med = Database.inventoryMap.get(request.getMedicine().getMedicineName());
                     int requestedQuantity = request.getRequestedQuantity();
                     addStock(med, requestedQuantity, sc);
 
