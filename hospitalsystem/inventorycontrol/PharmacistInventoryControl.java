@@ -188,10 +188,10 @@ public class PharmacistInventoryControl extends InventoryControl {
         boolean foundExpired = false;
 
         for (Medicine medicine : Database.inventoryMap.values()) {
-            Iterator<Batch> iterator = medicine.getBatches().iterator();
+            Iterator<Medicine.Batch> iterator = medicine.getBatches().iterator();
 
             while (iterator.hasNext()) {
-                Batch batch = iterator.next();
+                Medicine.Batch batch = iterator.next();
                 if (batch.isExpired()) {
                     foundExpired = true;
                     System.out.println("Removing expired batch of " + medicine.getMedicineName() +
