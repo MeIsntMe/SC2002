@@ -1,12 +1,48 @@
 package hospitalsystem.model;
 
+/**
+ * Represents a user in the Hospital Management System.
+ * This is an abstract class that serves as a base for specific user types.
+ *
+ * @author An Xian
+ * @version 1.0
+ * @since 2024-11-19
+ */
 public abstract class User {
+    /**
+     * The unique identifier of the user.
+     */
     private final String userID;
+
+    /**
+     * The password of the user.
+     */
     private String password;
-    private String name; 
-    private String gender; 
+
+    /**
+     * The name of the user.
+     */
+    private String name;
+
+    /**
+     * The gender of the user.
+     */
+    private String gender;
+
+    /**
+     * The age of the user.
+     */
     private int age;
 
+    /**
+     * Constructs a User object with the given parameters.
+     *
+     * @param userID The unique identifier of the user.
+     * @param name The name of the user.
+     * @param age The age of the user.
+     * @param gender The gender of the user.
+     * @param password The password of the user.
+     */
     User(String userID, String name, int age, String gender, String password) {
         this.userID = userID;
         this.name = name; 

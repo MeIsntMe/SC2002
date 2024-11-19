@@ -7,13 +7,18 @@ import hospitalsystem.model.User;
 import hospitalsystem.usercontrol.PharmacistUserControl;
 import java.util.Scanner;
 
+/**
+ * Represents the menu for pharmacist users in the Hospital Management System.
+ * Provides options for pharmacists to manage prescriptions, inventory, and replenishment requests.
+ *
+ * @author Shaivi,
+ * @version 1.0
+ * @since 2024-11-19
+ *
+ */
 public class PharmacistMenu implements MenuInterface {
     private final Pharmacist pharmacist;
 
-    /**
-     * Displays the Pharmacist Menu and processes user choices.
-     * Ensures type-safety via checks
-     */
     public PharmacistMenu(User currentUser) { 
         if (!(currentUser instanceof Pharmacist)) {
             throw new IllegalArgumentException("User must be a Pharmacist.");
