@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -60,7 +61,7 @@ public class Database {
     private static final String APPOINTMENT_CSV_HEADER = "AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions";
     private static final String APPOINTMENT_CSV_PATH = "hospitalsystem/data/Appointment.csv";
 
-    private static final String PATIENT_CSV_HEADER = "Patient ID,Name,Date of Birth,Gender,Blood Type,Contact Information";
+    private static final String PATIENT_CSV_HEADER = "Patient ID,Name,Date of Birth,Gender,Blood Type,Phone Number,Email,Password";
     private static final String PATIENT_CSV_PATH = "hospitalsystem/data/Patient_List.csv";
 
     private static final String STAFF_CSV_HEADER = "Staff ID,Name,Role,Gender,Age";
@@ -199,13 +200,14 @@ public class Database {
                 try {
                     String patientID = patientData[0].trim();
                     String name = patientData[1].trim();
-                    String phoneNumber = patientData[2].trim();
-                    LocalDate DOB = LocalDate.parse(patientData[3].trim());
-                    int age = Integer.parseInt(patientData[4].trim());
-                    String gender = patientData[5].trim().toLowerCase();
-                    BloodType bloodType = BloodType.valueOf(patientData[6].trim());
-                    String email = patientData[7].trim();
-                    String password = patientData.length > 8 ? patientData[8].trim() : "password";
+                    LocalDate DOB = LocalDate.parse(patientData[2].trim());
+                    String gender = patientData[3].trim().toLowerCase();
+                    BloodType bloodType = BloodType.valueOf(patientData[4].trim());
+                    String phoneNumber = patientData[5].trim();
+                    String email = patientData[6].trim();
+                    String password = patientData[7].trim();
+                    
+                    int age = (int)ChronoUnit.YEARS.between(DOB, LocalDate.now());
 
                     Patient patient = new Patient(patientID, name, phoneNumber, DOB, age, gender, bloodType, email, password);
                     patientsMap.put(patientID, patient);

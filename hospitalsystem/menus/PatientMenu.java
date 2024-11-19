@@ -56,9 +56,7 @@ public class PatientMenu implements MenuInterface {
 
             try {
                 choice = sc.nextInt();
-                if (sc.hasNext()){
-                    sc.skip(".*");
-                }
+                sc.nextLine();
                 switch (choice){
                     case 1:
                         //View Medical Record
@@ -166,6 +164,7 @@ public class PatientMenu implements MenuInterface {
             chosenSlot.setPatient(patient);
             chosenSlot.setIsAvailable(false);
             Database.appointmentMap.put(chosenSlot.getAppointmentID(), chosenSlot);
+            patient.setAppointments(AppointmentControl.getAppointmentsByPatientID(patient.getID()));
             System.err.println("Successfully scheduled appointment. Pending Doctor's approval.");
             break;
         }
