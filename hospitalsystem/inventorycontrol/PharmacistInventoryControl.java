@@ -2,7 +2,6 @@ package hospitalsystem.inventorycontrol;
 
 import hospitalsystem.data.*;
 import hospitalsystem.model.*;
-import java.util.Iterator;
 import java.util.Scanner;
 
 /**

@@ -1,11 +1,8 @@
 package hospitalsystem.usercontrol;
 
 import hospitalsystem.appointmentcontrol.AppointmentControl;
-import hospitalsystem.data.Database;
-import hospitalsystem.enums.UserType;
 import hospitalsystem.model.MedicalRecord;
 import hospitalsystem.model.Patient;
-import hospitalsystem.model.User;
 import java.util.Scanner;
 
 /**

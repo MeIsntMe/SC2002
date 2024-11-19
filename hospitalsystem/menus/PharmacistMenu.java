@@ -1,7 +1,6 @@
 package hospitalsystem.menus;
 
 import hospitalsystem.HMS;
-import hospitalsystem.inventorycontrol.InventoryControl;
 import hospitalsystem.inventorycontrol.PharmacistInventoryControl;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;

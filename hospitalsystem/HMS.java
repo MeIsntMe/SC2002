@@ -6,10 +6,7 @@ import hospitalsystem.data.Database;
 import hospitalsystem.usercontrol.AdminUserControl;
 import hospitalsystem.model.User;
 import hospitalsystem.enums.UserType;
-import hospitalsystem.menus.AdminMenu;
-import hospitalsystem.menus.DoctorMenu;
-import hospitalsystem.menus.PatientMenu;
-import hospitalsystem.menus.PharmacistMenu;
+import hospitalsystem.menus.*;
 import hospitalsystem.menus.MenuInterface;
 
 public class HMS {
