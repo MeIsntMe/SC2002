@@ -22,7 +22,7 @@ import java.util.Scanner;
  * This class interacts directly with the system database to ensure
  * real-time accuracy of pharmaceutical records and inventory status.
  *
- * @author Shaivi
+ * @author An Xian
  * @version 1.0
  * @since 2024-03-16
  */
@@ -141,110 +141,4 @@ public class PharmacistUserControl {
         }
     }
 
-
-
-//    /**
-//      * Interactive method to submit a replenishment request and view all requests.
-//      * Prompts the user for input and validates the request.
-//      *
-//      * @param sc Scanner instance for user input.
-//      */
-//     public static void submitReplenishmentRequest(Scanner sc) {
-//         System.out.println("Enter the medication name to request replenishment: ");
-//         String medicineName = sc.nextLine();
-
-//         if (!Database.inventoryMap.containsKey(medicineName)) {
-//             System.out.println("Medicine " + medicineName + " does not exist in the inventory.");
-//             return;
-//         }
-
-//         Medicine medicine = Database.inventoryMap.get(medicineName);
-
-//         System.out.println("Enter the quantity for replenishment: ");
-//         int quantity;
-//         try {
-//             quantity = Integer.parseInt(sc.nextLine());
-//             if (quantity <= 0) {
-//                 System.out.println("Invalid quantity. Please enter a positive number.");
-//                 return;
-//             }
-//         } catch (NumberFormatException e) {
-//             System.out.println("Invalid input. Please enter a valid numerical quantity.");
-//             return;
-//         }
-
-//         // Delegate to the programmatic method
-//         submitReplenishmentRequestForMedicine(medicine, quantity);
-
-//         // View all replenishment requests
-//         displayReplenishmentRequests();
-//     }
-
-//     /**
-//      * Displays all replenishment requests in a tabular format.
-//      */
-//     private static void displayReplenishmentRequests() {
-//         System.out.println("\nReplenishment Request Status:");
-//         if (Database.requestMap.isEmpty()) {
-//             System.out.println("No replenishment requests have been submitted.");
-//         } else {
-//             System.out.printf("%-10s %-20s %-15s %-15s%n", "Request ID", "Medicine Name", "Quantity", "Status");
-//             System.out.println("-----------------------------------------------------------------");
-//             for (ReplenishmentRequest req : Database.requestMap.values()) {
-//                 System.out.printf("%-10d %-20s %-15d %-15s%n",
-//                         req.getRequestID(),
-//                         req.getMedicine().getMedicineName(),
-//                         req.getRequestedQuantity(),
-//                         req.getStatus());
-//             }
-//         }
-//     }
-    
-
-//     /**
-//      * Checks for expired medicines, removes them from inventory, and submits replenishment requests if necessary.
-//      */
-//     public static void checkAndHandleExpiredMedicines() {
-//         System.out.println("Checking for expired medicines...");
-//         boolean foundExpired = false;
-
-//         for (Map.Entry<String, Medicine> entry : Database.inventoryMap.entrySet()) {
-//             Medicine medicine = entry.getValue();
-//             Iterator<Batch> iterator = medicine.getBatches().iterator();
-//             while (iterator.hasNext()) {
-//                 Batch batch = iterator.next();
-//                 if (batch.isExpired()) {
-//                     foundExpired = true;
-//                     System.out.println("Removing expired batch of " + medicine.getMedicineName() +
-//                                     " (Expiration Date: " + batch.getExpirationDate() + ").");
-//                     iterator.remove();
-//                 }
-//             }
-
-//             // Check if stock is low after removing expired batches
-//             if (medicine.getIsLowStock()) {
-//                 System.out.println("Low stock detected for " + medicine.getMedicineName() + ". Submitting replenishment request.");
-//                 submitReplenishmentRequestForMedicine(medicine, medicine.getMinStockLevel() * 2); // Request double the minimum level
-//             }
-//         }
-
-//         if (!foundExpired) {
-//             System.out.println("No expired medicines found.");
-//         }
-//     }
-
-//     /**
-//      * Programmatic method to submit a replenishment request for a specific medicine.
-//      * Typically called by other functions, such as automated inventory checks.
-//      *
-//      * @param medicine Medicine object for which to request replenishment.
-//      * @param quantity Quantity requested.
-//      */
-//     public static void submitReplenishmentRequestForMedicine(Medicine medicine, int quantity) {
-//         int requestID = Database.requestMap.size() + 1; // Simple auto-increment logic
-//         ReplenishmentRequest request = new ReplenishmentRequest(requestID, medicine, quantity);
-//         Database.requestMap.put(requestID, request);
-//         System.out.printf("Replenishment request submitted for medicine: %s, quantity: %d%n", medicine.getMedicineName(), quantity);
-//     }
 }
-

@@ -99,41 +99,8 @@ public class DoctorUserControl extends UserControl {
      * @param patient Patient whose record is to be displayed
      */
     static private void displayPatientMedicalRecord(Patient patient) {
-        // Display basic patient info
-        System.out.println("Medical Record for Patient: " + patient.getName());
-        System.out.println("Patient ID: " + patient.getID());
-        System.out.println("Date of Birth: " + patient.getDOB());
-        System.out.println("Age: " + patient.getAge());
-        System.out.println("Gender: " + patient.getGender());
-        System.out.println("Blood Type: " + patient.getBloodType());
-
-        // Display appointment history
-        List<Appointment> appointments = patient.getAppointments();
-        if (appointments == null || appointments.isEmpty()) {
-            System.out.println("\nNo appointments found for the patient.");
-            return;
-        }
-
-        System.out.println("\nAppointment History:");
-        for (Appointment apt : appointments) {
-            System.out.println("----------------------------------------");
-            System.out.println("Appointment ID: " + apt.getAppointmentID());
-            System.out.println("Doctor: " + apt.getDoctor().getName());
-            System.out.println("Date: " + apt.getSlot().getDateTime().toLocalDate());
-            System.out.println("Time: " + apt.getSlot().getDateTime().toLocalTime());
-            System.out.println("Status: " + apt.getStatus());
-            System.out.println("Consultation Notes: " + apt.getConsultationNotes());
-
-            // Display prescriptions if any
-            Prescription prescription = apt.getPrescription();
-            if (prescription != null) {
-                System.out.println("Prescriptions:");
-                for (Medicine medicine : prescription.getMedicineList().keySet()) {
-                    System.out.println("- Medicine: " + medicine.getMedicineName());
-                    System.out.println("  Quantity: " + prescription.getMedicineList().get(medicine));
-                }
-            }
-        }
+        System.out.println("================= Patient Details =================");
+        System.out.println(getMedicalRecordString(patient));
     }
 
     /**

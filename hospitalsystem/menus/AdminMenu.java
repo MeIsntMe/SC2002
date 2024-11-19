@@ -13,7 +13,7 @@ import hospitalsystem.usercontrol.AdminUserControl;
 public class AdminMenu implements MenuInterface {
     
     // Instance variables 
-    private static Scanner sc;
+    private final Scanner sc;
     private final Administrator admin;
 
     // Constructor
@@ -22,6 +22,7 @@ public class AdminMenu implements MenuInterface {
             throw new IllegalArgumentException("User must be a Administrator ");
         }
         this.admin = (Administrator) currentUser;
+        this.sc = new Scanner(System.in);
     }
 
 
@@ -84,8 +85,8 @@ public class AdminMenu implements MenuInterface {
             try{
                 int choice = sc.nextInt();
                 switch (choice) {
-                    case 1 -> AdminUserControl.addStaff(sc);
-                    case 2 -> AdminUserControl.removeStaff(sc);
+                    case 1 -> AdminUserControl.addUser(sc);
+                    case 2 -> AdminUserControl.removeUser(sc);
                     case 3 -> AdminUserControl.updateStaffDetails(sc);
                     case 4 -> AdminUserControl.displayStaffList(sc);
                     case 5 -> {sc.close(); return;}

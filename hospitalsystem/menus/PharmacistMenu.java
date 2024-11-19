@@ -33,8 +33,9 @@ public class PharmacistMenu implements MenuInterface {
             System.out.println("2. Update Prescription Status");
             System.out.println("3. View Medication Inventory");
             System.out.println("4. Submit Replenishment Request");
-            System.out.println("5. Check and Handle Expired Medicines");
-            System.out.println("6. Logout");
+            System.out.println("5. Submit Replenishment Request for All Low Stock Medicines");
+            System.out.println("6. View All Replenishment Requests");
+            System.out.println("7. Logout");
             System.out.println("=========================================");
             System.out.print("Enter your choice (1-6): ");
 
@@ -52,18 +53,21 @@ public class PharmacistMenu implements MenuInterface {
                         break;
                     case 3:
                         // Views medication inventory
-                        InventoryControl.displayInventory();
+                        PharmacistInventoryControl.displayInventory();
                         break;
                     case 4:
-                        // Submit medicine replenishment request for admin approval
+                        // Submit replenishment request (manual selection of medicine)
                         PharmacistInventoryControl.submitReplenishmentRequest(sc);
                         break;
                     case 5:
-                        // Novel Functionality: Included medicine expiry date
-                        // Function checks and removes medication that has expired
-                        PharmacistInventoryControl.checkAndHandleExpiredMedicines();
+                        // Submit replenishment request automatically for all low stock medicines 
+                        PharmacistInventoryControl.autoRequestLowStockReplenishment(); 
                         break;
-                    case 6:
+                    case 6: 
+                        //View all replenishment requests 
+                        PharmacistInventoryControl.displayAllRequests();
+                        break;
+                    case 7:
                         HMS.logout();
                         sc.close();
                         return;

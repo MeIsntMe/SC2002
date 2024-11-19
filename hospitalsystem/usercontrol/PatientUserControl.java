@@ -38,7 +38,8 @@ public class PatientUserControl extends UserControl {
             System.out.println("displayPatientDetails only accepts Patient object.");
             return;
         }
-        System.out.println(PatientUserControl.getMedicalRecordString(patient));
+        System.out.println("================= Patient Details =================");
+        System.out.println(getMedicalRecordString(patient));
     }
 
     /**

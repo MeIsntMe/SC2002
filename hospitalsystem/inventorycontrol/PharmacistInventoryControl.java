@@ -16,27 +16,6 @@ import java.util.Scanner;
  */
 public class PharmacistInventoryControl extends InventoryControl {
 
-    // // Method to manually submit replenishment request
-    // public static void manualRequest(Scanner sc){
-    //     Medicine medicine = getMedicineInput(sc);
-    //     submitReplenishmentRequest(medicine, sc);
-    // }
-
-    // // Method to automatically submit replenishment requests for low stock medicines
-    // public static void autoRequestLowStockReplenishment(Scanner sc) {
-    //     System.out.println("Checking for medications with low stock...");
-    //     boolean foundLowStock = false;
-
-    //     for (Medicine medicine : Database.inventoryMap.values()) {
-    //         if (medicine.getIsLowStock()) {
-    //             System.out.println(medicine.getMedicineName() + "has low stock. Requesting replenishment...");
-    //             submitReplenishmentRequest(medicine, sc);
-    //         } 
-    //     }
-    //     if (!foundLowStock) 
-    //         System.out.println("No low stock medicine found. ");
-    // }
-
     /**
      * Interactive method to submit a replenishment request and view all requests.
      * Prompts the user for input and validates the request.
@@ -71,10 +50,9 @@ public class PharmacistInventoryControl extends InventoryControl {
         submitReplenishmentRequestForMedicine(medicine, quantity);
     
         // View all replenishment requests
-        displayReplenishmentRequests();
+        displayAllRequests();
     }
     
-
     /**
      * Programmatic method to submit a replenishment request for a specific medicine.
      * Typically called by other functions, such as automated inventory checks.
@@ -88,76 +66,6 @@ public class PharmacistInventoryControl extends InventoryControl {
         Database.requestMap.put(requestID, request);
         System.out.printf("Replenishment request submitted for medicine: %s, quantity: %d%n",
                 medicine.getMedicineName(), quantity);
-    }
-    
-
-    /**
-     * Displays all replenishment requests in a tabular format.
-     */
-    private static void displayReplenishmentRequests() {
-        System.out.println("\nReplenishment Request Status:");
-        if (Database.requestMap.isEmpty()) {
-            System.out.println("No replenishment requests have been submitted.");
-        } else {
-            System.out.printf("%-10s %-20s %-15s %-15s%n", "Request ID", "Medicine Name", "Quantity", "Status");
-            System.out.println("-----------------------------------------------------------------");
-            for (ReplenishmentRequest req : Database.requestMap.values()) {
-                System.out.printf("%-10d %-20s %-15d %-15s%n",
-                        req.getRequestID(),
-                        req.getMedicine().getMedicineName(),
-                        req.getRequestedQuantity(),
-                        req.getStatus());
-            }
-        }
-    }
-
-
-    // can remove later 
-    // public static void submitReplenishmentRequest(Medicine medicine, Scanner sc) {
-    //     try {
-    //         System.out.print("Enter quantity for replenishment: ");
-    //         int quantity = sc.nextInt();
-    //         sc.nextLine(); 
-
-    //         int requestID = Database.requestMap.size() + 1;
-
-    //         // Submit request
-    //         ReplenishmentRequest request = new ReplenishmentRequest(requestID, medicine.getMedicineName(), quantity);
-    //         Database.requestMap.put(requestID, request);
-    //         System.out.println("Submitted: Request ID " + requestID);
-    //     } catch (InputMismatchException e) {
-    //         System.out.println("Invalid quantity. Please enter a number.");
-    //     }
-    // }
-    
-    /**
-     * Manually submit a replenishment request for a specific medicine.
-     *
-     * @param sc Scanner instance for user input.
-     */
-    public static void manualRequest(Scanner sc) {
-        Medicine medicine = getMedicineInput(sc);
-    
-        if (medicine == null) {
-            System.out.println("Medicine not found in inventory.");
-            return;
-        }
-    
-        System.out.print("Enter the quantity for replenishment: ");
-        int quantity;
-        try {
-            quantity = Integer.parseInt(sc.nextLine());
-            if (quantity <= 0) {
-                System.out.println("Invalid quantity. Please enter a positive number.");
-                return;
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid input. Please enter a valid numerical quantity.");
-            return;
-        }
-    
-        // Delegate to the programmatic method
-        submitReplenishmentRequestForMedicine(medicine, quantity);
     }
 
     /**
@@ -177,38 +85,6 @@ public class PharmacistInventoryControl extends InventoryControl {
 
         if (!foundLowStock) {
             System.out.println("No low-stock medicines found.");
-        }
-    }
-
-    /**
-     * Check for expired medicines, remove them, and submit replenishment requests if needed.
-     */
-    public static void checkAndHandleExpiredMedicines() {
-        System.out.println("Checking for expired medicines...");
-        boolean foundExpired = false;
-
-        for (Medicine medicine : Database.inventoryMap.values()) {
-            Iterator<Medicine.Batch> iterator = medicine.getBatches().iterator();
-
-            while (iterator.hasNext()) {
-                Medicine.Batch batch = iterator.next();
-                if (batch.isExpired()) {
-                    foundExpired = true;
-                    System.out.println("Removing expired batch of " + medicine.getMedicineName() +
-                            " (Expiration Date: " + batch.getExpirationDate() + ").");
-                    iterator.remove();
-                }
-            }
-
-            // Check stock and request replenishment if low after removing expired batches
-            if (medicine.getIsLowStock()) {
-                System.out.println("Low stock detected for: " + medicine.getMedicineName());
-                submitReplenishmentRequestForMedicine(medicine, medicine.getMinStockLevel() * 2);
-            }
-        }
-
-        if (!foundExpired) {
-            System.out.println("No expired medicines found.");
         }
     }
 

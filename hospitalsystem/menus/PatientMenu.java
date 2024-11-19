@@ -22,7 +22,7 @@ import java.util.Scanner;
 public class PatientMenu implements MenuInterface {
     
     // Instance variables 
-    private static Scanner sc;
+    private final Scanner sc;
     private final Patient patient;
     private int choice;
 
@@ -103,17 +103,17 @@ public class PatientMenu implements MenuInterface {
                 System.out.println("Invalid input. Please enter a number between 1-9.");
             } catch (Exception e) {
                 System.out.println("An error has occurred: " + e.getMessage());
-                scanner.nextLine();
+                sc.nextLine();
             }
         }
     }
 
     public void handleDisplayMedicalRecord(){
-        PatientUserControl.displayUserDetails(this.patient);
+        PatientUserControl.displayPatientDetails(this.patient);
     }
 
     public void handleUpdatePersonalInformation(){
-        PatientUserControl.updateUserDetails(this.patient);
+        PatientUserControl.updatePatientDetails(this.patient);
     }
 
     public List<Appointment> handleViewAppointmentSlots(){
