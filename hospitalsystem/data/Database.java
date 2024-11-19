@@ -1,5 +1,11 @@
 package hospitalsystem.data;
 
+import hospitalsystem.enums.AppointmentStatus;
+import hospitalsystem.enums.BloodType;
+import hospitalsystem.enums.PrescriptionStatus;
+import hospitalsystem.enums.UserType;
+import hospitalsystem.model.*;
+import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,20 +13,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
-
-import hospitalsystem.enums.AppointmentStatus;
-import hospitalsystem.enums.BloodType;
-import hospitalsystem.enums.PrescriptionStatus;
-import hospitalsystem.enums.UserType;
-import hospitalsystem.model.*;
-import hospitalsystem.model.Appointment.AppointmentSlot;
 
 /**
  * Database management class for the hospital system.
@@ -65,7 +66,7 @@ public class Database {
     private static final String STAFF_CSV_HEADER = "Staff ID,Name,Role,Gender,Age";
     private static final String STAFF_CSV_PATH = "hospitalsystem/data/Staff_List.csv";
 
-    private static final String INVENTORY_CSV_HEADER = "Medicine Name,Initial Stock,Low Stock Level Alert";
+    private static final String INVENTORY_CSV_HEADER = "Medicine Name,Initial Stock,Low Stock Level Alert,Batches Quantity,Batches Expiry Date";
     private static final String INVENTORY_CSV_PATH = "hospitalsystem/data/Medicine_List.csv";
 
     // Public interface methods for loading data
@@ -284,8 +285,8 @@ public class Database {
                     String instructions = inventoryData[2].trim();
 
                     // Parse batch data
-                    int initialStock = Integer.parseInt(inventoryData[3].trim());
-                    LocalDate expirationDate = LocalDate.parse(inventoryData[4].trim());
+                    String batchesQuantity = inventoryData[3].trim();
+                    String batchesDates = inventoryData[4].trim();
 
                     // Create medicine if it doesn't exist
                     Medicine medicine = inventoryMap.get(medicineName);
@@ -295,9 +296,7 @@ public class Database {
                     }
 
                     // Add batch to the medicine
-                    Medicine.Batch batch = medicine.new Batch(initialStock, expirationDate);
-                    List<Medicine.Batch> batches = new ArrayList<>(medicine.getBatches());
-                    batches.add(batch);
+                    List<Medicine.Batch> batches = loadBatchesFromCSVData(medicine, batchesQuantity, batchesDates);
                     medicine.setBatch(batches);
 
                 } catch (Exception e) {
@@ -309,6 +308,20 @@ public class Database {
         } catch (FileNotFoundException e) {
             System.out.println("CSV file not found: " + e.getMessage());
         }
+    }
+
+    private static List<Medicine.Batch> loadBatchesFromCSVData(Medicine medicine, String batchesQuantity, String batchesDates){
+        List<Medicine.Batch> batches = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        if (!batchesQuantity.equals("")){
+            int[] quantities = Arrays.stream(batchesQuantity.split("\\|")).mapToInt(Integer::parseInt).toArray();
+            LocalDate[] expiryDates = Arrays.stream(batchesDates.split("\\|")).map(dateStr -> LocalDate.parse(dateStr, formatter)).toArray(LocalDate[]::new);
+            int batchSize = quantities.length;
+            for (int i = 0; i < batchSize; i++) {
+                batches.add(medicine.new Batch(quantities[i], expiryDates[i]));
+            }
+        }
+        return batches;
     }
 
     /**
@@ -597,14 +610,16 @@ public class Database {
                     .forEach(medicine -> {
                         try {
                             // Calculate total stock from all batches
-                            int totalStock = medicine.getBatches().stream()
-                                    .mapToInt(batch -> batch.getQuantity())
-                                    .sum();
+                            List<Medicine.Batch> batches = medicine.getBatches();
+                            String batchesQuantity = batches.stream().map(batch -> String.valueOf(batch.getQuantity())).collect(Collectors.joining("\\|"));
+                            String batchesDates = batches.stream().map(batch -> batch.getExpirationDate().toString()).collect(Collectors.joining("\\|"));
 
-                            String line = String.format("%s,%d,%d",
+                            String line = String.format("%s,%d,%d,%s,%s",
                                     escapeCSV(medicine.getMedicineName()),
-                                    totalStock,
-                                    medicine.getIsLowStock()
+                                    medicine.getMinStockLevel(),
+                                    medicine.getIsLowStock(),
+                                    batchesQuantity, 
+                                    batchesDates
                             );
                             bw.write(line);
                             bw.newLine();
