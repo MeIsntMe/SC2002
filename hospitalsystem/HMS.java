@@ -7,9 +7,26 @@ import hospitalsystem.model.User;
 import hospitalsystem.usercontrol.AdminUserControl;
 import java.util.Scanner;
 
+/**
+ * The main class for the Hospital Management System (HMS).
+ * It provides the entry point and handles user interactions, login, and data management.
+ *
+ * @author An Xian, Gracelynn, Leo
+ * @version 1.0
+ * @since 2024-11-19
+ */
 public class HMS {
-
+    /**
+     * The currently logged-in user.
+     */
     public static User currentUser;
+
+    /**
+     * The main method that serves as the entry point of the HMS application.
+     * It displays the main menu, handles user input, and manages the application flow.
+     *
+     * @param args The command-line arguments.
+     */
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
@@ -52,6 +69,14 @@ public class HMS {
         }
     }
 
+    /**
+     * Handles the user login process.
+     * Prompts the user for their role, user ID, and password.
+     * Validates the provided credentials and sets the currentUser if login is successful.
+     *
+     * @param sc The Scanner object for user input.
+     * @return The UserType if login is successful, or null if login fails.
+     */
     public static UserType login(Scanner sc) {  
         //Returns UserType if login successful, else returns null 
 
@@ -92,6 +117,10 @@ public class HMS {
         }
     }
 
+    /**
+     * Handles the user logout process.
+     * Saves all data, clears loaded data, and sets currentUser to null.
+     */
     public static void logout() {
         try {
             Database.saveAllData(); // Save all changes before logout
@@ -103,6 +132,12 @@ public class HMS {
         }
     }
 
+    /**
+     * Prompts the user to reset their password if the default password is detected.
+     *
+     * @param user The User object representing the currently logged-in user.
+     * @param sc The Scanner object for user input.
+     */
     public static void resetPassword(User user, Scanner sc){
 
         // Check if first time log in
@@ -117,7 +152,12 @@ public class HMS {
         }
     }
 
-    // Function used throughout system to allow users to repeat action 
+    /**
+     * Prompts the user to confirm if they want to repeat an action.
+     *
+     * @param sc The Scanner object for user input.
+     * @return true if the user wants to repeat the action, false otherwise.
+     */
     public static boolean repeat(Scanner sc) {
         System.out.println("Would you like to repeat? (y/n): ");
         while (true) {
@@ -132,7 +172,11 @@ public class HMS {
         }
     }
 
-    // Database handlers
+    /**
+     * Loads the required data based on the user type.
+     *
+     * @param userType The UserType representing the user's role.
+     */
     private static void loadRequiredData(UserType userType) {
         clearLoadedData(); // Clear the minimal staff data first
 
@@ -163,6 +207,10 @@ public class HMS {
                 break;
         }
     }
+
+    /**
+     * Clears all loaded data from the local database.
+     */
     private static void clearLoadedData() {
         Database.patientsMap.clear();
         Database.doctorsMap.clear();
