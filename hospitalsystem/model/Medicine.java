@@ -1,7 +1,6 @@
 package hospitalsystem.model;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,9 +12,9 @@ public class Medicine {
     
 
     // Constructor
-    public Medicine(String medicineName, int minimumStockLevel, String instructions) {
+    public Medicine(String medicineName, int minimumStockLevel, String instructions, List<Batch> batches) {
         this.medicineName = medicineName;
-        this.batches = new ArrayList<>(); //This should be retrieve from csv
+        this.batches = batches;
         this.minimumStockLevel = minimumStockLevel;
         this.instructions = instructions;
         //Get rid of expired batches
