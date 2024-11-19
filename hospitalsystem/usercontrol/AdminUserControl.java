@@ -1,10 +1,17 @@
 package hospitalsystem.usercontrol;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
 import hospitalsystem.HMS;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.UserType;
 import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Doctor;
+import hospitalsystem.model.Patient;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
 import java.util.Collection;
@@ -197,11 +204,11 @@ public class AdminUserControl extends UserControl {
      *
      * @param sc Scanner for reading input
      */
-    public static void addStaff(Scanner sc){
+    public static void addUser(Scanner sc){
         while (true) {
 
             // Prompt for role and details
-            UserType role = getStaffRoleInput(sc);
+            UserType role = getRoleInput(sc);
             System.out.print("Enter name: ");
             String name = sc.nextLine();
             System.out.print("Enter gender: ");
@@ -216,6 +223,14 @@ public class AdminUserControl extends UserControl {
 
             // Create and add user
             switch (role) {
+                case PATIENT: 
+                    LocalDate DOB = LocalDate.of(2000, 1, 1);
+                    String email = "";
+                    String phoneNumber = "";
+                    BloodType bloodType = BloodType.UNDEFINED; //default
+                    Patient patient = new Patient(userID, name, phoneNumber, DOB, age, gender, bloodType, email, password);
+                    Database.patientsMap.put(userID, patient);
+                    break;
                 case DOCTOR: 
                     Doctor doc = new Doctor(userID, name, age, gender, password);
                     Database.doctorsMap.put(userID, doc);
@@ -295,7 +310,7 @@ public class AdminUserControl extends UserControl {
      *
      * @param sc Scanner for reading input
      */
-    public static void removeStaff(Scanner sc){
+    public static void removeUser(Scanner sc){
         while (true) {
 
             // Prompt for role and ID
@@ -306,10 +321,11 @@ public class AdminUserControl extends UserControl {
             // Remove user
             boolean removed = false;
             switch (role) {
+                case PATIENT -> removed = removeFromMap(Database.patientsMap, userID);
                 case DOCTOR -> removed = removeFromMap(Database.doctorsMap, userID);
                 case PHARMACIST -> removed = removeFromMap(Database.pharmsMap, userID);
                 case ADMINISTRATOR -> removed = removeFromMap(Database.adminsMap, userID);
-                default -> System.out.println("Invalid input. Please enter Doctor, Pharmacist or Administrator.");
+                default -> System.out.println("Invalid input. Please enter Doctor, Pharmacist, Administrator or Patient.");
             }
             if (removed) {System.out.println("Staff member with ID " + userID + " has been successfully removed."); }
             else {System.out.println("Staff member with ID " + userID + " not found."); }
@@ -360,6 +376,38 @@ public class AdminUserControl extends UserControl {
                 }
             } catch (Exception e) {
                 System.out.println("Invalid input. Enter a number between 1 and 4.");
+            }
+        }
+    }
+
+    /**
+     * Gets role input from user through interactive console.
+     * Provides numbered menu for role selection:
+     * 1. Patient
+     * 2. Doctor
+     * 3. Pharmacist
+     * 4. Admin
+     *
+     * Validates input and handles invalid selections.
+     *
+     * @param scanner Scanner object for reading user input
+     * @return selected UserType enum value
+     */
+    public static UserType getRoleInput(Scanner scanner) {
+        while (true) {
+            System.out.println("Select role: 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
+            int role;
+            try {
+                role = scanner.nextInt(); 
+                switch (role) {
+                    case 1 -> {return UserType.PATIENT;}
+                    case 2 -> {return UserType.DOCTOR;}
+                    case 3 -> {return UserType.PHARMACIST;}
+                    case 4 -> {return UserType.ADMINISTRATOR;}
+                    default -> System.out.println("Invalid role number specified. Please enter a number between 1 and 4.");
+                }
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please enter a number between 1 and 4.");
             }
         }
     }

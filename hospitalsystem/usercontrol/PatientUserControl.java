@@ -29,13 +29,13 @@ public class PatientUserControl extends UserControl {
      * @param user User object (must be Patient type)
      * @throws IllegalArgumentException if user is not a Patient type
      */
-    static public void displayUserDetails(User user){
+    static public void displayPatientDetails(User user){
         Patient patient;
         if (user instanceof Patient){
             patient = (Patient) user;
         }
         else{
-            System.out.println("displayUserDetails only accepts Patient object.");
+            System.out.println("displayPatientDetails only accepts Patient object.");
             return;
         }
         System.out.println(PatientUserControl.getMedicalRecordString(patient));
@@ -53,13 +53,13 @@ public class PatientUserControl extends UserControl {
      * @throws IllegalArgumentException if user is not a Patient type
      * @throws NullPointerException if user is null
      */
-    static public void updateUserDetails(User user){
+    static public void updatePatientDetails(User user){
         Patient patient;
         if (user instanceof Patient){
             patient = (Patient) user;
         }
         else{
-            System.out.println("updateUserDetails only accepts Patient object.");
+            System.out.println("updatePatientDetails only accepts Patient object.");
             return;
         }
         while(true){

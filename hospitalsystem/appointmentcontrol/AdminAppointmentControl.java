@@ -8,7 +8,7 @@ import hospitalsystem.model.Appointment;
  * Manages administrator-specific appointment operations in the hospital system.
  * Provides system-wide appointment oversight and management capabilities.
  *
- * @author Your Name
+ * @author An Xian
  * @version 1.0
  * @since 2024-03-16
  */

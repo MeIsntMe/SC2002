@@ -24,8 +24,9 @@ public class PharmacistMenu implements MenuInterface {
 
     @Override
     public void displayMenu() {
-        Scanner sc = new Scanner(System.in);
         while (true) {
+
+            Scanner sc = new Scanner(System.in);
             System.out.println("=========================================");
             System.out.println("Pharmacist Menu:");
             System.out.println("1. View Appointment Outcome Records");
@@ -64,6 +65,7 @@ public class PharmacistMenu implements MenuInterface {
                         break;
                     case 6:
                         HMS.logout();
+                        sc.close();
                         return;
                     default:
                         System.out.println("Invalid choice! Please select a valid option.");

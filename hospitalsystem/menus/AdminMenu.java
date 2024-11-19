@@ -28,11 +28,9 @@ public class AdminMenu implements MenuInterface {
     @Override
     public void displayMenu(){
         while (true) {
-            Scanner sc = new Scanner(System.in);
-
             System.out.println("=========================================");
             System.out.println("Administrator Menu:");
-            System.out.println("1. View and Manage Hospital Staff");
+            System.out.println("1. View and Manage Staff and Patients");
             System.out.println("2. View Appointment details");
             System.out.println("3. View and Manage Medication Inventory");
             System.out.println("4. Approve Replenishment Requests");
@@ -42,9 +40,9 @@ public class AdminMenu implements MenuInterface {
                 int choice = Integer.parseInt(sc.nextLine());
                 switch (choice) {
                     case 1:
-                        AdminMenu.manageStaffMenu(sc);
+                        AdminMenu.manageUserMenu(sc);
                         break;
-                    case 2:
+                    case 2: 
                         AdminAppointmentControl.viewAllAppointments(); 
                         break;
                     case 3:
@@ -72,12 +70,12 @@ public class AdminMenu implements MenuInterface {
     // change Staff Control to User control and let admin crud patient 
 
     // MANAGE STAFF MENU
-    public static void manageStaffMenu(Scanner sc) {
+    public static void manageUserMenu(Scanner sc) {
         while (true) {            
             System.out.println("=========================================");
             System.out.println("Staff Management: ");
-            System.out.println("1. Add staff");
-            System.out.println("2. Remove staff");
+            System.out.println("1. Add staff or patient");
+            System.out.println("2. Remove staff or patient");
             System.out.println("3. Update staff details");  
             System.out.println("4. Display filtered list of staff");
             System.out.println("5. Exit Staff Management");

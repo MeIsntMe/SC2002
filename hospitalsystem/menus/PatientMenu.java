@@ -40,21 +40,20 @@ public class PatientMenu implements MenuInterface {
     
     @Override
     public void displayMenu(){
-        boolean continueFlag = true;
-        sc = new Scanner(System.in);
-        System.out.println("=========================================");
-        System.out.println("Patient Menu: ");
-        System.out.println("1. View Medical Record");
-        System.out.println("2. Update Personal Information ");
-        System.out.println("3. View Available Slots for a Doctor ");
-        System.out.println("4. Schedule Appointment with a Doctor ");
-        System.out.println("5. Reschedule Appointment ");
-        System.out.println("6. Cancel Appointment ");
-        System.out.println("7. View Scheduled Appointments ");
-        System.out.println("8. Display Past Appointment Outcomes ");
-        System.out.println("9. Logout ");
-        System.out.print("Enter choice (1-9): ");
-        while (continueFlag){
+        while (true) {
+            System.out.println("=========================================");
+            System.out.println("Patient Menu: ");
+            System.out.println("1. View Medical Record");
+            System.out.println("2. Update Personal Information ");
+            System.out.println("3. View Available Slots for a Doctor ");
+            System.out.println("4. Schedule Appointment with a Doctor ");
+            System.out.println("5. Reschedule Appointment ");
+            System.out.println("6. Cancel Appointment ");
+            System.out.println("7. View Scheduled Appointments ");
+            System.out.println("8. Display Past Appointment Outcomes ");
+            System.out.println("9. Logout ");
+            System.out.print("Enter choice (1-9): ");
+
             try {
                 choice = sc.nextInt();
                 if (sc.hasNext()){
@@ -89,26 +88,22 @@ public class PatientMenu implements MenuInterface {
                         //View scheduled appointments
                         handleViewScheduledAppointments();
                         break;
-                
                     case 8:
                         //Display past appointment outcomes
                         handleDisplayPastAppointmentOutcomes();
                         break;
-                
                     case 9:
                         //logout
-                        continueFlag = false;
                         HMS.logout();
-                        break;
-                
+                        return;
                     default:
-                        System.out.println("=========================================");
-                        System.out.println("Invalid choice, try again"); 
+                        System.out.println("Invalid choice, try again.");
                 }
-            } 
-            catch (Exception e) {
-                System.out.println("=====================================");
-                System.out.println("An error has occurred: " + e);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number between 1-9.");
+            } catch (Exception e) {
+                System.out.println("An error has occurred: " + e.getMessage());
+                scanner.nextLine();
             }
         }
     }
