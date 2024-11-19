@@ -193,53 +193,25 @@ public class Database {
      */
     private static void loadPatientfromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
-            scanner.nextLine(); // Skip the header
+            scanner.nextLine(); // Skip header
             while (scanner.hasNextLine()) {
-                String[] patientData = scanner.nextLine().split(",");
-                try {
-                    // Parse basic data
-                    String patientID = patientData[0].trim();
-                    String name = patientData[1].trim();
-                    LocalDate DOB = LocalDate.parse(patientData[2].trim());
-                    String gender = patientData[3].trim().toLowerCase();
+                String[] data = scanner.nextLine().split(",");
+                String id = data[0].trim();
+                String name = data[1].trim();
+                LocalDate dob = LocalDate.parse(data[2].trim());
+                String gender = data[3].trim();
+                BloodType bloodType = BloodType.valueOf(data[4].trim().replace("+", "_POSITIVE").replace("-", "_NEGATIVE"));
+                String phone = data[5].trim();
+                String email = data[6].trim();
+                String password = data[7].trim();
 
-                    // Convert blood type
-                    String bloodTypeStr = patientData[4].trim();
-                    BloodType bloodType;
-                    switch (bloodTypeStr) {
-                        case "A+" -> bloodType = BloodType.A_POSITIVE;
-                        case "A-" -> bloodType = BloodType.A_NEGATIVE;
-                        case "B+" -> bloodType = BloodType.B_POSITIVE;
-                        case "B-" -> bloodType = BloodType.B_NEGATIVE;
-                        case "AB+" -> bloodType = BloodType.AB_POSITIVE;
-                        case "AB-" -> bloodType = BloodType.AB_NEGATIVE;
-                        case "O+" -> bloodType = BloodType.O_POSITIVE;
-                        case "O-" -> bloodType = BloodType.O_NEGATIVE;
-                        default -> bloodType = BloodType.UNDEFINED;
-                    }
+                int age = LocalDate.now().getYear() - dob.getYear();
 
-                    String email = patientData[5].trim();
-                    String phoneNumber = "";
-                    String password = "password";
-
-                    // Calculate age
-                    int age = LocalDate.now().getYear() - DOB.getYear();
-
-                    // Initialize patient with empty lists
-                    Patient patient = new Patient(patientID, name, phoneNumber, DOB, age, gender, bloodType, email, password);
-
-                    // Store in map
-                    patientsMap.put(patientID, patient);
-
-                } catch (Exception e) {
-                    System.out.println("Error processing patient line: " + String.join(",", patientData));
-                    System.out.println("Error details: " + e.getMessage());
-                    e.printStackTrace();
-                }
+                Patient patient = new Patient(id, name, phone, dob, age, gender, bloodType, email, password);
+                patientsMap.put(id, patient);
             }
-            System.out.println("Successfully loaded " + patientsMap.size() + " patients");
         } catch (FileNotFoundException e) {
-            System.out.println("An error has occurred\n" + e.getMessage());
+            System.out.println("Error loading patient data: " + e.getMessage());
         }
     }
 
@@ -299,34 +271,26 @@ public class Database {
      */
     private static void loadInventoryFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
-            scanner.nextLine(); // Skip the header
+            scanner.nextLine(); // Skip header
             while (scanner.hasNextLine()) {
-                String[] inventoryData = scanner.nextLine().split(",");
-                try {
-                    // Parse basic medicine data
-                    String medicineName = inventoryData[0].trim();
-                    int minimumStockLevel = Integer.parseInt(inventoryData[1].trim());
-                    String instructions = inventoryData[2].trim();
+                String[] data = scanner.nextLine().split(",");
+                String medicineName = data[0].trim();
+                int initialStock = Integer.parseInt(data[1].trim());
+                int minStockLevel = Integer.parseInt(data[2].trim());
+                String[] quantities = data[3].trim().split("\\|");
+                String[] dates = data[4].trim().split("\\|");
 
-                    // Parse batch data
-                    String batchesQuantity = inventoryData[3].trim();
-                    String batchesDates = inventoryData[4].trim();
+                Medicine medicine = new Medicine(medicineName, minStockLevel, "");
+                List<Medicine.Batch> batches = new ArrayList<>();
 
-                    // Create medicine if it doesn't exist
-                    Medicine medicine = inventoryMap.get(medicineName);
-                    if (medicine == null) {
-                        medicine = new Medicine(medicineName, minimumStockLevel, instructions);
-                        inventoryMap.put(medicineName, medicine);
-                    }
-
-                    // Add batch to the medicine
-                    List<Medicine.Batch> batches = loadBatchesFromCSVData(medicine, batchesQuantity, batchesDates);
-                    medicine.setBatch(batches);
-
-                } catch (Exception e) {
-                    System.out.println("Error processing inventory line: " + String.join(",", inventoryData));
-                    System.out.println("Error details: " + e.getMessage());
+                for (int i = 0; i < quantities.length; i++) {
+                    int quantity = Integer.parseInt(quantities[i]);
+                    LocalDate expiryDate = LocalDate.parse(dates[i]);
+                    batches.add(medicine.new Batch(quantity, expiryDate));
                 }
+
+                medicine.setBatch(batches);
+                inventoryMap.put(medicineName, medicine);
             }
             System.out.println("Successfully loaded " + inventoryMap.size() + " medicines");
         } catch (FileNotFoundException e) {
@@ -372,13 +336,13 @@ public class Database {
                     User doctorUser = doctorsMap.get(doctorID);
                     User patientUser = patientsMap.get(patientID);
 
-                    if (!(doctorUser instanceof Doctor) || !(patientUser instanceof Patient)) {
-                        System.out.println("Invalid doctor or patient for appointment: " + appointmentID);
+                    if (!(doctorUser instanceof Doctor)) {
+                        System.out.println("Invalid doctor for appointment: " + appointmentID);
                         continue;
                     }
 
                     Doctor doctor = (Doctor) doctorUser;
-                    Patient patient = (Patient) patientUser;
+                    Patient patient = (patientUser instanceof Patient) ? (Patient) patientUser : null;
 
                     int year = Integer.parseInt(appointmentData[3].trim());
                     int month = Integer.parseInt(appointmentData[4].trim());
@@ -391,6 +355,10 @@ public class Database {
 
                     appointment.setStatus(AppointmentStatus.valueOf(appointmentData[8].trim().toUpperCase()));
                     appointment.setIsAvailable(Boolean.parseBoolean(appointmentData[9].trim()));
+
+                    if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+                        patient.getMedicalRecord().getAppointmentOutcomes().add(appointment.getAppointmentOutcome());
+                    }
 
                     // Handle consultation notes (may be empty)
                     String consultationNotes = appointmentData.length > 10 ? appointmentData[10].trim() : "";
@@ -496,16 +464,13 @@ public class Database {
     private static String formatAppointmentToCSV(Appointment appointment) {
         StringBuilder sb = new StringBuilder();
 
-        // Get the date components
         AppointmentSlot slot = appointment.getSlot();
         LocalDateTime dateTime = slot.getDateTime();
 
-        // Format prescriptions if they exist
         String prescriptions = formatPrescription(appointment.getPrescription());
 
-        // Build the CSV line with proper escaping
         sb.append(escapeCSV(appointment.getAppointmentID())).append(",");
-        sb.append(escapeCSV(appointment.getPatient().getID())).append(",");
+        sb.append(appointment.getPatient() != null ? escapeCSV(appointment.getPatient().getID()) : "").append(",");
         sb.append(escapeCSV(appointment.getDoctor().getID())).append(",");
         sb.append(dateTime.getYear()).append(",");
         sb.append(dateTime.getMonthValue()).append(",");
@@ -618,36 +583,34 @@ public class Database {
         try (FileWriter fw = new FileWriter(INVENTORY_CSV_PATH);
              BufferedWriter bw = new BufferedWriter(fw)) {
 
-            // Write header
-            bw.write(INVENTORY_CSV_HEADER);
+            bw.write("Medicine Name,Initial Stock,Low Stock Level Alert,Batches Quantity,Batches Expiry Date");
             bw.newLine();
 
-            // Write inventory sorted by medicine name
             inventoryMap.values().stream()
                     .sorted(Comparator.comparing(Medicine::getMedicineName))
                     .forEach(medicine -> {
                         try {
-                            // Calculate total stock from all batches
                             List<Medicine.Batch> batches = medicine.getBatches();
-                            String batchesQuantity = batches.stream().map(batch -> String.valueOf(batch.getQuantity())).collect(Collectors.joining("\\|"));
-                            String batchesDates = batches.stream().map(batch -> batch.getExpirationDate().toString()).collect(Collectors.joining("\\|"));
+                            String batchesQuantity = batches.stream()
+                                    .map(batch -> String.valueOf(batch.getQuantity()))
+                                    .collect(Collectors.joining("|"));
+                            String batchesDates = batches.stream()
+                                    .map(batch -> batch.getExpirationDate().toString())
+                                    .collect(Collectors.joining("|"));
 
                             String line = String.format("%s,%d,%d,%s,%s",
                                     escapeCSV(medicine.getMedicineName()),
+                                    medicine.getTotalQuantity(),
                                     medicine.getMinStockLevel(),
-                                    medicine.getIsLowStock(),
-                                    batchesQuantity, 
+                                    batchesQuantity,
                                     batchesDates
                             );
                             bw.write(line);
                             bw.newLine();
-                        } catch (Exception e) {
-                            System.out.println("Error processing medicine " + medicine.getMedicineName() + ": " + e.getMessage());
+                        } catch (IOException e) {
+                            System.out.println("Error writing medicine " + medicine.getMedicineName() + ": " + e.getMessage());
                         }
                     });
-
-            System.out.println("Successfully saved inventory to " + INVENTORY_CSV_PATH);
-
         } catch (IOException e) {
             System.out.println("Error saving inventory to CSV: " + e.getMessage());
         }

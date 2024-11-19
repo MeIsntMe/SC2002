@@ -134,9 +134,7 @@ public class DoctorAppointmentControl extends AppointmentControl {
             Appointment appointment = new Appointment(appointmentID, null, doctor, slot);
             appointment.setIsAvailable(true);
             appointment.setStatus(AppointmentStatus.PENDING);
-
             Database.appointmentMap.put(appointmentID, appointment);
-            doctor.addAppointment(appointment);
         }
 
         doctor.setAvailableSlots(slots);

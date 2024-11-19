@@ -39,9 +39,9 @@ public class HMS {
             try{
                 int choice = scanner.nextInt();
                 UserType role;
-                Database.loadAllData();
                 switch (choice) {
                     case 1:
+                        Database.loadAllData();
                         role = login(scanner);
                         if (role == null) {
                             clearLoadedData(); //Clear data
@@ -79,7 +79,7 @@ public class HMS {
      * @return The UserType if login is successful, or null if login fails.
      */
     public static UserType login(Scanner sc) {  
-        //Returns UserType if login successful, else returns null 
+        //Returns UserType if login successful, else returns null
 
         // Get login details 
         UserType role = AdminUserControl.getRoleInput(sc);
@@ -139,20 +139,43 @@ public class HMS {
      * @param user The User object representing the currently logged-in user.
      * @param sc The Scanner object for user input.
      */
-    public static void resetPassword(User user, Scanner sc){
-
+    public static void resetPassword(User user, Scanner sc) {
         // Check if first time log in
         if (user.getPassword().equals("password")) {
             System.out.println("=========================================");
             System.out.println("Default password detected. Please reset your password.");
-            System.out.println("Enter new password: ");
-            String newPW = sc.nextLine(); 
 
-            user.setPassword(newPW);
-            Database.updatePassword(user, newPW);
-            Database.saveAllData();
+            while (true) {
+                System.out.println("Password requirements:");
+                System.out.println("- At least 6 characters long");
+                System.out.println("- Cannot contain commas");
+                System.out.print("Enter new password: ");
+                String newPW = sc.nextLine();
+
+                // Validate password
+                if (newPW.isEmpty() || newPW.length() < 6) {
+                    System.out.println("Password must be at least 6 characters long.");
+                    continue;
+                }
+                if (newPW.contains(",")) {
+                    System.out.println("Password cannot contain commas.");
+                    continue;
+                }
+                if (newPW.equals("password")) {
+                    System.out.println("New password cannot be the same as default password.");
+                    continue;
+                }
+
+                // If all validation passes, update the password
+                user.setPassword(newPW);
+                Database.updatePassword(user, newPW);
+                Database.saveAllData();
+                System.out.println("Password updated!");
+                break;
+            }
         }
     }
+
 
     /**
      * Prompts the user to confirm if they want to repeat an action.

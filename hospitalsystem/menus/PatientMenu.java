@@ -163,8 +163,7 @@ public class PatientMenu implements MenuInterface {
             chosenSlot.setPatient(patient);
             chosenSlot.setIsAvailable(false);
             Database.appointmentMap.put(chosenSlot.getAppointmentID(), chosenSlot);
-            patient.setAppointments(AppointmentControl.getAppointmentsByPatientID(patient.getID()));
-            System.err.println("Successfully scheduled appointment. Pending Doctor's approval.");
+            System.out.println("Successfully scheduled appointment. Pending Doctor's approval.");
             break;
         }
     }
