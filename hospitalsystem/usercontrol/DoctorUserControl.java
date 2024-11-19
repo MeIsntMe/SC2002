@@ -235,7 +235,7 @@ public class DoctorUserControl extends UserControl {
         if (patient != null) {
             return patient;
         } else {
-            System.out.println("Patient not found.");
+            System.out.println("Patient not found.\n\n");
             return null;
         }
     }

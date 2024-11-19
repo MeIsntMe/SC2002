@@ -1,6 +1,6 @@
 AppointmentID,PatientID,DoctorID,Year,Month,Day,Hour,Minute,Status,IsAvailable,ConsultationNotes,Prescriptions
-APT001,P1001,D001,2024,11,10,9,0,PENDING,TRUE,Initial consultation notes,"Paracetamol:2,Ibuprofen:1"
-APT002,P1002,D001,2024,11,11,10,30,BOOKED,FALSE,Follow-up on treatment,Amoxicillin:1
-APT003,P1003,D002,2024,11,12,13,0,PENDING,TRUE,,
-APT004,P1002,D002,2024,11,13,14,30,CANCELLED,TRUE,Cancelled by patient,
-APT005,P1001,D001,2024,11,14,9,0,COMPLETED,FALSE,Patient's condition improved,Ibuprofen:2
+APT001,P1001,D001,2024,11,10,9,0,PENDING,true,Initial consultation notes,
+APT002,P1002,D001,2024,11,11,10,30,BOOKED,false,Follow-up on treatment,
+APT003,P1003,D002,2024,11,12,13,0,PENDING,true,,
+APT004,P1002,D002,2024,11,13,14,30,CANCELLED,true,Cancelled by patient,
+APT005,P1001,D001,2024,11,14,9,0,COMPLETED,false,Patient's condition improved,

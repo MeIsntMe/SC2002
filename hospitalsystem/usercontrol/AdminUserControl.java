@@ -415,6 +415,7 @@ public class AdminUserControl extends UserControl {
                 }
             } catch (Exception e) {
                 System.out.println("Invalid input. Please enter a number between 1 and 4.");
+                scanner.nextLine(); // Consume the invalid input
             }
         }
     }

@@ -3,7 +3,7 @@ package hospitalsystem;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.UserType;
 import hospitalsystem.menus.*;
-import hospitalsystem.model.User;
+import hospitalsystem.model.*;
 import hospitalsystem.usercontrol.AdminUserControl;
 import java.util.Scanner;
 
@@ -38,7 +38,7 @@ public class HMS {
             System.out.print("Enter choice: ");
             try{
                 int choice = scanner.nextInt();
-                UserType role; 
+                UserType role;
                 Database.loadAllData();
                 switch (choice) {
                     case 1:
@@ -61,10 +61,11 @@ public class HMS {
                         return;
                     default:
                         System.out.println("Invalid choice. Please input either 1 or 2.");
-                } 
+                }
 
             } catch (Exception e) {
                     System.out.println("Invalid input. Please input either 1 or 2.");
+                    scanner.nextLine(); // Consume the invalid input
             }
         }
     }
@@ -96,14 +97,14 @@ public class HMS {
             case ADMINISTRATOR -> user = Database.adminsMap.get(inputID);
         }
 
-        System.out.println("user created");
-        System.out.println(Database.patientsMap);
-        System.out.printf("Password: %s", user.getPassword());
+        //System.out.println("user created");
+        //System.out.println(Database.patientsMap);
+        //System.out.printf("Password: %s", user.getPassword());
 
         // Validate credentials
         if (user != null && user.getPassword().equals(inputPassword)) {
             currentUser = user;
-            System.out.printf("Login successful. Welcome %s!", currentUser.getName());
+            System.out.printf("Login successful. Welcome %s!\n", currentUser.getName());
             loadRequiredData(role);
 
             // If first time log in, reset password 
@@ -148,7 +149,8 @@ public class HMS {
             String newPW = sc.nextLine(); 
 
             user.setPassword(newPW);
-            System.out.println("Password updated!");
+            Database.updatePassword(user, newPW);
+            Database.saveAllData();
         }
     }
 
@@ -184,8 +186,8 @@ public class HMS {
             case DOCTOR:
                 Database.loadStaffData();
                 Database.loadPatientData();
-                Database.loadAppointmentData();
                 Database.loadInventoryData();
+                Database.loadAppointmentData();
                 break;
 
             case ADMINISTRATOR:
