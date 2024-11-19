@@ -1,19 +1,27 @@
 package hospitalsystem.menus;
 
-import java.util.InputMismatchException;
-import java.util.Scanner;
-
 import hospitalsystem.HMS;
-import hospitalsystem.data.Database;
 import hospitalsystem.inventorycontrol.InventoryControl;
 import hospitalsystem.inventorycontrol.PharmacistInventoryControl;
+import hospitalsystem.model.Doctor;
+import hospitalsystem.model.Pharmacist;
+import hospitalsystem.model.User;
 import hospitalsystem.usercontrol.PharmacistUserControl;
+import java.util.Scanner;
 
 public class PharmacistMenu implements MenuInterface {
-    
+    private final Pharmacist pharmacist;
+
     /**
      * Displays the Pharmacist Menu and processes user choices.
      */
+    public PharmacistMenu(User currentUser) { 
+        if (!(currentUser instanceof Doctor)) {
+            throw new IllegalArgumentException("User must be a Pharmacist.");
+        }
+        this.pharmacist = (Pharmacist) currentUser;
+    }
+
     @Override
     public void displayMenu() {
         Scanner sc = new Scanner(System.in);
