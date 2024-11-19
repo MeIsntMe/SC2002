@@ -28,7 +28,8 @@ public class PatientMenu implements MenuInterface {
     public void displayMenu(){
         boolean continueFlag = true;
         sc = new Scanner(System.in);
-        System.out.println("Available Options: ");
+        System.out.println("=========================================");
+        System.out.println("Patient Menu: ");
         System.out.println("1. View Medical Record");
         System.out.println("2. Update Personal Information ");
         System.out.println("3. View Available Slots for a Doctor ");
@@ -37,7 +38,8 @@ public class PatientMenu implements MenuInterface {
         System.out.println("6. Cancel Appointment ");
         System.out.println("7. View Scheduled Appointments ");
         System.out.println("8. Display Past Appointment Outcomes ");
-        System.out.println("9. Log Out ");
+        System.out.println("9. Logout ");
+        System.out.print("Enter choice (1-9): ");
         while (continueFlag){
             try {
                 choice = sc.nextInt();

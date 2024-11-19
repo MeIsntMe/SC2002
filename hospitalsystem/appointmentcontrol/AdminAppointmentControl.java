@@ -17,13 +17,12 @@ public class AdminAppointmentControl extends AppointmentControl{
     /**
      * Displays all appointments in the system with their complete details.
      * For completed appointments, also displays the appointment outcome.
-     * Output is written to System.out, with error information to System.err.
      */
     public static void viewAllAppointments(){
         for (Appointment appointment : Database.appointmentMap.values()) {
             System.out.println(appointment);
             if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
-                System.err.println(appointment.getAppointmentOutcome());
+                System.out.println(appointment.getAppointmentOutcome());
             }
         }
     }
