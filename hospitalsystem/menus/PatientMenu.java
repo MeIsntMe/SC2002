@@ -8,6 +8,16 @@ import hospitalsystem.usercontrol.PatientUserControl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+/**
+ * Manages patient interface for the hospital system.
+ * Allows patients to do carry out actions such as viewing medical record,
+ * updating personal information, and managing appointments. 
+ *
+ *
+ * @author Gracelynn
+ * @version 1.0
+ * @since 2024-03-16
+ */
 
 public class PatientMenu implements MenuInterface {
     
@@ -16,12 +26,16 @@ public class PatientMenu implements MenuInterface {
     private final Patient patient;
     private int choice;
 
-    //Constructor
+    /*
+     * Constructor
+     * Ensures type-safety via checks
+     */
     public PatientMenu(User currentUser) { 
         if (!(currentUser instanceof Patient)) {
-            throw new IllegalArgumentException("User must be a Doctor");
+            throw new IllegalArgumentException("User must be a Patient");
         }
         this.patient = (Patient) currentUser;
+        this.sc = new Scanner(System.in);
     }
     
     @Override
@@ -107,6 +121,7 @@ public class PatientMenu implements MenuInterface {
 
     public List<Appointment> handleViewAppointmentSlots(){
         List<User> doctorList = new ArrayList<>(Database.doctorsMap.values());
+        //hides main choice field to prevent overriding main loop
         int choice;
         System.out.println("Which doctor you want to select?");
         int i;
@@ -135,6 +150,7 @@ public class PatientMenu implements MenuInterface {
     }
 
     public void handleScheduleAppointment(){
+        //hides main choice field to prevent overriding main loop
         int choice;
         List<Appointment> availableSlots = handleViewAppointmentSlots();
         System.out.print("Which slot would you like to schedule your new appointment for: ");
