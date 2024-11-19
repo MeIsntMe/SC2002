@@ -197,21 +197,44 @@ public class Database {
             while (scanner.hasNextLine()) {
                 String[] patientData = scanner.nextLine().split(",");
                 try {
+                    // Parse basic data
                     String patientID = patientData[0].trim();
                     String name = patientData[1].trim();
-                    String phoneNumber = patientData[2].trim();
-                    LocalDate DOB = LocalDate.parse(patientData[3].trim());
-                    int age = Integer.parseInt(patientData[4].trim());
-                    String gender = patientData[5].trim().toLowerCase();
-                    BloodType bloodType = BloodType.valueOf(patientData[6].trim());
-                    String email = patientData[7].trim();
-                    String password = patientData.length > 8 ? patientData[8].trim() : "password";
+                    LocalDate DOB = LocalDate.parse(patientData[2].trim());
+                    String gender = patientData[3].trim().toLowerCase();
 
+                    // Convert blood type
+                    String bloodTypeStr = patientData[4].trim();
+                    BloodType bloodType;
+                    switch (bloodTypeStr) {
+                        case "A+" -> bloodType = BloodType.A_POSITIVE;
+                        case "A-" -> bloodType = BloodType.A_NEGATIVE;
+                        case "B+" -> bloodType = BloodType.B_POSITIVE;
+                        case "B-" -> bloodType = BloodType.B_NEGATIVE;
+                        case "AB+" -> bloodType = BloodType.AB_POSITIVE;
+                        case "AB-" -> bloodType = BloodType.AB_NEGATIVE;
+                        case "O+" -> bloodType = BloodType.O_POSITIVE;
+                        case "O-" -> bloodType = BloodType.O_NEGATIVE;
+                        default -> bloodType = BloodType.UNDEFINED;
+                    }
+
+                    String email = patientData[5].trim();
+                    String phoneNumber = "";
+                    String password = "password";
+
+                    // Calculate age
+                    int age = LocalDate.now().getYear() - DOB.getYear();
+
+                    // Initialize patient with empty lists
                     Patient patient = new Patient(patientID, name, phoneNumber, DOB, age, gender, bloodType, email, password);
+
+                    // Store in map
                     patientsMap.put(patientID, patient);
+
                 } catch (Exception e) {
                     System.out.println("Error processing patient line: " + String.join(",", patientData));
                     System.out.println("Error details: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
             System.out.println("Successfully loaded " + patientsMap.size() + " patients");
@@ -219,6 +242,7 @@ public class Database {
             System.out.println("An error has occurred\n" + e.getMessage());
         }
     }
+
 
     /**
      * Loads staff data from specified CSV file into respective staff maps.

@@ -3,6 +3,7 @@ import hospitalsystem.appointmentcontrol.AppointmentControl;
 import hospitalsystem.enums.BloodType;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Represents a patient in the Hospital Management System.
@@ -56,14 +57,14 @@ public class Patient extends User{
      * @param email The email address of the patient.
      * @param password The password of the patient.
      */
-    public Patient(String HospitalID, String name, String phoneNumber, LocalDate DOB, int age, String gender, BloodType bloodType, String email, String password){
+    public Patient(String HospitalID, String name, String phoneNumber, LocalDate DOB, int age, String gender, BloodType bloodType, String email, String password) {
         super(HospitalID, name, age, gender, password);
         this.phoneNumber = phoneNumber;
-        this.DOB = DOB; 
-        this.email = email; 
+        this.DOB = DOB;
+        this.email = email;
         this.bloodType = bloodType;
-        this.medicalRecord = new MedicalRecord(this);
-        this.appointments = AppointmentControl.getAppointmentsByPatientID(this.getID());
+        this.appointments = new ArrayList<>(); // Initialize empty list
+        this.medicalRecord = new MedicalRecord(this); // Create medical record after initializing other fields
     }
 
     public LocalDate getDOB() {

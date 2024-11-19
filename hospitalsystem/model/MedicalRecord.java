@@ -58,12 +58,20 @@ public class MedicalRecord {
      *
      * @param patient The patient associated with the medical record.
      */
-    public MedicalRecord(Patient patient){
+    public MedicalRecord(Patient patient) {
         this.id = patient.getID();
-        ArrayList<Appointment> appointmentList = new ArrayList<>(patient.getAppointments());
-        for (Appointment appointment: appointmentList){
-            if (appointment.getStatus() == AppointmentStatus.COMPLETED){
-                this.appointmentOutcomes.add(appointment.getAppointmentOutcome());
+        this.name = patient.getName();
+        this.dOB = patient.getDOB().toString();
+        this.gender = patient.getGender();
+        this.email = patient.getEmail();
+        this.bloodType = patient.getBloodType();
+        this.appointmentOutcomes = new ArrayList<>(); // Initialize empty list
+        // Only add outcomes if patient has appointments
+        if (patient.getAppointments() != null) {
+            for (Appointment appointment : patient.getAppointments()) {
+                if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+                    this.appointmentOutcomes.add(appointment.getAppointmentOutcome());
+                }
             }
         }
     }
