@@ -3,14 +3,42 @@ package hospitalsystem.model;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Represents a medicine in the Hospital Management System.
+ * A medicine has a name, instructions, batches, and minimum stock level.
+ *
+ * @author Gracelynn, Shaivi
+ * @version 1.0
+ * @since 2024-11-19
+ */
 public class Medicine {
+    /**
+     * The name of the medicine.
+     */
     private final String medicineName;
-    private final String instructions;
-    private List<Batch> batches;
-    private int minimumStockLevel;  // Low stock alert threshold
-    
 
-    // Constructor
+    /**
+     * The instructions for the medicine.
+     */
+    private final String instructions;
+
+    /**
+     * The list of batches for the medicine.
+     */
+    private List<Batch> batches;
+
+    /**
+     * The minimum stock level for the medicine.
+     */
+    private int minimumStockLevel;
+
+    /**
+     * Constructs a Medicine object with the given parameters.
+     *
+     * @param medicineName The name of the medicine.
+     * @param minimumStockLevel The minimum stock level for the medicine.
+     * @param instructions The instructions for the medicine.
+     */
     public Medicine(String medicineName, int minimumStockLevel, String instructions) {
         this.medicineName = medicineName;
         this.minimumStockLevel = minimumStockLevel;
@@ -63,15 +91,32 @@ public class Medicine {
 
     // Nested Batch class within Medicine
     public class Batch implements Comparable<Batch>{
+        /**
+         * The quantity of the batch.
+         */
         private int quantity;
+        /**
+         * The expiration date of the batch.
+         */
         private final LocalDate expirationDate;
 
-        // Constructor
+        /**
+         * Constructs a Batch object with the given parameters.
+         *
+         * @param quantity The quantity of the batch.
+         * @param expirationDate The expiration date of the batch.
+         */
         public Batch(int quantity, LocalDate expirationDate) {
             this.quantity = quantity;
             this.expirationDate = expirationDate;
         }
 
+        /**
+         * Compares this batch with another batch based on their expiration dates.
+         *
+         * @param otherBatch The batch to compare with.
+         * @return A negative integer, zero, or a positive integer as this batch is less than, equal to, or greater than the specified batch.
+         */
         @Override
         public int compareTo(Batch otherBatch){
             return this.expirationDate.compareTo(otherBatch.expirationDate);

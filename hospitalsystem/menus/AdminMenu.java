@@ -10,6 +10,15 @@ import hospitalsystem.model.Administrator;
 import hospitalsystem.model.User;
 import hospitalsystem.usercontrol.AdminUserControl;
 
+/**
+ * Represents the menu for administrator users in the Hospital Management System.
+ * Provides options for administrators to manage staff, patients, appointments, and inventory.
+ *
+ * @author An Xian
+ * @version 1.0
+ * @since 2024-11-19
+ *
+ */
 public class AdminMenu implements MenuInterface {
     
     // Instance variables 

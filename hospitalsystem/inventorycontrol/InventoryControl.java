@@ -14,7 +14,7 @@ import java.util.Scanner;
  *
  * @author An Xian, Shaivi
  * @version 1.0
- * @since 2024-03-16
+ * @since 2024-11-19
  */
 public class InventoryControl {
 
@@ -25,7 +25,7 @@ public class InventoryControl {
      * verify that medicine stock level is updated in inventory 
      */
     
-    public static void displayInventory() { //used by both 
+    public static void displayInventory() { //used by both
         if (Database.inventoryMap.isEmpty()) {
             System.out.println("The inventory is currently empty.");
             return;
@@ -41,7 +41,7 @@ public class InventoryControl {
         }
     }
 
-    public static void displayMedicineBatches(Scanner sc){ 
+    public static void displayMedicineBatches(Scanner sc){
 
         Medicine med = getMedicineInput(sc);
 
@@ -54,7 +54,7 @@ public class InventoryControl {
         System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.getIsLowStock() ? " **LOW STOCK ALERT**" : ""));
     }
 
-    public static void displayAllRequests() { // used by both 
+    public static void displayAllRequests() { // used by both
         if (Database.requestMap.isEmpty()) {
             System.out.println("There are no replenishment requests.");
             return;
@@ -70,7 +70,7 @@ public class InventoryControl {
         System.out.println(" ");
     }
 
-    public static Medicine getMedicineInput(Scanner sc) { //used by both 
+    public static Medicine getMedicineInput(Scanner sc) { //used by both
         while (true) {
             System.out.println("Enter medicine: ");
             String medicineName = sc.nextLine();

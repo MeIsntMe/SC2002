@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
  * - Appointments
  * - Replenishment Requests
  *
- * @author Your Name
+ * @author An Xian, Gracelynn, Leo
  * @version 1.0
- * @since 2024-03-16
+ * @since 2024-11-19
  */
 public class Database {
 

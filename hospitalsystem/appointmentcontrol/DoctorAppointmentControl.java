@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  *
  * @author Gracelynn, Leo
  * @version 1.0
- * @since 2024-03-16
+ * @since 2024-11-19
  */
 public class DoctorAppointmentControl extends AppointmentControl {
 
