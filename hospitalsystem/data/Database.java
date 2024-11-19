@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -35,9 +34,9 @@ import java.util.stream.Collectors;
  * - Appointments
  * - Replenishment Requests
  *
- * @author Your Name
+ * @author An Xian, Gracelynn, Leo
  * @version 1.0
- * @since 2024-03-16
+ * @since 2024-11-19
  */
 public class Database {
 
@@ -198,22 +197,44 @@ public class Database {
             while (scanner.hasNextLine()) {
                 String[] patientData = scanner.nextLine().split(",");
                 try {
+                    // Parse basic data
                     String patientID = patientData[0].trim();
                     String name = patientData[1].trim();
                     LocalDate DOB = LocalDate.parse(patientData[2].trim());
                     String gender = patientData[3].trim().toLowerCase();
-                    BloodType bloodType = BloodType.valueOf(patientData[4].trim());
-                    String phoneNumber = patientData[5].trim();
-                    String email = patientData[6].trim();
-                    String password = patientData[7].trim();
-                    
-                    int age = (int)ChronoUnit.YEARS.between(DOB, LocalDate.now());
 
+                    // Convert blood type
+                    String bloodTypeStr = patientData[4].trim();
+                    BloodType bloodType;
+                    switch (bloodTypeStr) {
+                        case "A+" -> bloodType = BloodType.A_POSITIVE;
+                        case "A-" -> bloodType = BloodType.A_NEGATIVE;
+                        case "B+" -> bloodType = BloodType.B_POSITIVE;
+                        case "B-" -> bloodType = BloodType.B_NEGATIVE;
+                        case "AB+" -> bloodType = BloodType.AB_POSITIVE;
+                        case "AB-" -> bloodType = BloodType.AB_NEGATIVE;
+                        case "O+" -> bloodType = BloodType.O_POSITIVE;
+                        case "O-" -> bloodType = BloodType.O_NEGATIVE;
+                        default -> bloodType = BloodType.UNDEFINED;
+                    }
+
+                    String email = patientData[5].trim();
+                    String phoneNumber = "";
+                    String password = "password";
+
+                    // Calculate age
+                    int age = LocalDate.now().getYear() - DOB.getYear();
+
+                    // Initialize patient with empty lists
                     Patient patient = new Patient(patientID, name, phoneNumber, DOB, age, gender, bloodType, email, password);
+
+                    // Store in map
                     patientsMap.put(patientID, patient);
+
                 } catch (Exception e) {
                     System.out.println("Error processing patient line: " + String.join(",", patientData));
                     System.out.println("Error details: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
             System.out.println("Successfully loaded " + patientsMap.size() + " patients");
@@ -221,6 +242,7 @@ public class Database {
             System.out.println("An error has occurred\n" + e.getMessage());
         }
     }
+
 
     /**
      * Loads staff data from specified CSV file into respective staff maps.
@@ -334,96 +356,87 @@ public class Database {
      */
     private static void loadAppointmentsFromCSV(String filePath) {
         try (Scanner scanner = new Scanner(new File(filePath))) {
-            scanner.nextLine(); // Skip the first line
+            scanner.nextLine(); // Skip the header
             while (scanner.hasNextLine()) {
                 String[] appointmentData = scanner.nextLine().replaceAll("\"", "").split(",");
                 try {
+                    if (appointmentData.length < 10) {
+                        System.out.println("Skipping invalid appointment data: " + String.join(",", appointmentData));
+                        continue;
+                    }
+
                     String appointmentID = appointmentData[0].trim();
                     String patientID = appointmentData[1].trim();
                     String doctorID = appointmentData[2].trim();
 
-                    // Get Doctor and Patient from MainSystem maps
                     User doctorUser = doctorsMap.get(doctorID);
                     User patientUser = patientsMap.get(patientID);
 
-                    Doctor doctor = null;
-                    Patient patient = null;
+                    if (!(doctorUser instanceof Doctor) || !(patientUser instanceof Patient)) {
+                        System.out.println("Invalid doctor or patient for appointment: " + appointmentID);
+                        continue;
+                    }
 
-                    if (doctorUser instanceof Doctor)
-                        doctor = (Doctor) doctorUser;
-                    if (patientUser instanceof Patient)
-                        patient = (Patient) patientUser;
+                    Doctor doctor = (Doctor) doctorUser;
+                    Patient patient = (Patient) patientUser;
 
-                    if (doctor != null && patient != null) {
-                        // Parse date/time components
-                        int year = Integer.parseInt(appointmentData[3].trim());
-                        int month = Integer.parseInt(appointmentData[4].trim());
-                        int day = Integer.parseInt(appointmentData[5].trim());
-                        int hour = Integer.parseInt(appointmentData[6].trim());
-                        int minute = Integer.parseInt(appointmentData[7].trim());
+                    int year = Integer.parseInt(appointmentData[3].trim());
+                    int month = Integer.parseInt(appointmentData[4].trim());
+                    int day = Integer.parseInt(appointmentData[5].trim());
+                    int hour = Integer.parseInt(appointmentData[6].trim());
+                    int minute = Integer.parseInt(appointmentData[7].trim());
 
-                        // Create appointment slot
-                        AppointmentSlot slot = new AppointmentSlot(year, month, day, hour, minute);
+                    AppointmentSlot slot = new AppointmentSlot(year, month, day, hour, minute);
+                    Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
 
-                        // Create appointment
-                        Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
+                    appointment.setStatus(AppointmentStatus.valueOf(appointmentData[8].trim().toUpperCase()));
+                    appointment.setIsAvailable(Boolean.parseBoolean(appointmentData[9].trim()));
 
-                        // Set appointment properties
-                        appointment.setStatus(AppointmentStatus.valueOf(appointmentData[8].trim().toUpperCase()));
-                        appointment.setIsAvailable(Boolean.parseBoolean(appointmentData[9].trim()));
-                        appointment.setConsultationNotes(appointmentData[10].trim());
+                    // Handle consultation notes (may be empty)
+                    String consultationNotes = appointmentData.length > 10 ? appointmentData[10].trim() : "";
+                    appointment.setConsultationNotes(consultationNotes);
 
-                        // Handle prescriptions if they exist
-                        if (appointmentData.length > 11 && !appointmentData[11].trim().isEmpty()) {
-                            List<Prescription.MedicineSet> medicineSets = new ArrayList<>();
-                            String[] prescriptionPairs = appointmentData[11].split(";");
+                    // Handle prescriptions (may be empty)
+                    if (appointmentData.length > 11 && !appointmentData[11].trim().isEmpty()) {
+                        List<Prescription.MedicineSet> medicineSets = new ArrayList<>();
+                        String[] prescriptionPairs = appointmentData[11].split(";");
 
-                            for (String pair : prescriptionPairs) {
-                                String[] parts = pair.split(":");
-                                if (parts.length == 2) {
-                                    String medicineName = parts[0].trim();
-                                    int quantity = Integer.parseInt(parts[1].trim());
+                        for (String pair : prescriptionPairs) {
+                            String[] parts = pair.split(":");
+                            if (parts.length == 2) {
+                                String medicineName = parts[0].trim();
+                                int quantity = Integer.parseInt(parts[1].trim());
 
-                                    Medicine medicine = inventoryMap.get(medicineName);
-                                    if (medicine != null) {
-                                        medicineSets.add(new Prescription.MedicineSet(medicine, quantity));
-                                    } else {
-                                        System.out.println("Medicine not found: " + medicineName);
-                                    }
+                                Medicine medicine = inventoryMap.get(medicineName);
+                                if (medicine != null) {
+                                    medicineSets.add(new Prescription.MedicineSet(medicine, quantity));
+                                } else {
+                                    System.out.println("Medicine not found: " + medicineName);
                                 }
                             }
-
-                            if (!medicineSets.isEmpty()) {
-                                Prescription prescription = new Prescription(
-                                        medicineSets,
-                                        doctor.getID(),
-                                        patient.getID(),
-                                        PrescriptionStatus.PENDING
-                                );
-                                appointment.setPrescription(prescription);
-                            }
                         }
 
-                        // Add to maps and lists
-                        appointmentMap.put(appointmentID, appointment);
-                        doctor.addAppointment(appointment);
-
-                        // Update patient's appointments
-                        List<Appointment> patientAppointments = patient.getAppointments();
-                        if (patientAppointments == null) {
-                            patientAppointments = new ArrayList<>();
-                        }
-                        patientAppointments.add(appointment);
-                        patient.setAppointments(patientAppointments);
-
-                    } else {
-                        if (doctor == null) {
-                            System.out.println("Doctor not found for ID: " + doctorID);
-                        }
-                        if (patient == null) {
-                            System.out.println("Patient not found for ID: " + patientID);
+                        if (!medicineSets.isEmpty()) {
+                            Prescription prescription = new Prescription(
+                                    medicineSets,
+                                    doctor.getID(),
+                                    patient.getID(),
+                                    PrescriptionStatus.PENDING
+                            );
+                            appointment.setPrescription(prescription);
                         }
                     }
+
+                    appointmentMap.put(appointmentID, appointment);
+                    doctor.addAppointment(appointment);
+
+                    List<Appointment> patientAppointments = patient.getAppointments();
+                    if (patientAppointments == null) {
+                        patientAppointments = new ArrayList<>();
+                    }
+                    patientAppointments.add(appointment);
+                    patient.setAppointments(patientAppointments);
+
                 } catch (Exception e) {
                     System.out.println("Error processing appointment line: " + String.join(",", appointmentData));
                     System.out.println("Error details: " + e.getMessage());

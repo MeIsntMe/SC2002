@@ -3,21 +3,75 @@ package hospitalsystem.model;
 import hospitalsystem.enums.*; 
 import java.time.LocalDateTime;
 
+/**
+ * Represents an appointment in the Hospital Management System.
+ * An appointment is associated with a patient, doctor, time slot, and outcome details.
+ *
+ * @author Gracelynn, Leo
+ * @version 1.0
+ * @since 2024-11-19
+ */
 public class Appointment implements Comparable<Appointment> {
+    /**
+     * The unique identifier of the appointment.
+     */
     private final String appointmentID;
+
+    /**
+     * The patient associated with the appointment.
+     */
     private Patient patient;
+
+    /**
+     * The doctor associated with the appointment.
+     */
     private final Doctor doctor;
+
+    /**
+     * The pharmacist associated with the appointment.
+     */
     private Pharmacist pharmacist;
+
+    /**
+     * The time slot of the appointment.
+     */
     private final AppointmentSlot slot;
+
+    /**
+     * The status of the appointment.
+     */
     private AppointmentStatus status;
+
+    /**
+     * The outcome of the appointment.
+     */
     private AppointmentOutcome outcome;
+
+    /**
+     * Indicates whether the appointment slot is available.
+     */
     private Boolean isAvailable = true;
 
+    /**
+     * Compares this appointment with another appointment based on their time slots.
+     *
+     * @param appointment The appointment to compare with.
+     * @return A negative integer, zero, or a positive integer as this appointment is less than, equal to, or greater than the specified appointment.
+     */
     @Override
     public int compareTo(Appointment appointment) {
         return this.slot.getDateTime().compareTo(appointment.slot.getDateTime());
     }
 
+
+    /**
+     * Constructs an Appointment object with the given parameters.
+     *
+     * @param appointmentID The unique identifier of the appointment.
+     * @param patient The patient associated with the appointment.
+     * @param doctor The doctor associated with the appointment.
+     * @param slot The time slot of the appointment.
+     */
     public Appointment(String appointmentID, Patient patient, Doctor doctor, AppointmentSlot slot) {
         this.appointmentID = appointmentID;
         this.patient = patient;
@@ -95,6 +149,11 @@ public class Appointment implements Comparable<Appointment> {
         this.outcome.setConsultationNotes(consultationNotes);
     }
 
+    /**
+     * Returns a string representation of the appointment.
+     *
+     * @return A string representation of the appointment.
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -109,7 +168,9 @@ public class Appointment implements Comparable<Appointment> {
         return sb.toString();
     }
 
-    // Static nested class representing appointment slots
+    /**
+     * Represents an appointment slot with a specific date and time.
+     */
     public static class AppointmentSlot {
         private final LocalDateTime dateTime;
 
@@ -135,7 +196,9 @@ public class Appointment implements Comparable<Appointment> {
         }
     }
 
-    // Non-static inner class
+    /**
+     * Represents an appointment slot with a specific date and time.
+     */
     public class AppointmentOutcome {
         private final Appointment appointment;
         private Prescription prescription;

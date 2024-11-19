@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  *
  * @author An Xian 
  * @version 1.0
- * @since 2024-03-16
+ * @since 2024-11-19
  */
 public class AdminUserControl extends UserControl {
     
@@ -55,7 +55,12 @@ public class AdminUserControl extends UserControl {
         UserType role = getStaffRoleInput(sc);
 
         // Select appropriate set based on role
-        Collection<? extends User> staffCollection;
+        Collection<? extends User> staffCollection = null;
+        if (role == null) {
+            System.out.println("Invalid staff role specified.");
+            return;
+        }
+
         switch (role) {
             case DOCTOR -> staffCollection = Database.doctorsMap.values();
             case PHARMACIST -> staffCollection = Database.pharmsMap.values();
@@ -63,9 +68,9 @@ public class AdminUserControl extends UserControl {
             case PATIENT -> { 
                 System.out.println("Invalid staff role specified. Patients are not staff.");
                 return;}
-            case null -> {
-                System.out.println("Invalid staff role specified.");
-                return;} 
+//            case null -> {
+//                System.out.println("Invalid staff role specified.");
+//                return;}
         }
     
         // Prompt for optional filters
@@ -280,7 +285,7 @@ public class AdminUserControl extends UserControl {
                 prefix = "A";
                 userMap = Database.adminsMap;
                 break;
-            case null: 
+            default:
                 return ("");
             }
 
@@ -364,6 +369,7 @@ public class AdminUserControl extends UserControl {
             int role;
             try {
                 role = sc.nextInt(); 
+                sc.nextLine();
                 switch (role) {
                     case 1 -> {return UserType.DOCTOR;}
                     case 2 -> {return UserType.PHARMACIST;}

@@ -10,7 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-
+/**
+ * Represents the menu for doctor users in the Hospital Management System.
+ * Provides options for doctors to manage patient records, appointments, and schedules.
+ *
+ * @author Gracelynn, Leo
+ * @version 1.0
+ * @since 2024-11-19
+ *
+ */
 public class DoctorMenu implements MenuInterface {
     
     private final Doctor doctor;

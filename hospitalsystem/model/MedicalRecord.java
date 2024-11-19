@@ -4,23 +4,74 @@ import hospitalsystem.enums.*;
 import hospitalsystem.model.Appointment.AppointmentOutcome;
 import java.util.ArrayList;
 
+/**
+ * Represents a patient's medical record in the Hospital Management System.
+ * A medical record contains personal information, blood type, and appointment outcomes.
+ *
+ * @author Gracelynn
+ * @version 1.0
+ * @since 2024-11-19
+ */
 public class MedicalRecord {
+    /**
+     * The unique identifier of the medical record.
+     */
     final private String id;
+
+    /**
+     * The name of the patient.
+     */
     private String name;
+
+    /**
+     * The date of birth of the patient.
+     */
     private String dOB;
+
+    /**
+     * The gender of the patient.
+     */
     private String gender;
+
+    /**
+     * The phone number of the patient.
+     */
     private String phoneNumber;
+
+    /**
+     * The email address of the patient.
+     */
     private String email;
+
+    /**
+     * The blood type of the patient.
+     */
     private BloodType bloodType;
+
+    /**
+     * The list of appointment outcomes for the patient.
+     */
     private ArrayList<AppointmentOutcome> appointmentOutcomes;
 
-    //Requires update when appointment is finished
-    public MedicalRecord(Patient patient){
+    /**
+     * Constructs a MedicalRecord object for the given patient.
+     *
+     * @param patient The patient associated with the medical record.
+     */
+    public MedicalRecord(Patient patient) {
         this.id = patient.getID();
-        ArrayList<Appointment> appointmentList = new ArrayList<>(patient.getAppointments());
-        for (Appointment appointment: appointmentList){
-            if (appointment.getStatus() == AppointmentStatus.COMPLETED){
-                this.appointmentOutcomes.add(appointment.getAppointmentOutcome());
+        this.name = patient.getName();
+        this.dOB = patient.getDOB().toString();
+        this.gender = patient.getGender();
+        this.email = patient.getEmail();
+        this.bloodType = patient.getBloodType();
+        this.appointmentOutcomes = new ArrayList<>(); // Initialize empty list
+        // Only add outcomes if patient has appointments
+        if (patient.getAppointments() != null) {
+            for (Appointment appointment : patient.getAppointments()) {
+                if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
+                    this.appointmentOutcomes.add(appointment.getAppointmentOutcome());
+                }
             }
         }
     }

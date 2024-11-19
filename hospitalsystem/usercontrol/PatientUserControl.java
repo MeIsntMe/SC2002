@@ -10,9 +10,9 @@ import java.util.Scanner;
  * and update personal information. Implements restricted access to
  * ensure patients can only view and modify appropriate information.
  *
- * @author Your Name
+ * @author Gracelynn
  * @version 1.0
- * @since 2024-03-16
+ * @since 2024-11-19
  */
 public class PatientUserControl extends UserControl {
     

@@ -15,9 +15,9 @@ import java.util.*;
  * Provides functionality for stock management, including adding/removing stock,
  * managing expired medicine, and handling replenishment requests.
  *
- * @author Your Name
+ * @author An Xian
  * @version 1.0
- * @since 2024-03-16
+ * @since 2024-11-19
  */
 public class AdminInventoryControl extends InventoryControl {
 
