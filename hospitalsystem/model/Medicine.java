@@ -1,6 +1,7 @@
 package hospitalsystem.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -51,6 +52,9 @@ public class Medicine {
     }
 
     public List<Batch> getBatches() {
+        if (batches == null) {
+            batches = new ArrayList<>();
+        }
         return batches;
     }
 

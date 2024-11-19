@@ -7,6 +7,8 @@ import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
+import javax.swing.JSpinner.NumberEditor;
+
 /**
  * Base class for managing hospital inventory operations.
  * Provides core functionality for viewing and managing medication inventory,
@@ -54,10 +56,10 @@ public class InventoryControl {
         System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.getIsLowStock() ? " **LOW STOCK ALERT**" : ""));
     }
 
-    public static void displayAllRequests() { // used by both
+    public static boolean displayAllRequests() { // used by both
         if (Database.requestMap.isEmpty()) {
             System.out.println("There are no replenishment requests.");
-            return;
+            return false;
         }
         // Print in table format  
         System.out.println("Replenishment Request List: ");
@@ -68,11 +70,13 @@ public class InventoryControl {
             System.out.printf("%-10s %-20s %-15d %-15s%n", req.getRequestID(), req.getMedicine().getMedicineName(), req.getRequestedQuantity(), req.getStatus());
         }
         System.out.println(" ");
+        return true;
     }
 
     public static Medicine getMedicineInput(Scanner sc) { //used by both
         while (true) {
-            System.out.println("Enter medicine: ");
+            System.out.println("");
+            System.out.print("Enter medicine: ");
             String medicineName = sc.nextLine();
             
             if (!Database.inventoryMap.containsKey(medicineName)) {
@@ -88,8 +92,7 @@ public class InventoryControl {
         while (true) {
             System.out.println("Enter request ID: ");
             try {
-                int requestID = sc.nextInt();
-                sc.nextLine();
+                int requestID = Integer.parseInt(sc.nextLine());
 
                 if (!Database.requestMap.containsKey(requestID)) {
                     System.out.println("Request ID " + requestID + " is invalid.");
@@ -97,7 +100,7 @@ public class InventoryControl {
                 }
                 ReplenishmentRequest request = Database.requestMap.get(requestID);
                 return request; 
-            } catch (InputMismatchException e) {
+            } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid numerical ID.");
             }
         }

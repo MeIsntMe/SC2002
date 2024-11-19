@@ -11,6 +11,7 @@ import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -95,7 +96,7 @@ public class AdminUserControl extends UserControl {
         if (filteredStaff.isEmpty()) {
             System.out.println("No staff found matching your criteria.");
         } else {
-            System.out.printf("Filtered %s List:", role.toString().toLowerCase());
+            System.out.printf("Filtered %s List: %n", role.toString().toLowerCase());
             System.out.printf("%-10s %-20s %-10s %-5s%n", "ID", "Name", "Gender", "Age"); // Headers
             System.out.println("----------------------------------------------------");
             for (User staff : filteredStaff) 
@@ -133,7 +134,7 @@ public class AdminUserControl extends UserControl {
         // Prompt for role and ID 
         UserType role = getStaffRoleInput(sc);
         System.out.print("Enter the staff ID: ");
-        String staffID = sc.nextLine().trim().toUpperCase();
+        String staffID = sc.nextLine().trim().toUpperCase().trim();
 
         // Retrieve staff
         User staff = null;
@@ -174,16 +175,21 @@ public class AdminUserControl extends UserControl {
             switch (choice) { 
                 case 1:
                     System.out.print("Enter new age: ");
-                    int age = sc.nextInt();
-                    sc.nextLine();
-                    staff.setAge(age);
-                    System.out.println("Age updated.");
+                    try {
+                        int age = sc.nextInt();
+                        sc.nextLine();
+                        staff.setAge(age);
+                        System.out.println("Age updated.");
+                    } catch (InputMismatchException e) {
+                        System.out.println("Invalid, please input a number");
+                        continue;
+                    }
                     break;
                 case 2:
                     System.out.print("Enter new password: ");
                     String password = sc.nextLine().trim();
                     staff.setPassword(password);
-                    System.out.println("Password updated.");
+                    System.out.println("Password updated to " + password);
                     break;
                 case 3: 
                     done = true;  // Exit the update loop
@@ -245,7 +251,7 @@ public class AdminUserControl extends UserControl {
                     Database.adminsMap.put(userID, admin);
                     break; 
             }
-            System.out.printf("%s %s added at ID %s", role, name, userID);
+            System.out.printf("%s %s added at ID %s %n", role, name, userID);
 
             // Offer option to repeat
             if (!HMS.repeat(sc)) break;
@@ -271,7 +277,7 @@ public class AdminUserControl extends UserControl {
             case PATIENT:
                 prefix = "P1";
                 parseIDIndex = 2;
-                userMap = Database.doctorsMap;
+                userMap = Database.patientsMap;
                 break;
             case DOCTOR:
                 prefix = "D";
@@ -291,6 +297,7 @@ public class AdminUserControl extends UserControl {
 
         // Find next available ID in that map
         for (User user : userMap.values()) {
+            System.out.println(user.getID() + " " + user.getName());
             int idNumber = Integer.parseInt(user.getID().substring(parseIDIndex));
             if (idNumber > maxID) 
                 maxID = idNumber;
@@ -315,9 +322,10 @@ public class AdminUserControl extends UserControl {
         while (true) {
 
             // Prompt for role and ID
-            UserType role = getStaffRoleInput(sc);
+            UserType role = getRoleInput(sc);
+        
             System.out.print("Enter the user ID: ");
-            String userID = sc.nextLine().toUpperCase();
+            String userID = sc.nextLine().toUpperCase().trim();
 
             // Remove user
             boolean removed = false;
@@ -328,8 +336,8 @@ public class AdminUserControl extends UserControl {
                 case ADMINISTRATOR -> removed = removeFromMap(Database.adminsMap, userID);
                 default -> System.out.println("Invalid input. Please enter Doctor, Pharmacist, Administrator or Patient.");
             }
-            if (removed) {System.out.println("Staff member with ID " + userID + " has been successfully removed."); }
-            else {System.out.println("Staff member with ID " + userID + " not found."); }
+            if (removed) {System.out.println("User member with ID " + userID + " has been successfully removed."); }
+            else {System.out.println("User member with ID " + userID + " not found."); }
             
             // Offer option to repeat
             if (!HMS.repeat(sc)) break;
@@ -344,8 +352,8 @@ public class AdminUserControl extends UserControl {
      * @param staffID the ID of the user to remove
      * @return true if user was successfully removed, false if not found
      */
-    private static boolean removeFromMap(Map<String, ? extends User> userMap, String staffID) {
-        return (userMap.remove(staffID) != null);
+    private static boolean removeFromMap(Map<String, ? extends User> userMap, String userID) {
+        return (userMap.remove(userID) != null);
         // remove returns the removed value if it exists, or null if not found
     }
 

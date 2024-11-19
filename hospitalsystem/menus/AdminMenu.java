@@ -41,7 +41,7 @@ public class AdminMenu implements MenuInterface {
             System.out.println("=========================================");
             System.out.println("Administrator Menu:");
             System.out.println("1. View and Manage Staff and Patients");
-            System.out.println("2. View Appointment details");
+            System.out.println("2. View All Appointments");
             System.out.println("3. View and Manage Medication Inventory");
             System.out.println("4. Approve Replenishment Requests");
             System.out.println("5. Logout");
@@ -83,7 +83,7 @@ public class AdminMenu implements MenuInterface {
     public static void manageUserMenu(Scanner sc) {
         while (true) {            
             System.out.println("=========================================");
-            System.out.println("Staff Management: ");
+            System.out.println("Staff/Patient Management: ");
             System.out.println("1. Add staff or patient");
             System.out.println("2. Remove staff or patient");
             System.out.println("3. Update staff details");  
@@ -92,7 +92,7 @@ public class AdminMenu implements MenuInterface {
             System.out.print("Enter choice: ");
 
             try{
-                int choice = sc.nextInt();
+                int choice = Integer.parseInt(sc.nextLine());
                 switch (choice) {
                     case 1 -> AdminUserControl.addUser(sc);
                     case 2 -> AdminUserControl.removeUser(sc);
@@ -101,7 +101,7 @@ public class AdminMenu implements MenuInterface {
                     case 5 -> {return;}
                     default -> System.out.println("Invalid input! Please enter a number between 1-5 ");
                 }
-            } catch (InputMismatchException e) {
+            } catch (NumberFormatException e) {
                 System.out.println("Invalid input! Please enter a number between 1-5");
             } catch (Exception e) {
                 System.out.println("An error has occurred: " + e.getMessage());
@@ -125,7 +125,6 @@ public class AdminMenu implements MenuInterface {
 
             try {
                 int choice = Integer.parseInt(sc.nextLine());
-                sc.nextLine();  // Consume newline
                 switch (choice) {
                     case 1 -> AdminInventoryControl.displayInventory();
                     case 2 -> AdminInventoryControl.manageStock(sc);

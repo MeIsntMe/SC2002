@@ -29,28 +29,50 @@ public class AdminInventoryControl extends InventoryControl {
      */
     public static void manageStock(Scanner sc) {
         while (true){
-            Medicine medicine = getMedicineInput(sc);
 
-            // Get add or remove options 
+            // Get action choice  
+            System.out.println("");
             System.out.println("Stock management options:");
             System.out.println("1. Add stock for a medicine");
             System.out.println("2. Remove stock for a medicine");
             System.out.println("3. Add new medicine");
             System.out.println("4. Remove all expired medicines");
-            System.out.println("Enter choice (1-4): ");
+            System.out.print("Enter choice (1-4): ");
             
             try {
                 int choice = Integer.parseInt(sc.nextLine());
                 
-                System.out.print("Enter the quantity: ");
-                int quantity = Integer.parseInt(sc.nextLine());
-
                 switch (choice){
-                    case 1 -> addStock(medicine, quantity, sc);
-                    case 2 -> removeStock(medicine, quantity);
-                    case 3 -> addNewMedicine(sc);
-                    case 4 -> removeExpiredStock();
-                    default -> System.out.println("Invalid input. Please enter '1' or '2'.");
+                    case 1: 
+                        Medicine medicine = getMedicineInput(sc);
+                        System.out.print("Enter the quantity to add: ");
+                        int increment; 
+                        try {
+                            increment = Integer.parseInt(sc.nextLine());
+                            addStock(medicine, increment, sc);
+                        } catch (NumberFormatException e ){
+                            System.out.println("Invalid input. Please enter a number. ");
+                            continue;
+                        } break;
+                    case 2: 
+                        Medicine med = getMedicineInput(sc);
+                        System.out.print("Enter the quantity to remove: ");
+                        int decrement; 
+                        try {
+                            decrement = Integer.parseInt(sc.nextLine());
+                            removeStock(med, decrement);
+                        } catch (NumberFormatException e ){
+                            System.out.println("Invalid input. Please enter a number. ");
+                            continue;
+                        } break; 
+                    case 3: 
+                        addNewMedicine(sc);
+                        break;
+                    case 4: 
+                        removeExpiredStock();
+                        break;
+                    default: 
+                        System.out.println("Invalid input. Please enter a number from 1-4.");
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a number 1-4.");
@@ -155,7 +177,7 @@ public class AdminInventoryControl extends InventoryControl {
      */
     public static void addNewMedicine(Scanner sc) {
         while (true) {
-            
+            System.out.println(" ");
             System.out.print("Enter name of medicine to add: ");
             String medicineName = sc.nextLine();
 
@@ -168,11 +190,14 @@ public class AdminInventoryControl extends InventoryControl {
             // Create new medicine
             System.out.print("Enter minumum stock level: ");
             int minStockLevel = sc.nextInt();
+            sc.nextLine();
             System.out.print("Enter usage instructions: ");
             String instructions = sc.nextLine();
             System.out.print("Enter inputted stock amount: "); 
             int newStock = sc.nextInt();
+            sc.nextLine();
             Medicine newMedicine = new Medicine(medicineName, minStockLevel, instructions);
+            Database.inventoryMap.put(medicineName, newMedicine);
             
             // Add batch
             addStock(newMedicine, newStock, sc);
@@ -214,11 +239,11 @@ public class AdminInventoryControl extends InventoryControl {
      */
     public static void manageRequests(Scanner sc) {
         
-        // View all requests
-        displayAllRequests();
+        // View all requests, if no requests end
+        if (!displayAllRequests()) return;
 
         while (true) {
-            ReplenishmentRequest request = getRequestInput(sc); 
+            ReplenishmentRequest request = getRequestInput(sc);
 
             // Check that request is pending
             if (request.getStatus() != RequestStatus.PENDING) {

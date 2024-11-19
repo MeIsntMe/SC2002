@@ -159,10 +159,10 @@ public class HMS {
      * @return true if the user wants to repeat the action, false otherwise.
      */
     public static boolean repeat(Scanner sc) {
-        System.out.println("Would you like to repeat? (y/n): ");
+        System.out.print("Would you like to repeat? (y/n): ");
         while (true) {
             try {
-                char choice = sc.next().charAt(0);
+                char choice = sc.nextLine().charAt(0);
                 if (choice == 'y') return true;
                 else if (choice == 'n') return false;
                 else System.out.println("Invalid input. Please input 'y' or 'n'. ");
@@ -177,7 +177,7 @@ public class HMS {
      *
      * @param userType The UserType representing the user's role.
      */
-    private static void loadRequiredData(UserType userType) {
+    public static void loadRequiredData(UserType userType) {
         clearLoadedData(); // Clear the minimal staff data first
 
         switch (userType) {
@@ -191,6 +191,8 @@ public class HMS {
             case ADMINISTRATOR:
                 Database.loadStaffData();
                 Database.loadPatientData();
+                Database.loadInventoryData();
+                Database.loadAppointmentData();
                 break;
 
             case PHARMACIST:
