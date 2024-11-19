@@ -1,10 +1,5 @@
 package hospitalsystem.usercontrol;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.stream.Collectors;
-
 import hospitalsystem.HMS;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.UserType;
@@ -12,6 +7,10 @@ import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Administrative control class for managing all user-related operations in the hospital system.
@@ -25,7 +24,7 @@ import hospitalsystem.model.User;
  * - Pharmacists
  * - Administrators
  *
- * @author Your Name
+ * @author An Xian
  * @version 1.0
  * @since 2024-03-16
  */

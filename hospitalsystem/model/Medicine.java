@@ -1,7 +1,6 @@
 package hospitalsystem.model;
 
 import java.time.LocalDate;
-import java.util.Iterator;
 import java.util.List;
 
 public class Medicine {
@@ -12,20 +11,10 @@ public class Medicine {
     
 
     // Constructor
-    public Medicine(String medicineName, int minimumStockLevel, String instructions, List<Batch> batches) {
+    public Medicine(String medicineName, int minimumStockLevel, String instructions) {
         this.medicineName = medicineName;
-        this.batches = batches;
         this.minimumStockLevel = minimumStockLevel;
         this.instructions = instructions;
-        //Get rid of expired batches
-        Iterator<Batch> iterator = batches.iterator();
-        while (iterator.hasNext()) {
-            Batch batch = iterator.next();
-            if (batch.isExpired()) {
-                System.out.println("Removing expired batch of " + medicineName + " with expiration date: " + batch.getExpirationDate());
-                iterator.remove();
-            }
-        }
     }
 
     // Getters

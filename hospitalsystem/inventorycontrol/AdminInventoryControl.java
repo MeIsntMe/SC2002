@@ -172,8 +172,7 @@ public class AdminInventoryControl extends InventoryControl {
             String instructions = sc.nextLine();
             System.out.print("Enter inputted stock amount: "); 
             int newStock = sc.nextInt();
-            ArrayList<Medicine.Batch> batches = new ArrayList<>();
-            Medicine newMedicine = new Medicine(medicineName, minStockLevel, instructions, batches);
+            Medicine newMedicine = new Medicine(medicineName, minStockLevel, instructions);
             
             // Add batch
             addStock(newMedicine, newStock, sc);
