@@ -22,7 +22,7 @@ import java.util.Scanner;
  * This class interacts directly with the system database to ensure
  * real-time accuracy of pharmaceutical records and inventory status.
  *
- * @author An Xian, Shaivi 
+ * @author Shaivi 
  * @version 1.0
  * @since 2024-11-19
  */
