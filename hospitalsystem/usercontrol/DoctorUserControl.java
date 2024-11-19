@@ -20,7 +20,7 @@ import java.util.Scanner;
  * - Prescription management
  * - Appointment outcome recording
  *
- * @author Your Name
+ * @author Leo, Gracelynn
  * @version 1.0
  * @since 2024-03-16
  */

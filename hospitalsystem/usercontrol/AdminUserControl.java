@@ -1,20 +1,19 @@
 package hospitalsystem.usercontrol;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.stream.Collectors;
-
 import hospitalsystem.HMS;
 import hospitalsystem.data.Database;
-import hospitalsystem.enums.UserType;
 import hospitalsystem.enums.BloodType;
+import hospitalsystem.enums.UserType;
 import hospitalsystem.model.Administrator;
 import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Patient;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Administrative control class for managing all user-related operations in the hospital system.
@@ -396,6 +395,11 @@ public class AdminUserControl extends UserControl {
             int role;
             try {
                 role = scanner.nextInt(); 
+                scanner.nextLine();
+                // if (scanner.hasNext()){
+                //     scanner.skip(".*");
+                //     scanner.nextLine();
+                // }
                 switch (role) {
                     case 1 -> {return UserType.PATIENT;}
                     case 2 -> {return UserType.DOCTOR;}

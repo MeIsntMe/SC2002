@@ -1,13 +1,11 @@
 package hospitalsystem;
 
-import java.util.Scanner;
-
 import hospitalsystem.data.Database;
-import hospitalsystem.usercontrol.AdminUserControl;
-import hospitalsystem.model.User;
 import hospitalsystem.enums.UserType;
 import hospitalsystem.menus.*;
-import hospitalsystem.menus.MenuInterface;
+import hospitalsystem.model.User;
+import hospitalsystem.usercontrol.AdminUserControl;
+import java.util.Scanner;
 
 public class HMS {
 
@@ -24,6 +22,7 @@ public class HMS {
             try{
                 int choice = scanner.nextInt();
                 UserType role; 
+                Database.loadAllData();
                 switch (choice) {
                     case 1: 
                         role = login(scanner);
@@ -46,6 +45,7 @@ public class HMS {
                     default:
                         System.out.println("Invalid choice. Please input either 1 or 2.");
                 } 
+
             } catch (Exception e) {
                     System.out.println("Invalid input. Please input either 1 or 2.");
             }
@@ -62,9 +62,6 @@ public class HMS {
         System.out.print("Enter password: ");
         String inputPassword = sc.nextLine();
 
-        // Load minimal staff data for verification
-        Database.loadStaffData();
-
         // Retrieve user from database by ID 
         User user = null;
         switch (role) {
@@ -74,10 +71,14 @@ public class HMS {
             case UserType.ADMINISTRATOR -> user = Database.adminsMap.get(inputID);
         }
 
+        System.out.println("user created");
+        System.out.println(Database.patientsMap);
+        System.out.printf("Password: %s", user.getPassword());
+
         // Validate credentials
         if (user != null && user.getPassword().equals(inputPassword)) {
-            System.out.printf("Login successful. Welcome %s!", currentUser.getName());
             currentUser = user;
+            System.out.printf("Login successful. Welcome %s!", currentUser.getName());
             loadRequiredData(role);
 
             // If first time log in, reset password 
