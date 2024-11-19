@@ -3,7 +3,6 @@ package hospitalsystem.menus;
 import hospitalsystem.HMS;
 import hospitalsystem.inventorycontrol.InventoryControl;
 import hospitalsystem.inventorycontrol.PharmacistInventoryControl;
-import hospitalsystem.model.Doctor;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
 import hospitalsystem.usercontrol.PharmacistUserControl;
@@ -14,9 +13,10 @@ public class PharmacistMenu implements MenuInterface {
 
     /**
      * Displays the Pharmacist Menu and processes user choices.
+     * Ensures type-safety via checks
      */
     public PharmacistMenu(User currentUser) { 
-        if (!(currentUser instanceof Doctor)) {
+        if (!(currentUser instanceof Pharmacist)) {
             throw new IllegalArgumentException("User must be a Pharmacist.");
         }
         this.pharmacist = (Pharmacist) currentUser;
@@ -31,7 +31,7 @@ public class PharmacistMenu implements MenuInterface {
             System.out.println("Pharmacist Menu:");
             System.out.println("1. View Appointment Outcome Records");
             System.out.println("2. Update Prescription Status");
-            System.out.println("3. View and Update Medication Inventory");
+            System.out.println("3. View Medication Inventory");
             System.out.println("4. Submit Replenishment Request");
             System.out.println("5. Check and Handle Expired Medicines");
             System.out.println("6. Logout");
@@ -43,18 +43,24 @@ public class PharmacistMenu implements MenuInterface {
 
                 switch (choice) {
                     case 1:
+                        //View all appointment outcome records
                         PharmacistUserControl.viewAppointmentOutcomeRecord(sc);
                         break;
                     case 2:
+                        //updates prescription status
                         PharmacistUserControl.updatePrescriptionStatus(sc);
                         break;
                     case 3:
+                        // Views medication inventory
                         InventoryControl.displayInventory();
                         break;
                     case 4:
+                        // Submit medicine replenishment request for admin approval
                         PharmacistInventoryControl.submitReplenishmentRequest(sc);
                         break;
                     case 5:
+                        // Novel Functionality: Included medicine expiry date
+                        // Function checks and removes medication that has expired
                         PharmacistInventoryControl.checkAndHandleExpiredMedicines();
                         break;
                     case 6:

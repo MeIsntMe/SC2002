@@ -16,8 +16,15 @@ public class DoctorMenu implements MenuInterface {
     private final Doctor doctor;
     private final Scanner scanner;
 
-    public DoctorMenu(User user) {
-        this.doctor = (Doctor) user;
+    /*
+     * Constructor
+     * Ensures type-safety via checks
+     */
+    public DoctorMenu(User currentUser) {
+        if (!(currentUser instanceof Doctor)) {
+            throw new IllegalArgumentException("User must be a Doctor");
+        }
+        this.doctor = (Doctor) currentUser;
         this.scanner = new Scanner(System.in);
     }
 

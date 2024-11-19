@@ -10,7 +10,7 @@ import java.util.Scanner;
  * Manages pharmacist-specific appointment operations in the hospital system.
  * Handles prescription management, dispensing, and related appointment functions.
  *
- * @author Shaivi
+ * @author An Xian, Shiavi, Gracelynn
  * @version 1.0
  * @since 2024-03-16
  */
