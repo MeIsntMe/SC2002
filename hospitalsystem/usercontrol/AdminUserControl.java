@@ -364,6 +364,7 @@ public class AdminUserControl extends UserControl {
             int role;
             try {
                 role = sc.nextInt(); 
+                sc.nextLine();
                 switch (role) {
                     case 1 -> {return UserType.DOCTOR;}
                     case 2 -> {return UserType.PHARMACIST;}

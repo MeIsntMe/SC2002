@@ -89,7 +89,7 @@ public class AdminMenu implements MenuInterface {
                     case 2 -> AdminUserControl.removeUser(sc);
                     case 3 -> AdminUserControl.updateStaffDetails(sc);
                     case 4 -> AdminUserControl.displayStaffList(sc);
-                    case 5 -> {sc.close(); return;}
+                    case 5 -> {return;}
                     default -> System.out.println("Invalid input! Please enter a number between 1-5 ");
                 }
             } catch (InputMismatchException e) {
@@ -121,7 +121,7 @@ public class AdminMenu implements MenuInterface {
                     case 1 -> AdminInventoryControl.displayInventory();
                     case 2 -> AdminInventoryControl.manageStock(sc);
                     case 3 -> AdminInventoryControl.updateLowStockAlert(sc);
-                    case 7 -> { sc.close(); return; }
+                    case 4 -> {return; }
                     default -> System.out.println("Invalid input! Please enter a number between 1-7.");
                 }
             } catch (NumberFormatException e) {
