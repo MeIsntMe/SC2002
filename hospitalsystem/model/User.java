@@ -53,8 +53,8 @@ public abstract class User {
     
     public String getID() {return userID;}
     public String getName() {return name;}   
-    public String getGender() {return gender;}    
-    public String getPassword() {System.out.println("Method called and errored");return password;}
+    public String getGender() {return gender;}
+    public String getPassword() {return password;}
     public int getAge() {return age;}    
 
     public void setName(String name) {this.name = name; }

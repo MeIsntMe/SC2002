@@ -63,7 +63,7 @@ public class Database {
     private static final String PATIENT_CSV_HEADER = "Patient ID,Name,Date of Birth,Gender,Blood Type,Phone Number,Email,Password";
     private static final String PATIENT_CSV_PATH = "hospitalsystem/data/Patient_List.csv";
 
-    private static final String STAFF_CSV_HEADER = "Staff ID,Name,Role,Gender,Age";
+    private static final String STAFF_CSV_HEADER = "Staff ID,Name,Role,Gender,Age,Password";
     private static final String STAFF_CSV_PATH = "hospitalsystem/data/Staff_List.csv";
 
     private static final String INVENTORY_CSV_HEADER = "Medicine Name,Initial Stock,Low Stock Level Alert,Batches Quantity,Batches Expiry Date";
@@ -538,13 +538,15 @@ public class Database {
                     .sorted(Comparator.comparing(User::getID))
                     .forEach(patient -> {
                         try {
-                            String line = String.format("%s,%s,%s,%s,%s,%s",
+                            String line = String.format("%s,%s,%s,%s,%s,%s,%s,%s",
                                     escapeCSV(patient.getID()),
                                     escapeCSV(patient.getName()),
                                     patient.getDOB().toString(),
                                     escapeCSV(patient.getGender()),
                                     patient.getBloodType().toString(),
-                                    escapeCSV(patient.getEmail())
+                                    escapeCSV(patient.getPhoneNumber()),
+                                    escapeCSV(patient.getEmail()),
+                                    escapeCSV(patient.getPassword())
                             );
                             bw.write(line);
                             bw.newLine();
@@ -577,35 +579,36 @@ public class Database {
             allStaff.addAll(doctorsMap.values());
             allStaff.addAll(adminsMap.values());
             allStaff.addAll(pharmsMap.values());
+            allStaff.sort(Comparator.comparing(User::getID));
 
-            allStaff.stream()
-                    .sorted(Comparator.comparing(User::getID))
-                    .forEach(staff -> {
-                        try {
-                            String role = "Doctor";
-                            if (staff instanceof Administrator) role = "Administrator";
-                            if (staff instanceof Pharmacist) role = "Pharmacist";
+            // Write staff data with updated passwords
+            for (User staff : allStaff) {
+                String newPassword = staff.getPassword(); // Get the updated password
+                staff.setPassword(newPassword); // Set the updated password back to the staff object
+                System.out.print(staff.getPassword());
+                System.out.print(staff.getID());
 
-                            String line = String.format("%s,%s,%s,%s,%d",
-                                    escapeCSV(staff.getID()),
-                                    escapeCSV(staff.getName()),
-                                    role,
-                                    escapeCSV(staff.getGender()),
-                                    staff.getAge()
-                            );
-                            bw.write(line);
-                            bw.newLine();
-                        } catch (IOException e) {
-                            System.out.println("Error writing staff " + staff.getID() + ": " + e.getMessage());
-                        }
-                    });
+                String role = determineRole(staff);
+                String line = String.format("%s,%s,%s,%s,%d,%s",
+                        escapeCSV(staff.getID()),
+                        escapeCSV(staff.getName()),
+                        role,
+                        escapeCSV(staff.getGender()),
+                        staff.getAge(),
+                        escapeCSV(staff.getPassword())
+                );
+                bw.write(line);
+                bw.newLine();
+            }
 
             System.out.println("Successfully saved " + allStaff.size() + " staff members to " + STAFF_CSV_PATH);
 
         } catch (IOException e) {
             System.out.println("Error saving staff to CSV: " + e.getMessage());
+            throw new RuntimeException("Failed to save staff data", e);
         }
     }
+
 
     /**
      * Saves current inventory data to CSV file.
@@ -680,4 +683,29 @@ public class Database {
             System.out.println("Error saving appointments to CSV: " + e.getMessage());
         }
     }
+
+    private static String determineRole(User staff) {
+        if (staff instanceof Doctor) return "DOCTOR";
+        if (staff instanceof Administrator) return "ADMINISTRATOR";
+        if (staff instanceof Pharmacist) return "PHARMACIST";
+        return "UNKNOWN";
+    }
+
+    public static void updatePassword(User user, String newPassword) {
+        user.setPassword(newPassword);
+
+        // Update the user in the appropriate map
+        if (user instanceof Doctor) {
+            Database.doctorsMap.put(user.getID(), user);
+        } else if (user instanceof Administrator) {
+            Database.adminsMap.put(user.getID(), user);
+        } else if (user instanceof Pharmacist) {
+            Database.pharmsMap.put(user.getID(), user);
+        } else if (user instanceof Patient) {
+            Database.patientsMap.put(user.getID(), user);
+        }
+
+        System.out.println("Password updated!");
+    }
+
 }
