@@ -65,6 +65,7 @@ public class PharmacistMenu implements MenuInterface {
                         break;
                     case 6:
                         HMS.logout();
+                        sc.close();
                         return;
                     default:
                         System.out.println("Invalid choice! Please select a valid option.");
