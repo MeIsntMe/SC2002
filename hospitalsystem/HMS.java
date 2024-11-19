@@ -59,7 +59,7 @@ public class HMS {
         //Returns UserType if login successful, else returns null 
 
         // Get login details 
-        UserType role = AdminUserControl.getRoleInput(sc);
+        UserType role = getRoleInput(sc);
         System.out.print("Enter user ID: ");
         String inputID = sc.nextLine();
         System.out.print("Enter password: ");
@@ -116,6 +116,39 @@ public class HMS {
 
             user.setPassword(newPW);
             System.out.println("Password updated!");
+        }
+    }
+
+
+    /**
+     * Gets role input from user through interactive console.
+     * Provides numbered menu for role selection:
+     * 1. Patient
+     * 2. Doctor
+     * 3. Pharmacist
+     * 4. Admin
+     *
+     * Validates input and handles invalid selections.
+     *
+     * @param scanner Scanner object for reading user input
+     * @return selected UserType enum value
+     */
+    public static UserType getRoleInput(Scanner scanner) {
+        while (true) {
+            System.out.println("Select role: 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
+            int role;
+            try {
+                role = scanner.nextInt(); 
+                switch (role) {
+                    case 1 -> {return UserType.PATIENT;}
+                    case 2 -> {return UserType.DOCTOR;}
+                    case 3 -> {return UserType.PHARMACIST;}
+                    case 4 -> {return UserType.ADMINISTRATOR;}
+                    default -> System.out.println("Invalid role number specified. Please enter a number between 1 and 4.");
+                }
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please enter a number between 1 and 4.");
+            }
         }
     }
 

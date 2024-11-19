@@ -33,9 +33,11 @@ public class AdminInventoryControl extends InventoryControl {
 
             // Get add or remove options 
             System.out.println("Stock management options:");
-            System.out.println("1. Add");
-            System.out.println("2. Remove");
-            System.out.println("Enter choice (1/2): ");
+            System.out.println("1. Add stock for a medicine");
+            System.out.println("2. Remove stock for a medicine");
+            System.out.println("3. Add new medicine");
+            System.out.println("4. Remove all expired medicines");
+            System.out.println("Enter choice (1-4): ");
             
             try {
                 int choice = Integer.parseInt(sc.nextLine());
@@ -46,10 +48,12 @@ public class AdminInventoryControl extends InventoryControl {
                 switch (choice){
                     case 1 -> addStock(medicine, quantity, sc);
                     case 2 -> removeStock(medicine, quantity);
+                    case 3 -> addNewMedicine(sc);
+                    case 4 -> removeExpiredStock();
                     default -> System.out.println("Invalid input. Please enter '1' or '2'.");
                 }
-            } catch (InputMismatchException e) {
-                System.out.println("Invalid input. Please enter '1' or '2'.");
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number 1-4.");
             }
 
             // Option to repeat

@@ -12,6 +12,7 @@ import java.util.Scanner;
 
 
 public class DoctorMenu implements MenuInterface {
+    
     private final Doctor doctor;
     private final Scanner scanner;
 
@@ -82,7 +83,7 @@ public class DoctorMenu implements MenuInterface {
                         System.out.println("Invalid choice, try again.");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid number.");
+                System.out.println("Invalid input. Please enter a number between 1-8.");
             } catch (Exception e) {
                 System.out.println("An error has occurred: " + e.getMessage());
                 scanner.nextLine();
