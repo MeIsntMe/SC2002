@@ -41,21 +41,21 @@ public class HMS {
                 UserType role; 
                 Database.loadAllData();
                 switch (choice) {
-                    case 1: 
+                    case 1:
                         role = login(scanner);
-                        MenuInterface control;
-                        switch (role) {
-                            case PATIENT -> control = new PatientMenu(currentUser);
-                            case DOCTOR -> control = new DoctorMenu(currentUser);
-                            case PHARMACIST -> control = new PharmacistMenu(currentUser);
-                            case ADMINISTRATOR -> control = new AdminMenu(currentUser);
-                            case null -> {
-                                control = null;
-                                clearLoadedData(); //Clear data
+                        if (role == null) {
+                            clearLoadedData(); //Clear data
+                        } else {
+                            MenuInterface control = null;
+                            switch (role) {
+                                case PATIENT -> control = new PatientMenu(currentUser);
+                                case DOCTOR -> control = new DoctorMenu(currentUser);
+                                case PHARMACIST -> control = new PharmacistMenu(currentUser);
+                                case ADMINISTRATOR -> control = new AdminMenu(currentUser);
                             }
-                        }
-                        if (control != null) 
                             control.displayMenu();
+                        }
+                        break;
                     case 2:
                         scanner.close();
                         return;
@@ -90,10 +90,10 @@ public class HMS {
         // Retrieve user from database by ID 
         User user = null;
         switch (role) {
-            case UserType.PATIENT -> user = Database.patientsMap.get(inputID);
-            case UserType.DOCTOR -> user = Database.doctorsMap.get(inputID);
-            case UserType.PHARMACIST -> user = Database.pharmsMap.get(inputID);
-            case UserType.ADMINISTRATOR -> user = Database.adminsMap.get(inputID);
+            case PATIENT -> user = Database.patientsMap.get(inputID);
+            case DOCTOR -> user = Database.doctorsMap.get(inputID);
+            case PHARMACIST -> user = Database.pharmsMap.get(inputID);
+            case ADMINISTRATOR -> user = Database.adminsMap.get(inputID);
         }
 
         System.out.println("user created");
