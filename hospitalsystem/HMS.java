@@ -105,7 +105,6 @@ public class HMS {
         if (user != null && user.getPassword().equals(inputPassword)) {
             currentUser = user;
             System.out.printf("Login successful. Welcome %s!\n", currentUser.getName());
-            loadRequiredData(role);
 
             // If first time log in, reset password 
             resetPassword(currentUser, sc);

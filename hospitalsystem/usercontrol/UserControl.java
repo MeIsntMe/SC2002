@@ -16,7 +16,7 @@ import java.util.Scanner;
  */
 public class UserControl{
 
-    Scanner sc = new Scanner(System.in);
+    static final Scanner sc = new Scanner(System.in);
     /**
      * Generates a formatted string representation of a patient's medical record.
      * Includes personal information, medical history, and appointment outcomes.
@@ -34,7 +34,7 @@ public class UserControl{
         sb.append("\n  Phone Number: ").append(mr.getPhoneNumber());
         sb.append("\n  Email Address: ").append(mr.getEmail());
         sb.append("\n  Blood Type: ").append(mr.getBloodType());   
-        sb.append("\n}").append(AppointmentControl.getAppointmentOutcomesString(patient, "  "));
+        sb.append("\n").append(AppointmentControl.getAppointmentOutcomesString(patient, "  "));
 
         return sb.toString();
     }

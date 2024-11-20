@@ -33,8 +33,6 @@ import java.util.stream.Collectors;
  * @since 2024-11-19
  */
 public class AdminUserControl extends UserControl {
-    
-    Scanner sc = new Scanner(System.in);
 
     /**
      * Displays filtered staff list based on specified criteria with formatted output.

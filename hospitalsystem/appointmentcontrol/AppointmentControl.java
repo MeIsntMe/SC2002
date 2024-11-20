@@ -40,7 +40,7 @@ public class AppointmentControl {
      */
     public static List<Appointment> getAppointmentsByPatientID(String patientID) {
         return Database.appointmentMap.values().stream()
-                .filter(appointment -> appointment.getPatient().getID().equals(patientID))
+                .filter(appointment -> (appointment.getPatient() != null? appointment.getPatient().getID().equals(patientID):false))
                 .sorted()
                 .toList();
     }

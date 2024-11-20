@@ -3,11 +3,9 @@ package hospitalsystem.usercontrol;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
-import hospitalsystem.model.Prescription.MedicineSet;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * Manages doctor-specific user operations in the hospital system.
@@ -25,7 +23,6 @@ import java.util.Scanner;
  * @since 2024-11-19
  */
 public class DoctorUserControl extends UserControl {
-    private static final Scanner sc = new Scanner(System.in);
 
     /**
      * Displays complete patient medical details and history.
@@ -123,7 +120,7 @@ public class DoctorUserControl extends UserControl {
         }
 
         // Get prescriptions
-        List<MedicineSet> prescribedMedicineList = new ArrayList<>();
+        List<Medicine.MedicineSet> prescribedMedicineList = new ArrayList<>();
         while (true) {
             System.out.print("Add prescription? (y/n): ");
             if (!sc.nextLine().toLowerCase().startsWith("y")) break;
@@ -141,7 +138,7 @@ public class DoctorUserControl extends UserControl {
                 continue;
             }
 
-            prescribedMedicineList.add(new MedicineSet(medicine, quantity));
+            prescribedMedicineList.add(new Medicine.MedicineSet(medicine, quantity));
         }
 
         // Create new prescription
