@@ -3,13 +3,10 @@ package hospitalsystem.data;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import hospitalsystem.model.Appointment.AppointmentSlot;
-
 import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -457,8 +454,8 @@ public class Database {
 
                             Medicine medicine = inventoryMap.get(medicineName);
                             if (medicine != null) {
-                                List<Prescription.MedicineSet> medicineSets = new ArrayList<>();
-                                medicineSets.add(new Prescription.MedicineSet(medicine, quantity));
+                                List<Medicine.MedicineSet> medicineSets = new ArrayList<>();
+                                medicineSets.add(new Medicine.MedicineSet(medicine, quantity));
 
                                 Prescription prescription = new Prescription(
                                         medicineSets,
