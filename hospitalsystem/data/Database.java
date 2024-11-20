@@ -3,11 +3,8 @@ package hospitalsystem.data;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import hospitalsystem.model.Appointment.AppointmentSlot;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
+
+import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -367,19 +364,58 @@ public class Database {
      * @param filePath path to the appointment CSV file
      */
     private static void loadAppointmentsFromCSV(String filePath) {
-        try (Scanner scanner = new Scanner(new File(filePath))) {
-            scanner.nextLine(); // Skip the header
-            while (scanner.hasNextLine()) {
-                String[] appointmentData = scanner.nextLine().replaceAll("\"", "").split(",");
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String header = reader.readLine(); // Skip header
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                // Combine any split lines that might exist
+                StringBuilder fullLine = new StringBuilder(line);
+                while (line.endsWith("\"") && !line.endsWith("\"\"")) {
+                    line = reader.readLine();
+                    if (line != null) {
+                        fullLine.append("\n").append(line);
+                    }
+                }
+
+                line = fullLine.toString();
+                System.out.println("Raw line: " + line);  // Debug
+
                 try {
-                    if (appointmentData.length < 10) {
-                        System.out.println("Skipping invalid appointment data: " + String.join(",", appointmentData));
+                    // Split the line, preserving quoted values
+                    List<String> fields = new ArrayList<>();
+                    StringBuilder field = new StringBuilder();
+                    boolean inQuotes = false;
+
+                    for (int i = 0; i < line.length(); i++) {
+                        char c = line.charAt(i);
+                        if (c == '"') {
+                            inQuotes = !inQuotes;
+                        } else if (c == ',' && !inQuotes) {
+                            fields.add(field.toString().trim());
+                            field = new StringBuilder();
+                        } else {
+                            field.append(c);
+                        }
+                    }
+                    fields.add(field.toString().trim());
+
+                    // Remove quotes from fields
+                    fields = fields.stream()
+                            .map(f -> f.replaceAll("^\"|\"$", ""))
+                            .collect(Collectors.toList());
+
+                    System.out.println("Parsed fields: " + fields);  // Debug
+
+                    if (fields.size() < 10) {
+                        System.out.println("Skipping invalid appointment data: insufficient fields");
                         continue;
                     }
 
-                    String appointmentID = appointmentData[0].trim();
-                    String patientID = appointmentData[1].trim();
-                    String doctorID = appointmentData[2].trim();
+                    // Create appointment
+                    String appointmentID = fields.get(0);
+                    String patientID = fields.get(1);
+                    String doctorID = fields.get(2);
 
                     User doctorUser = doctorsMap.get(doctorID);
                     User patientUser = patientsMap.get(patientID);
@@ -392,76 +428,81 @@ public class Database {
                     Doctor doctor = (Doctor) doctorUser;
                     Patient patient = (patientUser instanceof Patient) ? (Patient) patientUser : null;
 
-                    int year = Integer.parseInt(appointmentData[3].trim());
-                    int month = Integer.parseInt(appointmentData[4].trim());
-                    int day = Integer.parseInt(appointmentData[5].trim());
-                    int hour = Integer.parseInt(appointmentData[6].trim());
-                    int minute = Integer.parseInt(appointmentData[7].trim());
+                    int year = Integer.parseInt(fields.get(3));
+                    int month = Integer.parseInt(fields.get(4));
+                    int day = Integer.parseInt(fields.get(5));
+                    int hour = Integer.parseInt(fields.get(6));
+                    int minute = Integer.parseInt(fields.get(7));
 
                     AppointmentSlot slot = new AppointmentSlot(year, month, day, hour, minute);
                     Appointment appointment = new Appointment(appointmentID, patient, doctor, slot);
 
-                    appointment.setStatus(AppointmentStatus.valueOf(appointmentData[8].trim().toUpperCase()));
-                    appointment.setIsAvailable(Boolean.parseBoolean(appointmentData[9].trim()));
+                    appointment.setStatus(AppointmentStatus.valueOf(fields.get(8).toUpperCase()));
+                    appointment.setIsAvailable(Boolean.parseBoolean(fields.get(9)));
 
-                    if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
-                        patient.getMedicalRecord().getAppointmentOutcomes().add(appointment.getAppointmentOutcome());
-                    }
-
-                    // Handle consultation notes (may be empty)
-                    String consultationNotes = appointmentData.length > 10 ? appointmentData[10].trim() : "";
+                    // Handle consultation notes
+                    String consultationNotes = fields.size() > 10 ? fields.get(10) : "";
                     appointment.setConsultationNotes(consultationNotes);
+                    System.out.println("Set consultation notes: " + consultationNotes);
 
-                    // Handle prescriptions (may be empty)
-                    if (appointmentData.length > 11 && !appointmentData[11].trim().isEmpty()) {
-                        List<Prescription.MedicineSet> medicineSets = new ArrayList<>();
-                        String[] prescriptionPairs = appointmentData[11].split(";");
+                    // Handle prescriptions
+                    if (fields.size() > 11 && !fields.get(11).isEmpty()) {
+                        String prescriptionData = fields.get(11);
+                        System.out.println("Processing prescription data: " + prescriptionData);
 
-                        for (String pair : prescriptionPairs) {
-                            String[] parts = pair.split(":");
-                            if (parts.length == 2) {
-                                String medicineName = parts[0].trim();
-                                int quantity = Integer.parseInt(parts[1].trim());
+                        String[] prescriptionParts = prescriptionData.split(":");
+                        if (prescriptionParts.length == 2) {
+                            String medicineName = prescriptionParts[0].trim();
+                            int quantity = Integer.parseInt(prescriptionParts[1].trim());
 
-                                Medicine medicine = inventoryMap.get(medicineName);
-                                if (medicine != null) {
-                                    medicineSets.add(new Prescription.MedicineSet(medicine, quantity));
-                                } else {
-                                    System.out.println("Medicine not found: " + medicineName);
-                                }
+                            Medicine medicine = inventoryMap.get(medicineName);
+                            if (medicine != null) {
+                                List<Prescription.MedicineSet> medicineSets = new ArrayList<>();
+                                medicineSets.add(new Prescription.MedicineSet(medicine, quantity));
+
+                                Prescription prescription = new Prescription(
+                                        medicineSets,
+                                        doctor.getID(),
+                                        patient.getID(),
+                                        PrescriptionStatus.PENDING
+                                );
+
+                                appointment.setPrescription(prescription);
+                                System.out.println("Created prescription: " + prescription);
+                            } else {
+                                System.out.println("WARNING: Medicine not found in inventory: " + medicineName);
+                                System.out.println("Available medicines: " + String.join(", ", inventoryMap.keySet()));
                             }
                         }
+                    }
 
-                        if (!medicineSets.isEmpty()) {
-                            Prescription prescription = new Prescription(
-                                    medicineSets,
-                                    doctor.getID(),
-                                    patient.getID(),
-                                    PrescriptionStatus.PENDING
-                            );
-                            appointment.setPrescription(prescription);
-                        }
+                    if (appointment.getStatus() == AppointmentStatus.COMPLETED && patient != null) {
+                        patient.getMedicalRecord().getAppointmentOutcomes().add(appointment.getAppointmentOutcome());
                     }
 
                     appointmentMap.put(appointmentID, appointment);
                     doctor.addAppointment(appointment);
 
-                    List<Appointment> patientAppointments = patient.getAppointments();
-                    if (patientAppointments == null) {
-                        patientAppointments = new ArrayList<>();
+                    if (patient != null) {
+                        List<Appointment> patientAppointments = patient.getAppointments();
+                        if (patientAppointments == null) {
+                            patientAppointments = new ArrayList<>();
+                        }
+                        patientAppointments.add(appointment);
+                        patient.setAppointments(patientAppointments);
                     }
-                    patientAppointments.add(appointment);
-                    patient.setAppointments(patientAppointments);
 
                 } catch (Exception e) {
-                    System.out.println("Error processing appointment line: " + String.join(",", appointmentData));
+                    System.out.println("Error processing appointment line: " + line);
                     System.out.println("Error details: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
             System.out.println("Successfully loaded " + appointmentMap.size() + " appointments");
 
-        } catch (FileNotFoundException e) {
-            System.out.println("An error has occurred\n" + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("Error reading appointments file: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -745,6 +786,31 @@ public class Database {
             System.out.println("Error saving replenishment requests to CSV: " + e.getMessage());
             throw new RuntimeException("Failed to save replenishment request data", e);
         }
+    }
+
+    /**
+     * Parses a CSV line handling quoted values properly.
+     * @param line The CSV line to parse
+     * @return List of parsed values
+     */
+    private static List<String> parseCSVLine(String line) {
+        List<String> result = new ArrayList<>();
+        boolean inQuotes = false;
+        StringBuilder currentValue = new StringBuilder();
+
+        for (char c : line.toCharArray()) {
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            } else if (c == ',' && !inQuotes) {
+                result.add(currentValue.toString());
+                currentValue = new StringBuilder();
+            } else {
+                currentValue.append(c);
+            }
+        }
+        result.add(currentValue.toString());
+
+        return result;
     }
 
     private static String determineRole(User staff) {

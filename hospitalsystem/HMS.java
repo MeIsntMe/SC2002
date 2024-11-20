@@ -203,7 +203,6 @@ public class HMS {
      * @param userType The UserType representing the user's role.
      */
     public static void loadRequiredData(UserType userType) {
-        clearLoadedData(); // Clear the minimal staff data first
 
         switch (userType) {
             case DOCTOR:
@@ -211,6 +210,7 @@ public class HMS {
                 Database.loadPatientData();
                 Database.loadInventoryData();
                 Database.loadAppointmentData();
+                Database.loadRequestsFromCSV();
                 break;
 
             case ADMINISTRATOR:
@@ -231,8 +231,9 @@ public class HMS {
 
             case PATIENT:
                 Database.loadPatientData();
-                Database.loadStaffData();
+                Database.loadInventoryData();
                 Database.loadAppointmentData();
+                Database.loadRequestsFromCSV();
                 break;
         }
     }
