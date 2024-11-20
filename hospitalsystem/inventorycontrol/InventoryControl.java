@@ -3,6 +3,8 @@ package hospitalsystem.inventorycontrol;
 import hospitalsystem.data.Database;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
+
+import java.util.Comparator;
 import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
@@ -56,20 +58,27 @@ public class InventoryControl {
         System.out.println("  Total Quantity: " + med.getTotalQuantity() + (med.getIsLowStock() ? " **LOW STOCK ALERT**" : ""));
     }
 
-    public static boolean displayAllRequests() { // used by both
-        if (Database.requestMap.isEmpty()) {
-            System.out.println("There are no replenishment requests.");
+    public static boolean displayAllRequests() {
+        if (Database.requestMap == null || Database.requestMap.isEmpty()) {
+            System.out.println("No replenishment requests found.");
             return false;
         }
-        // Print in table format  
-        System.out.println("Replenishment Request List: ");
-        System.out.printf("%-10s %-20s %-10s %-15s%n", "ID", "Medicine Name", "Requested Qty", "Status");
-        System.out.println("----------------------------------------------------------------------------");
+
+        System.out.println("\nReplenishment Request List:");
+        System.out.println("-----------------------------------------------------------------");
+        System.out.printf("%-10s %-20s %-15s %-15s%n", "ID", "Medicine", "Quantity", "Status");
+        System.out.println("-----------------------------------------------------------------");
+
         for (Map.Entry<Integer, ReplenishmentRequest> entry : Database.requestMap.entrySet()) {
             ReplenishmentRequest req = entry.getValue();
-            System.out.printf("%-10s %-20s %-15d %-15s%n", req.getRequestID(), req.getMedicine().getMedicineName(), req.getRequestedQuantity(), req.getStatus());
+            System.out.printf("%-10d %-20s %-15d %-15s%n",
+                    req.getRequestID(),
+                    req.getMedicine().getMedicineName(),
+                    req.getRequestedQuantity(),
+                    req.getStatus());
         }
-        System.out.println(" ");
+        System.out.println("-----------------------------------------------------------------");
+
         return true;
     }
 
@@ -90,20 +99,25 @@ public class InventoryControl {
 
     public static ReplenishmentRequest getRequestInput(Scanner sc) {
         while (true) {
-            System.out.println("Enter request ID: ");
             try {
-                int requestID = Integer.parseInt(sc.nextLine());
+                System.out.print("Enter request ID (0 to cancel): ");
+                String input = sc.nextLine().trim();
+                int requestID = Integer.parseInt(input);
 
-                if (!Database.requestMap.containsKey(requestID)) {
-                    System.out.println("Request ID " + requestID + " is invalid.");
-                    continue;
+                if (requestID == 0) {
+                    return null;
                 }
-                ReplenishmentRequest request = Database.requestMap.get(requestID);
-                return request; 
+
+                if (Database.requestMap.containsKey(requestID)) {
+                    return Database.requestMap.get(requestID);
+                } else {
+                    System.out.println("Request ID " + requestID + " not found. Please try again.");
+                }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid numerical ID.");
+                System.out.println("Invalid input. Please enter a number.");
             }
         }
     }
+
 
 }

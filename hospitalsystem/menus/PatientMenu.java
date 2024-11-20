@@ -159,7 +159,7 @@ public class PatientMenu implements MenuInterface {
                 System.out.println("Invalid choice.");
                 continue;
             }
-            Appointment chosenSlot = availableSlots.get(choice);
+            Appointment chosenSlot = availableSlots.get(choice-1);
             chosenSlot.setPatient(patient);
             chosenSlot.setIsAvailable(false);
             Database.appointmentMap.put(patient.getID(), chosenSlot);

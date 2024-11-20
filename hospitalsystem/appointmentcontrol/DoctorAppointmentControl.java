@@ -328,12 +328,29 @@ public class DoctorAppointmentControl extends AppointmentControl {
      * @param prescription the prescription issued during the appointment
      */
     public static void recordOutcome(Appointment appointment, String notes, Prescription prescription) {
-        appointment.setConsultationNotes(notes);
-        appointment.setPrescription(prescription);
+        // Sanitize notes - replace any remaining newlines with spaces
+        String sanitizedNotes = notes.replaceAll("[\n\r]", " ").trim();
+
+        appointment.setConsultationNotes(sanitizedNotes);
+        if (prescription != null) {
+            appointment.setPrescription(prescription);
+        }
         appointment.setStatus(AppointmentStatus.COMPLETED);
+
+        // Update database
         Database.appointmentMap.put(appointment.getAppointmentID(), appointment);
         Database.saveAppointmentsToCSV();
-        System.out.println("Appointment outcome recorded successfully.");
+
+        // Update patient's medical record if needed
+        Patient patient = appointment.getPatient();
+        if (patient != null) {
+            ArrayList<Appointment.AppointmentOutcome> outcomes = patient.getMedicalRecord().getAppointmentOutcomes();
+            if (outcomes == null) {
+                outcomes = new ArrayList<>();
+                patient.getMedicalRecord().setAppointmentOutcomes(outcomes);
+            }
+            outcomes.add(appointment.getAppointmentOutcome());
+        }
     }
 
     /**

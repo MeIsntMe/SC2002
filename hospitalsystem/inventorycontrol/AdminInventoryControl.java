@@ -238,46 +238,75 @@ public class AdminInventoryControl extends InventoryControl {
      * @param sc Scanner object for reading input
      */
     public static void manageRequests(Scanner sc) {
-        
-        // View all requests, if no requests end
-        if (!displayAllRequests()) return;
-
         while (true) {
-            ReplenishmentRequest request = getRequestInput(sc);
+            System.out.println("\nManaging Replenishment Requests");
+            System.out.println("=========================================");
 
-            // Check that request is pending
+            // Debug print to verify map contents
+            System.out.println("Current requests in system: " + Database.requestMap.size());
+
+            if (!displayAllRequests()) {
+                return;
+            }
+
+            ReplenishmentRequest request = getRequestInput(sc);
+            if (request == null) {
+                return; // User cancelled
+            }
+
             if (request.getStatus() != RequestStatus.PENDING) {
-                System.out.println("Request not found or already processed.");
+                System.out.println("Request " + request.getRequestID() + " is already " + request.getStatus());
                 continue;
             }
 
-            // Approve or reject 
-            System.out.println("1. Approve");
+            System.out.println("\nRequest Details:");
+            System.out.printf("Medicine: %s%nQuantity: %d%nStatus: %s%n",
+                    request.getMedicine().getMedicineName(),
+                    request.getRequestedQuantity(),
+                    request.getStatus());
+
+            System.out.println("\n1. Approve");
             System.out.println("2. Reject");
-            System.out.println("Enter choice (1/2): ");
-            int choice = sc.nextInt();
-            sc.nextLine();
+            System.out.println("3. Cancel");
+            System.out.print("Enter choice (1-3): ");
 
-            switch (choice){
-                case 1: // Approve 
-                    request.setStatus(RequestStatus.APPROVED);
-                    System.out.println("Request approved.");
-                    
-                    // Add stock 
-                    Medicine med = Database.inventoryMap.get(request.getMedicine().getMedicineName());
-                    int requestedQuantity = request.getRequestedQuantity();
-                    addStock(med, requestedQuantity, sc);
+            try {
+                int choice = Integer.parseInt(sc.nextLine().trim());
 
-                case 2: // Reject 
-                    request.setStatus(RequestStatus.REJECTED);
-                    System.out.println("Request rejected.");
-                default:
-                System.out.println("Invalid choice. Select 1 or 2.");
-            }  
+                switch (choice) {
+                    case 1: // Approve
+                        request.setStatus(RequestStatus.APPROVED);
+                        System.out.println("Request approved.");
 
-        // Option to repeat
-        if (!HMS.repeat(sc)) break;
+                        // Add stock
+                        Medicine med = Database.inventoryMap.get(request.getMedicine().getMedicineName());
+                        addStock(med, request.getRequestedQuantity(), sc);
+
+                        // Save changes
+                        Database.saveRequestsToCSV();
+                        break;
+
+                    case 2: // Reject
+                        request.setStatus(RequestStatus.REJECTED);
+                        System.out.println("Request rejected.");
+                        Database.saveRequestsToCSV();
+                        break;
+
+                    case 3: // Cancel
+                        System.out.println("Operation cancelled.");
+                        break;
+
+                    default:
+                        System.out.println("Invalid choice. Please select 1-3.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+
+            System.out.print("\nManage another request? (y/n): ");
+            if (!sc.nextLine().trim().toLowerCase().startsWith("y")) {
+                break;
+            }
         }
     }
-
 }

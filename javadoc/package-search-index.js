@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"hospitalsystem"},{"l":"hospitalsystem.appointmentcontrol"},{"l":"hospitalsystem.data"},{"l":"hospitalsystem.enums"},{"l":"hospitalsystem.inventorycontrol"},{"l":"hospitalsystem.menus"},{"l":"hospitalsystem.model"},{"l":"hospitalsystem.usercontrol"}];updateSearchResults();

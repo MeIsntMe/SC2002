@@ -32,12 +32,12 @@ import java.util.Scanner;
  */
 public class PharmacistUserControl {
 
-/**
- * Displays all appointment outcome records, including associated prescriptions,
- * for the pharmacist. Fetches data from the shared database to ensure accuracy.
- *
- * @param sc Scanner instance for user input.
- */
+    /**
+     * Displays all appointment outcome records, including associated prescriptions,
+     * for the pharmacist. Fetches data from the shared database to ensure accuracy.
+     *
+     * @param sc Scanner instance for user input.
+     */
     public static void viewAppointmentOutcomeRecord(Scanner sc) {
         System.out.print("Enter Appointment ID to view prescription details: ");
         String appointmentID = sc.nextLine();
@@ -51,36 +51,45 @@ public class PharmacistUserControl {
         }
 
         // Display appointment details
-        System.out.printf("Appointment ID: %s | Patient ID: %s | Doctor ID: %s%n",
-                appointment.getAppointmentID(),
-                appointment.getPatient().getID(),
-                appointment.getDoctor().getID());
+        System.out.println("\nAppointment Details:");
+        System.out.printf("Appointment ID: %s%n", appointment.getAppointmentID());
+        System.out.printf("Patient ID: %s%n", appointment.getPatient().getID());
+        System.out.printf("Doctor ID: %s%n", appointment.getDoctor().getID());
+        System.out.printf("Status: %s%n", appointment.getStatus());
 
-        // Retrieve the prescription
+        // Display consultation notes if available
+        String notes = appointment.getConsultationNotes();
+        if (notes != null && !notes.trim().isEmpty()) {
+            System.out.println("\nConsultation Notes: " + notes);
+        }
+
+        // Get and display prescription information
         Prescription prescription = appointment.getPrescription();
+        if (prescription != null && prescription.getMedicineList() != null && !prescription.getMedicineList().isEmpty()) {
+            System.out.println("\nPrescription Details:");
+            System.out.printf("Status: %s%n", prescription.getStatus());
+            System.out.println("Prescribed Medications:");
 
-        if (prescription != null && !prescription.getMedicineList().isEmpty()) {
-            System.out.println("Prescriptions:");
             for (Map.Entry<Medicine, Integer> entry : prescription.getMedicineList().entrySet()) {
                 Medicine medicine = entry.getKey();
-                int dosage = entry.getValue();
-                System.out.printf("    Medicine: %s | Dosage: %d | Status: %s%n",
+                int quantity = entry.getValue();
+                System.out.printf("  - %s (Quantity: %d)%n",
                         medicine.getMedicineName(),
-                        dosage,
-                        prescription.getStatus());
+                        quantity);
             }
-            System.out.println("--------------------------------------------------");
         } else {
-            System.out.println("No prescriptions associated with this appointment.");
+            System.out.println("\nNo prescriptions associated with this appointment.");
         }
+
+        System.out.println("\n--------------------------------------------------");
     }
 
 
-/**
- * Updates the status of a specific prescription for a given appointment.
- *
- * @param sc Scanner instance for user input.
- */
+    /**
+     * Updates the status of a specific prescription for a given appointment.
+     *
+     * @param sc Scanner instance for user input.
+     */
     public static void updatePrescriptionStatus(Scanner sc) {
         // Prompt for appointment ID
         System.out.print("Enter Appointment ID to update prescription status: ");
@@ -93,51 +102,61 @@ public class PharmacistUserControl {
             return;
         }
 
-        // Fetch prescription associated with the appointment
-        Prescription prescription = appointment.getPrescription();
+        // Get appointment outcome and prescription
+        Appointment.AppointmentOutcome outcome = appointment.getAppointmentOutcome();
+        if (outcome == null) {
+            System.out.println("No outcome record found for this appointment.");
+            return;
+        }
+
+        Prescription prescription = outcome.getPrescription();
         if (prescription == null || prescription.getMedicineList().isEmpty()) {
             System.out.println("No prescriptions found for this appointment.");
             return;
         }
 
-        // Display prescriptions in the appointment
-        System.out.println("Prescriptions in Appointment " + appointmentID + ":");
+        // Display current prescriptions
+        System.out.println("\nCurrent Prescriptions in Appointment " + appointmentID + ":");
         List<Medicine> medicines = new ArrayList<>(prescription.getMedicineList().keySet());
         for (int i = 0; i < medicines.size(); i++) {
             Medicine medicine = medicines.get(i);
-            System.out.printf("%d. %s (Status: %s)%n", i + 1, medicine.getMedicineName(), prescription.getStatus());
+            int quantity = prescription.getMedicineList().get(medicine);
+            System.out.printf("%d. %s (Quantity: %d, Status: %s)%n",
+                    i + 1,
+                    medicine.getMedicineName(),
+                    quantity,
+                    prescription.getStatus());
         }
 
-        // Prompt for prescription to update
-        System.out.print("Select prescription to update (by number): ");
+        // Get and validate prescription selection
+        System.out.print("\nSelect prescription to update (by number): ");
         int prescriptionIndex;
         try {
             prescriptionIndex = Integer.parseInt(sc.nextLine()) - 1;
+            if (prescriptionIndex < 0 || prescriptionIndex >= medicines.size()) {
+                System.out.println("Invalid selection. Please select a valid prescription.");
+                return;
+            }
         } catch (NumberFormatException e) {
             System.out.println("Invalid input. Please enter a valid number.");
             return;
         }
 
-        // Validate selected prescription
-        if (prescriptionIndex < 0 || prescriptionIndex >= medicines.size()) {
-            System.out.println("Invalid selection. Please select a valid prescription.");
-            return;
-        }
-
-        Medicine selectedMedicine = medicines.get(prescriptionIndex);
-
-        // Prompt for new status
-        System.out.print("Enter new status (e.g., PENDING, DISPENSED, REJECTED): ");
+        // Update prescription status
+        System.out.print("Enter new status (PENDING/DISPENSED/REJECTED): ");
         String statusInput = sc.nextLine().toUpperCase();
-
         try {
             PrescriptionStatus newStatus = PrescriptionStatus.valueOf(statusInput);
-            prescription.setStatus(newStatus); // Update prescription status
+            prescription.setStatus(newStatus);
             System.out.printf("Prescription status for %s updated to %s successfully.%n",
-                    selectedMedicine.getMedicineName(), newStatus);
+                    medicines.get(prescriptionIndex).getMedicineName(),
+                    newStatus);
+
+            // Update the database
+            Database.appointmentMap.put(appointmentID, appointment);
+            Database.saveAppointmentsToCSV();
         } catch (IllegalArgumentException e) {
-            System.out.println("Invalid status entered. Please use PENDING, DISPENSED, or REJECTED.");
+            System.out.println("Invalid status. Please use PENDING, DISPENSED, or REJECTED.");
         }
     }
-
 }

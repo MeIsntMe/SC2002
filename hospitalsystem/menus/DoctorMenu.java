@@ -248,45 +248,71 @@ public class DoctorMenu implements MenuInterface {
 
             Appointment selectedAppointment = bookedAppointments.get(choice - 1);
 
-            // Get consultation notes
+            // Get consultation notes - Modified to handle multi-line input
             System.out.println("Enter consultation notes (press Enter twice to finish):");
             StringBuilder notes = new StringBuilder();
             String line;
+            boolean firstLine = true;
             while (!(line = scanner.nextLine()).isEmpty()) {
-                notes.append(line).append("\n");
+                if (!firstLine) {
+                    notes.append(" ");  // Use space instead of newline
+                }
+                notes.append(line.trim());
+                firstLine = false;
             }
 
             // Get prescription
             ArrayList<Prescription.MedicineSet> prescribedMedicineList = new ArrayList<>();
+
+            // Display available medicines first
+            System.out.println("\nAvailable Medicines:");
+            for (String medName : Database.inventoryMap.keySet()) {
+                System.out.println("- " + medName);
+            }
+
             while (true) {
-                System.out.print("Add prescription? (y/n): ");
+                System.out.print("\nAdd prescription? (y/n): ");
                 if (!scanner.nextLine().toLowerCase().startsWith("y")) break;
 
                 System.out.print("Enter medication name: ");
-                String medicineName = scanner.nextLine();
-
-                System.out.print("Enter quantity: ");
-                int quantity = Integer.parseInt(scanner.nextLine());
+                String medicineName = scanner.nextLine().trim();
 
                 Medicine medicine = Database.inventoryMap.get(medicineName);
                 if (medicine == null) {
-                    System.out.println("Medicine not found in inventory.");
+                    System.out.println("Medicine not found in inventory. Please select from the available medicines list.");
                     continue;
                 }
 
-                prescribedMedicineList.add(new Prescription.MedicineSet(medicine, quantity));
+                System.out.print("Enter quantity: ");
+                try {
+                    int quantity = Integer.parseInt(scanner.nextLine().trim());
+                    if (quantity <= 0) {
+                        System.out.println("Please enter a positive quantity.");
+                        continue;
+                    }
+                    prescribedMedicineList.add(new Prescription.MedicineSet(medicine, quantity));
+                    System.out.println("Medicine added to prescription.");
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid quantity. Please enter a number.");
+                }
             }
 
-            Prescription prescription = new Prescription(
-                    prescribedMedicineList,
-                    doctor.getID(),
-                    selectedAppointment.getPatient().getID(),
-                    PrescriptionStatus.PENDING
-            );
+            Prescription prescription = null;
+            if (!prescribedMedicineList.isEmpty()) {
+                prescription = new Prescription(
+                        prescribedMedicineList,
+                        doctor.getID(),
+                        selectedAppointment.getPatient().getID(),
+                        PrescriptionStatus.PENDING
+                );
+            }
 
             DoctorAppointmentControl.recordOutcome(selectedAppointment, notes.toString(), prescription);
+            System.out.println("Appointment outcome recorded successfully.");
+
         } catch (NumberFormatException e) {
             System.out.println("Please enter a valid number.");
         }
     }
+
 }
