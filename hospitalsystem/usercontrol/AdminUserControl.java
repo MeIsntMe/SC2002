@@ -5,7 +5,6 @@ import hospitalsystem.data.Database;
 import hospitalsystem.enums.BloodType;
 import hospitalsystem.enums.UserType;
 import hospitalsystem.model.*;
-
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.InputMismatchException;
