@@ -3,7 +3,6 @@ package hospitalsystem.appointmentcontrol;
 import hospitalsystem.data.*;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,11 +49,11 @@ public class PatientAppointmentControl extends AppointmentControl{
                 System.out.println("Invalid input, only numbers are accepted.");
                 continue;
             }
-            if (choice >= doctorList.size() || choice <= 0){
+            if (choice > doctorList.size() || choice <= 0){
                 System.out.println("Invalid choice.");
                 continue;
             }
-            Doctor selectedDoctor = (Doctor) doctorList.get(choice);
+            Doctor selectedDoctor = (Doctor) doctorList.get(choice-1);
             List<Appointment> availableSlots = getAvailableSlots(selectedDoctor);
             for (i = 0; i < availableSlots.size(); i++){
                 System.out.println((i + 1) + ". " + availableSlots.get(i).getSlot());
@@ -108,11 +107,11 @@ public class PatientAppointmentControl extends AppointmentControl{
                 System.out.println("Invalid input, only numbers are accepted.");
                 continue;
             }
-            if (choice >= scheduledAppointments.size() || choice <= 0){
+            if (choice > scheduledAppointments.size() || choice <= 0){
                 System.out.println("Invalid choice.");
                 continue;
             }
-            Appointment chosenSlot = scheduledAppointments.get(choice);
+            Appointment chosenSlot = scheduledAppointments.get(choice-1);
             chosenSlot.setPatient(null);
             chosenSlot.setIsAvailable(true);
             Database.appointmentMap.put(chosenSlot.getAppointmentID(), chosenSlot);

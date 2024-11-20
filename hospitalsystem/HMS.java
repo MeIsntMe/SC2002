@@ -38,6 +38,7 @@ public class HMS {
             System.out.print("Enter choice: ");
             try{
                 int choice = scanner.nextInt();
+                scanner.nextLine();
                 UserType role;
                 switch (choice) {
                     case 1:

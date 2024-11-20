@@ -1,7 +1,7 @@
 package hospitalsystem.menus;
-import hospitalsystem.model.*;
 import hospitalsystem.HMS;
 import hospitalsystem.enums.UserType;
+import hospitalsystem.model.*;
 
 
 public class Test {
