@@ -114,6 +114,18 @@ public class AppointmentControl {
     }
 
     /**
+     * Retrieves completed appointments for a specific doctor.
+     *
+     * @return a sorted list of booked appointments
+     */
+    public static List<Appointment> getCompletedAppointments() {
+        return Database.appointmentMap.values().stream()
+                .filter(apt -> apt.getStatus() == AppointmentStatus.COMPLETED)
+                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
+                .toList();
+    }
+
+    /**
      * Generates a unique appointment ID based on doctor ID and appointment slot.
      * Format: APT_[doctorID]_[YYYYMMDDHHMM]
      *
