@@ -74,7 +74,7 @@ public class PatientAppointmentControl extends AppointmentControl{
                 System.out.println("Invalid input, only numbers are accepted.");
                 continue;
             }
-            if (choice >= availableSlots.size() || choice <= 0){
+            if (choice > availableSlots.size() || choice <= 0){
                 System.out.println("Invalid choice.");
                 continue;
             }
@@ -83,6 +83,7 @@ public class PatientAppointmentControl extends AppointmentControl{
             chosenSlot.setIsAvailable(false);
             Database.appointmentMap.put(chosenSlot.getAppointmentID(), chosenSlot);
             System.out.println("Successfully scheduled appointment. Pending Doctor's approval.");
+            Database.saveAppointmentData();
             break;
         }
     }
@@ -116,6 +117,7 @@ public class PatientAppointmentControl extends AppointmentControl{
             chosenSlot.setIsAvailable(true);
             Database.appointmentMap.put(chosenSlot.getAppointmentID(), chosenSlot);
             System.err.println("Successfully canceled appointment.");
+            Database.saveAppointmentData();
             break;
         }
     }
