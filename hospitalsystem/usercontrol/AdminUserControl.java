@@ -4,16 +4,12 @@ import hospitalsystem.HMS;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.BloodType;
 import hospitalsystem.enums.UserType;
-import hospitalsystem.model.Administrator;
-import hospitalsystem.model.Doctor;
-import hospitalsystem.model.Patient;
-import hospitalsystem.model.Pharmacist;
-import hospitalsystem.model.User;
+import hospitalsystem.model.*;
+
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.InputMismatchException;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
@@ -34,8 +30,6 @@ import java.util.stream.Collectors;
  */
 public class AdminUserControl extends UserControl {
     
-    Scanner sc = new Scanner(System.in);
-
     /**
      * Displays filtered staff list based on specified criteria with formatted output.
      * Allows multi-criteria filtering:
@@ -50,10 +44,10 @@ public class AdminUserControl extends UserControl {
      * - Age
      *
      */
-    public static void displayStaffList(Scanner sc) {
+    public static void displayStaffList() {
 
         // Prompt for role filter
-        UserType role = getStaffRoleInput(sc);
+        UserType role = getStaffRoleInput();
 
         // Select appropriate set based on role
         Collection<? extends User> staffCollection = null;
@@ -129,10 +123,10 @@ public class AdminUserControl extends UserControl {
      * 5. Confirms changes
      *
      */
-    public static void updateStaffDetails(Scanner sc){
+    public static void updateStaffDetails(){
         
         // Prompt for role and ID 
-        UserType role = getStaffRoleInput(sc);
+        UserType role = getStaffRoleInput();
         System.out.print("Enter the staff ID: ");
         String staffID = sc.nextLine().trim().toUpperCase().trim();
 
@@ -154,7 +148,7 @@ public class AdminUserControl extends UserControl {
                 staff.getID(), staff.getName(), staff.getGender(), staff.getAge());
 
         //Call updateUserDetails
-        updateUserDetails(staff, sc);
+        updateUserDetails(staff);
     }
 
     /**
@@ -165,7 +159,7 @@ public class AdminUserControl extends UserControl {
      *
      * @param staff Staff member to update
      */
-    public static void updateUserDetails(User staff, Scanner sc) {
+    public static void updateUserDetails(User staff) {
         boolean done = false;
         while (!done) {
             System.out.println("Enter field to update (1-3): 1. Age | 2. Password | 3. Done");
@@ -209,13 +203,12 @@ public class AdminUserControl extends UserControl {
      * 3. Sets default values
      * 4. Adds to appropriate database map
      *
-     * @param sc Scanner for reading input
      */
-    public static void addUser(Scanner sc){
+    public static void addUser(){
         while (true) {
 
             // Prompt for role and details
-            UserType role = getRoleInput(sc);
+            UserType role = getRoleInput();
             System.out.print("Enter name: ");
             String name = sc.nextLine();
             System.out.print("Enter gender: ");
@@ -316,13 +309,12 @@ public class AdminUserControl extends UserControl {
      * 3. Removes from appropriate database map
      * 4. Updates related records
      *
-     * @param sc Scanner for reading input
      */
-    public static void removeUser(Scanner sc){
+    public static void removeUser(){
         while (true) {
 
             // Prompt for role and ID
-            UserType role = getRoleInput(sc);
+            UserType role = getRoleInput();
         
             System.out.print("Enter the user ID: ");
             String userID = sc.nextLine().toUpperCase().trim();
@@ -367,11 +359,10 @@ public class AdminUserControl extends UserControl {
      *
      * Validates input and handles invalid selections.
      *
-     * @param sc Scanner object for reading user input
      * @return selected UserType enum value
      * @throws IllegalArgumentException if invalid role is selected repeatedly
      */
-    public static UserType getStaffRoleInput(Scanner sc) {
+    public static UserType getStaffRoleInput() {
         while (true) {
             System.out.println("Select role (1-3): 1. Doctor | 2. Pharmacist | 3. Administrator");
             int role;
@@ -400,16 +391,15 @@ public class AdminUserControl extends UserControl {
      *
      * Validates input and handles invalid selections.
      *
-     * @param scanner Scanner object for reading user input
      * @return selected UserType enum value
      */
-    public static UserType getRoleInput(Scanner scanner) {
+    public static UserType getRoleInput() {
         while (true) {
             System.out.println("Select role: 1. Patient | 2. Doctor | 3. Pharmacist | 4. Admin");
             int role;
             try {
-                role = scanner.nextInt(); 
-                scanner.nextLine();
+                role = sc.nextInt(); 
+                sc.nextLine();
                 // if (scanner.hasNext()){
                 //     scanner.skip(".*");
                 //     scanner.nextLine();
@@ -423,7 +413,7 @@ public class AdminUserControl extends UserControl {
                 }
             } catch (Exception e) {
                 System.out.println("Invalid input. Please enter a number between 1 and 4.");
-                scanner.nextLine(); // Consume the invalid input
+                sc.nextLine(); // Consume the invalid input
             }
         }
     }

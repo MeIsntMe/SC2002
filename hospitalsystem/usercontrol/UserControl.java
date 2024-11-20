@@ -15,8 +15,7 @@ import java.util.Scanner;
  * @since 2024-11-19
  */
 public class UserControl{
-
-    Scanner sc = new Scanner(System.in);
+    static final Scanner sc = new Scanner(System.in);
     /**
      * Generates a formatted string representation of a patient's medical record.
      * Includes personal information, medical history, and appointment outcomes.

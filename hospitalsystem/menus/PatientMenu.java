@@ -2,12 +2,8 @@ package hospitalsystem.menus;
 
 import hospitalsystem.HMS;
 import hospitalsystem.appointmentcontrol.*;
-import hospitalsystem.data.Database;
 import hospitalsystem.model.*;
 import hospitalsystem.usercontrol.PatientUserControl;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
 /**
  * Manages patient interface for the hospital system.
  * Allows patients to do carry out actions such as viewing medical record,
@@ -21,7 +17,6 @@ import java.util.Scanner;
 public class PatientMenu implements MenuInterface {
     
     // Instance variables 
-    private final Scanner sc;
     private final Patient patient;
     private int choice;
 
@@ -34,7 +29,6 @@ public class PatientMenu implements MenuInterface {
             throw new IllegalArgumentException("User must be a Patient");
         }
         this.patient = (Patient) currentUser;
-        this.sc = new Scanner(System.in);
     }
     
     @Override
@@ -59,35 +53,35 @@ public class PatientMenu implements MenuInterface {
                 switch (choice){
                     case 1:
                         //View Medical Record
-                        handleDisplayMedicalRecord();
+                        PatientUserControl.displayPatientDetails(this.patient);
                         break;
                     case 2:
                         //Update Personal Information
-                        handleUpdatePersonalInformation();
+                        PatientUserControl.updatePatientDetails(this.patient);
                         break;
                     case 3:
                         // View available appointment slots of a specific doctor
-                        handleViewAppointmentSlots();
+                        PatientAppointmentControl.handleViewAppointmentSlots();
                         break;
                     case 4:
                         //Scheduling an Appointment with a specific doctor
-                        handleScheduleAppointment();
+                        PatientAppointmentControl.handleScheduleAppointment(patient);
                         break;
                     case 5:
                         //Rescheduling
-                        handleRescheduleAppointment();
+                        PatientAppointmentControl.handleRescheduleAppointment(patient);
                         break;               
                     case 6:
                         //Cancal appointment
-                        handleCancelAppointment();
+                        PatientAppointmentControl.handleCancelAppointment(patient);
                         break;
                     case 7:
                         //View scheduled appointments
-                        handleViewScheduledAppointments();
+                        PatientAppointmentControl.handleViewScheduledAppointments(patient);
                         break;
                     case 8:
                         //Display past appointment outcomes
-                        handleDisplayPastAppointmentOutcomes();
+                        System.out.println(AppointmentControl.getAppointmentOutcomesString(patient, ""));
                         break;
                     case 9:
                         //logout
@@ -103,110 +97,6 @@ public class PatientMenu implements MenuInterface {
                 sc.nextLine();
             }
         }
-    }
-
-    public void handleDisplayMedicalRecord(){
-        PatientUserControl.displayPatientDetails(this.patient);
-    }
-
-    public void handleUpdatePersonalInformation(){
-        PatientUserControl.updatePatientDetails(this.patient);
-    }
-
-    public List<Appointment> handleViewAppointmentSlots(){
-        List<User> doctorList = new ArrayList<>(Database.doctorsMap.values());
-        //hides main choice field to prevent overriding main loop
-        int choice;
-        System.out.println("Which doctor you want to select?");
-        int i;
-        for (i = 0; i < doctorList.size(); i++) {
-            System.out.println((i + 1) + ". " + doctorList.get(i).getName());
-        }
-        System.out.print("Enter choice: ");
-        while (true) { 
-            try {
-                choice = Integer.parseInt(sc.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input, only numbers are accepted.");
-                continue;
-            }
-            if (choice >= doctorList.size() || choice <= 0){
-                System.out.println("Invalid choice.");
-                continue;
-            }
-            Doctor selectedDoctor = (Doctor) doctorList.get(choice);
-            List<Appointment> availableSlots = PatientAppointmentControl.getAvailableSlots(selectedDoctor);
-            for (i = 0; i < availableSlots.size(); i++){
-                System.out.println((i + 1) + ". " + availableSlots.get(i).getSlot());
-            }
-            return availableSlots;
-        }
-    }
-
-    public void handleScheduleAppointment(){
-        //hides main choice field to prevent overriding main loop
-        int choice;
-        List<Appointment> availableSlots = handleViewAppointmentSlots();
-        System.out.print("Which slot would you like to schedule your new appointment for: ");
-        while (true) { 
-            try {
-                choice = Integer.parseInt(sc.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input, only numbers are accepted.");
-                continue;
-            }
-            if (choice >= availableSlots.size() || choice <= 0){
-                System.out.println("Invalid choice.");
-                continue;
-            }
-            Appointment chosenSlot = availableSlots.get(choice-1);
-            chosenSlot.setPatient(patient);
-            chosenSlot.setIsAvailable(false);
-            Database.appointmentMap.put(chosenSlot.getAppointmentID(), chosenSlot);
-            System.out.println("Successfully scheduled appointment. Pending Doctor's approval.");
-            break;
-        }
-    }
-
-    public List<Appointment> handleViewScheduledAppointments(){
-        List<Appointment> scheduledAppointments = PatientAppointmentControl.getScheduledSlots(patient);
-        int i;
-        for (i = 0; i < scheduledAppointments.size(); i++){
-            System.out.println((i + 1) + ". " + scheduledAppointments.get(i));
-        }
-        return scheduledAppointments;
-    }
-
-    public void handleCancelAppointment(){
-        List<Appointment> scheduledAppointments = handleViewScheduledAppointments();
-        System.out.print("Which slot would you like to cancel: ");
-        while (true) { 
-            try {
-                choice = Integer.parseInt(sc.nextLine());
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input, only numbers are accepted.");
-                continue;
-            }
-            if (choice >= scheduledAppointments.size() || choice <= 0){
-                System.out.println("Invalid choice.");
-                continue;
-            }
-            Appointment chosenSlot = scheduledAppointments.get(choice);
-            chosenSlot.setPatient(null);
-            chosenSlot.setIsAvailable(true);
-            Database.appointmentMap.put(chosenSlot.getAppointmentID(), chosenSlot);
-            System.err.println("Successfully canceled appointment.");
-            break;
-        }
-    }
-
-    public void handleRescheduleAppointment(){
-        handleCancelAppointment();
-        handleScheduleAppointment();
-    }
-
-    public void handleDisplayPastAppointmentOutcomes(){
-        System.out.println(AppointmentControl.getAppointmentOutcomesString(patient, ""));
     }
 
 }

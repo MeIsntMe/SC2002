@@ -25,9 +25,8 @@ public class AdminInventoryControl extends InventoryControl {
      * Interactive method for managing medicine stock levels.
      * Allows administrators to add or remove stock quantities.
      *
-     * @param sc Scanner object for reading user input
      */
-    public static void manageStock(Scanner sc) {
+    public static void manageStock() {
         while (true){
 
             // Get action choice  
@@ -49,7 +48,7 @@ public class AdminInventoryControl extends InventoryControl {
                         int increment; 
                         try {
                             increment = Integer.parseInt(sc.nextLine());
-                            addStock(medicine, increment, sc);
+                            addStock(medicine, increment);
                         } catch (NumberFormatException e ){
                             System.out.println("Invalid input. Please enter a number. ");
                             continue;
@@ -66,7 +65,7 @@ public class AdminInventoryControl extends InventoryControl {
                             continue;
                         } break; 
                     case 3: 
-                        addNewMedicine(sc);
+                        addNewMedicine();
                         break;
                     case 4: 
                         removeExpiredStock();
@@ -89,9 +88,8 @@ public class AdminInventoryControl extends InventoryControl {
      *
      * @param medicine Medicine object to add stock to
      * @param quantity Amount of stock to add
-     * @param sc Scanner object for reading expiration date input
      */
-    public static void addStock(Medicine medicine, int quantity, Scanner sc) {
+    public static void addStock(Medicine medicine, int quantity) {
         
             LocalDate expirationDate = null;
     
@@ -173,9 +171,8 @@ public class AdminInventoryControl extends InventoryControl {
      * Adds a new medicine to the inventory system.
      * Collects medicine details and creates initial stock batch.
      *
-     * @param sc Scanner object for reading medicine details
      */
-    public static void addNewMedicine(Scanner sc) {
+    public static void addNewMedicine() {
         while (true) {
             System.out.println(" ");
             System.out.print("Enter name of medicine to add: ");
@@ -200,7 +197,7 @@ public class AdminInventoryControl extends InventoryControl {
             Database.inventoryMap.put(medicineName, newMedicine);
             
             // Add batch
-            addStock(newMedicine, newStock, sc);
+            addStock(newMedicine, newStock);
             
             // Option to repeat 
             if (!HMS.repeat(sc)) break;
@@ -210,9 +207,8 @@ public class AdminInventoryControl extends InventoryControl {
     /**
      * Updates the low stock alert level for a specific medicine.
      *
-     * @param sc Scanner object for reading new alert level
      */
-    public static void updateLowStockAlert(Scanner sc) {
+    public static void updateLowStockAlert() {
         while (true){
             Medicine medicine = getMedicineInput(sc);
 
@@ -235,9 +231,8 @@ public class AdminInventoryControl extends InventoryControl {
      * Manages replenishment requests from pharmacists.
      * Allows administrators to approve or reject requests and update stock accordingly.
      *
-     * @param sc Scanner object for reading input
      */
-    public static void manageRequests(Scanner sc) {
+    public static void manageRequests() {
         while (true) {
             System.out.println("\nManaging Replenishment Requests");
             System.out.println("=========================================");
@@ -280,7 +275,7 @@ public class AdminInventoryControl extends InventoryControl {
 
                         // Add stock
                         Medicine med = Database.inventoryMap.get(request.getMedicine().getMedicineName());
-                        addStock(med, request.getRequestedQuantity(), sc);
+                        addStock(med, request.getRequestedQuantity());
 
                         // Save changes
                         Database.saveRequestsToCSV();

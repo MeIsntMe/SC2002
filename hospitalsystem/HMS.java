@@ -3,7 +3,7 @@ package hospitalsystem;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.UserType;
 import hospitalsystem.menus.*;
-import hospitalsystem.model.*;
+import hospitalsystem.model.User;
 import hospitalsystem.usercontrol.AdminUserControl;
 import java.util.Scanner;
 
@@ -82,7 +82,7 @@ public class HMS {
         //Returns UserType if login successful, else returns null
 
         // Get login details 
-        UserType role = AdminUserControl.getRoleInput(sc);
+        UserType role = AdminUserControl.getRoleInput();
         System.out.print("Enter user ID: ");
         String inputID = sc.nextLine();
         System.out.print("Enter password: ");

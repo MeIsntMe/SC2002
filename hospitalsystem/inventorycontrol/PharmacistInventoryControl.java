@@ -2,7 +2,6 @@ package hospitalsystem.inventorycontrol;
 
 import hospitalsystem.data.*;
 import hospitalsystem.model.*;
-import java.util.Scanner;
 
 /**
  * Manages pharmacist-specific inventory operations.
@@ -19,9 +18,8 @@ public class PharmacistInventoryControl extends InventoryControl {
      * Interactive method to submit a replenishment request and view all requests.
      * Prompts the user for input and validates the request.
      *
-     * @param sc Scanner instance for user input.
      */
-    public static void submitReplenishmentRequest(Scanner sc) {
+    public static void submitReplenishmentRequest() {
         System.out.println("Enter the medication name to request replenishment: ");
         String medicineName = sc.nextLine();
     

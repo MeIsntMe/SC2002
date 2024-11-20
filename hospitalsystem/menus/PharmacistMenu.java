@@ -5,7 +5,6 @@ import hospitalsystem.inventorycontrol.PharmacistInventoryControl;
 import hospitalsystem.model.Pharmacist;
 import hospitalsystem.model.User;
 import hospitalsystem.usercontrol.PharmacistUserControl;
-import java.util.Scanner;
 
 /**
  * Represents the menu for pharmacist users in the Hospital Management System.
@@ -17,20 +16,16 @@ import java.util.Scanner;
  *
  */
 public class PharmacistMenu implements MenuInterface {
-    private final Pharmacist pharmacist;
 
     public PharmacistMenu(User currentUser) { 
         if (!(currentUser instanceof Pharmacist)) {
             throw new IllegalArgumentException("User must be a Pharmacist.");
         }
-        this.pharmacist = (Pharmacist) currentUser;
     }
 
     @Override
     public void displayMenu() {
         while (true) {
-
-            Scanner sc = new Scanner(System.in);
             System.out.println("=========================================");
             System.out.println("Pharmacist Menu:");
             System.out.println("1. View Appointment Outcome Records");
@@ -49,11 +44,11 @@ public class PharmacistMenu implements MenuInterface {
                 switch (choice) {
                     case 1:
                         //View all appointment outcome records
-                        PharmacistUserControl.viewAppointmentOutcomeRecord(sc);
+                        PharmacistUserControl.viewAppointmentOutcomeRecord();
                         break;
                     case 2:
                         //updates prescription status
-                        PharmacistUserControl.updatePrescriptionStatus(sc);
+                        PharmacistUserControl.updatePrescriptionStatus();
                         break;
                     case 3:
                         // Views medication inventory
@@ -61,7 +56,7 @@ public class PharmacistMenu implements MenuInterface {
                         break;
                     case 4:
                         // Submit replenishment request (manual selection of medicine)
-                        PharmacistInventoryControl.submitReplenishmentRequest(sc);
+                        PharmacistInventoryControl.submitReplenishmentRequest();
                         break;
                     case 5:
                         // Submit replenishment request automatically for all low stock medicines 

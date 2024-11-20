@@ -4,12 +4,9 @@ import hospitalsystem.data.Database;
 import hospitalsystem.model.Medicine;
 import hospitalsystem.model.ReplenishmentRequest;
 
-import java.util.Comparator;
-import java.util.InputMismatchException;
 import java.util.Map;
 import java.util.Scanner;
 
-import javax.swing.JSpinner.NumberEditor;
 
 /**
  * Base class for managing hospital inventory operations.
@@ -29,6 +26,8 @@ public class InventoryControl {
      * verify that medicine stock level is updated in inventory 
      */
     
+    static final Scanner sc = new Scanner(System.in);
+
     public static void displayInventory() { //used by both
         if (Database.inventoryMap.isEmpty()) {
             System.out.println("The inventory is currently empty.");

@@ -18,6 +18,8 @@ import java.util.*;
  * @since 2024-11-19
  */
 public class AppointmentControl {
+    
+    static final Scanner scanner = new Scanner(System.in);
 
     /**
      * Retrieves all appointments associated with a specific doctor.

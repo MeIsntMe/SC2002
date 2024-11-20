@@ -4,7 +4,6 @@ import hospitalsystem.HMS;
 import hospitalsystem.data.*;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
-import java.util.Scanner;
 
 /**
  * Manages pharmacist-specific appointment operations in the hospital system.
@@ -15,10 +14,6 @@ import java.util.Scanner;
  * @since 2024-11-19
  */
 public class PharmacistAppointmentControl extends AppointmentControl{
-    /**
-     * Scanner object for reading user input.
-     */
-    Scanner sc = new Scanner(System.in);
 
     /**
      * Displays all appointments that have pending prescriptions.
@@ -43,12 +38,12 @@ public class PharmacistAppointmentControl extends AppointmentControl{
             System.out.println("No appointments with pending prescriptions found.");
     }
 
-    public static void updatePrescriptionStatus(Scanner sc){
+    public static void updatePrescriptionStatus(){
         while (true) {
            
             // Get appointment ID
             System.out.println("Enter appointment ID to dispense prescription for: ");
-            String appointmentID = sc.nextLine();
+            String appointmentID = scanner.nextLine();
 
             if (!Database.appointmentMap.containsKey(appointmentID)){
                 System.out.println("Appointment does not exist.");
@@ -64,7 +59,7 @@ public class PharmacistAppointmentControl extends AppointmentControl{
             System.out.println(prescription);
             
             // Option to repeat 
-            if (!HMS.repeat(sc)) return;
+            if (!HMS.repeat(scanner)) return;
         }
     }
 

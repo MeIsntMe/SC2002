@@ -6,7 +6,6 @@ import hospitalsystem.enums.PrescriptionStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * Handles pharmacist-specific operations in the hospital system.
@@ -31,15 +30,14 @@ import java.util.Scanner;
 /**
  * Handles the core logic and operations for pharmacists.
  */
-public class PharmacistUserControl {
+public class PharmacistUserControl extends UserControl{
 
     /**
      * Displays all appointment outcome records, including associated prescriptions,
      * for the pharmacist. Fetches data from the shared database to ensure accuracy.
      *
-     * @param sc Scanner instance for user input.
      */
-    public static void viewAppointmentOutcomeRecord(Scanner sc) {
+    public static void viewAppointmentOutcomeRecord() {
         System.out.print("Enter Appointment ID to view prescription details: ");
         String appointmentID = sc.nextLine();
 
@@ -88,10 +86,8 @@ public class PharmacistUserControl {
 
     /**
      * Updates the status of a specific prescription for a given appointment.
-     *
-     * @param sc Scanner instance for user input.
-     */
-    public static void updatePrescriptionStatus(Scanner sc) {
+    */
+    public static void updatePrescriptionStatus() {
         // Prompt for appointment ID
         System.out.print("Enter Appointment ID to update prescription status: ");
         String appointmentID = sc.nextLine();

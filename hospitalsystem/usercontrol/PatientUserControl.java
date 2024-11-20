@@ -2,7 +2,6 @@ package hospitalsystem.usercontrol;
 
 import hospitalsystem.model.Patient;
 import hospitalsystem.model.User;
-import java.util.Scanner;
 
 /**
  * Manages patient-specific user operations in the hospital system.
@@ -16,8 +15,6 @@ import java.util.Scanner;
  */
 public class PatientUserControl extends UserControl {
     
-    static private Scanner sc = new Scanner(System.in);
-
     /**
      * Displays patient medical record information.
      * Shows only information accessible to patients:

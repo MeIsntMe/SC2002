@@ -3,6 +3,8 @@ package hospitalsystem.appointmentcontrol;
 import hospitalsystem.data.*;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,4 +31,98 @@ public class PatientAppointmentControl extends AppointmentControl{
                 .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
                 .toList();
     }
+
+    public static List<Appointment> handleViewAppointmentSlots(){
+        List<User> doctorList = new ArrayList<>(Database.doctorsMap.values());
+        //hides main choice field to prevent overriding main loop
+        int choice;
+        System.out.println("Which doctor you want to select?");
+        int i;
+        for (i = 0; i < doctorList.size(); i++) {
+            System.out.println((i + 1) + ". " + doctorList.get(i).getName());
+        }
+        System.out.print("Enter choice: ");
+        while (true) { 
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input, only numbers are accepted.");
+                continue;
+            }
+            if (choice >= doctorList.size() || choice <= 0){
+                System.out.println("Invalid choice.");
+                continue;
+            }
+            Doctor selectedDoctor = (Doctor) doctorList.get(choice);
+            List<Appointment> availableSlots = getAvailableSlots(selectedDoctor);
+            for (i = 0; i < availableSlots.size(); i++){
+                System.out.println((i + 1) + ". " + availableSlots.get(i).getSlot());
+            }
+            return availableSlots;
+        }
+    }
+
+    public static void handleScheduleAppointment(Patient patient){
+        //hides main choice field to prevent overriding main loop
+        int choice;
+        List<Appointment> availableSlots = handleViewAppointmentSlots();
+        System.out.print("Which slot would you like to schedule your new appointment for: ");
+        while (true) { 
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input, only numbers are accepted.");
+                continue;
+            }
+            if (choice >= availableSlots.size() || choice <= 0){
+                System.out.println("Invalid choice.");
+                continue;
+            }
+            Appointment chosenSlot = availableSlots.get(choice-1);
+            chosenSlot.setPatient(patient);
+            chosenSlot.setIsAvailable(false);
+            Database.appointmentMap.put(chosenSlot.getAppointmentID(), chosenSlot);
+            System.out.println("Successfully scheduled appointment. Pending Doctor's approval.");
+            break;
+        }
+    }
+
+    public static List<Appointment> handleViewScheduledAppointments(Patient patient){
+        List<Appointment> scheduledAppointments = getScheduledSlots(patient);
+        int i;
+        for (i = 0; i < scheduledAppointments.size(); i++){
+            System.out.println((i + 1) + ". " + scheduledAppointments.get(i));
+        }
+        return scheduledAppointments;
+    }
+
+    public static void handleCancelAppointment(Patient patient){
+        List<Appointment> scheduledAppointments = handleViewScheduledAppointments(patient);
+        System.out.print("Which slot would you like to cancel: ");
+        int choice; 
+        while (true) { 
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input, only numbers are accepted.");
+                continue;
+            }
+            if (choice >= scheduledAppointments.size() || choice <= 0){
+                System.out.println("Invalid choice.");
+                continue;
+            }
+            Appointment chosenSlot = scheduledAppointments.get(choice);
+            chosenSlot.setPatient(null);
+            chosenSlot.setIsAvailable(true);
+            Database.appointmentMap.put(chosenSlot.getAppointmentID(), chosenSlot);
+            System.err.println("Successfully canceled appointment.");
+            break;
+        }
+    }
+
+    public static void handleRescheduleAppointment(Patient patient){
+        handleCancelAppointment(patient);
+        handleScheduleAppointment(patient);
+    }
+
 }

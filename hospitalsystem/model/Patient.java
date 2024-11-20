@@ -1,5 +1,4 @@
 package hospitalsystem.model;
-import hospitalsystem.appointmentcontrol.AppointmentControl;
 import hospitalsystem.enums.BloodType;
 import java.time.LocalDate;
 import java.util.List;

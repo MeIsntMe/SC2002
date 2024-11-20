@@ -19,6 +19,204 @@ import java.util.stream.Collectors;
  */
 public class DoctorAppointmentControl extends AppointmentControl {
 
+    public static void handleSetAvailability(Doctor doctor) {
+        System.out.println("\n=== Managing Doctor Availability ===");
+        System.out.println("1. Generate slots for next week");
+        System.out.println("2. Mark slot as unavailable");
+        System.out.println("3. Mark slot as available");
+        System.out.println("4. Return to main menu");
+
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            switch (choice) {
+                case 1:
+                    generateNextWeekSlots(doctor);
+                    break;
+                case 2:
+                    handleMarkSlotUnavailable(doctor);
+                    break;
+                case 3:
+                    handleMarkSlotAvailable(doctor);
+                    break;
+                case 4:
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
+    }
+
+    public static void handleMarkSlotUnavailable(Doctor doctor) {
+        List<Appointment> availableSlots = getAvailableSlots(doctor);
+        displayAvailableSlots(availableSlots);
+
+        if (availableSlots.isEmpty()) {
+            System.out.println("No available slots to mark as unavailable.");
+            return;
+        }
+
+        System.out.print("Enter slot number to mark as unavailable (0 to cancel): ");
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice == 0) return;
+            if (choice < 1 || choice > availableSlots.size()) {
+                System.out.println("Invalid slot number.");
+                return;
+            }
+
+            markSlotUnavailable(doctor, availableSlots.get(choice - 1));
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
+    }
+
+    public static void handleMarkSlotAvailable(Doctor doctor) {
+        List<Appointment> unavailableSlots = getUnavailableSlots(doctor);
+        displayUnavailableSlots(unavailableSlots);
+
+        if (unavailableSlots.isEmpty()) {
+            System.out.println("No unavailable slots to mark as available.");
+            return;
+        }
+
+        System.out.print("Enter slot number to mark as available (0 to cancel): ");
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice == 0) return;
+            if (choice < 1 || choice > unavailableSlots.size()) {
+                System.out.println("Invalid slot number.");
+                return;
+            }
+
+            markSlotAvailable(doctor, unavailableSlots.get(choice - 1));
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
+    }
+
+    public static void handleAppointmentRequests(Doctor doctor) {
+        List<Appointment> pendingAppointments = getPendingAppointments(doctor);
+
+        if (pendingAppointments.isEmpty()) {
+            System.out.println("No pending appointment requests.");
+            return;
+        }
+
+        displayPendingAppointments(pendingAppointments);
+
+        System.out.print("Enter appointment number to process (0 to cancel): ");
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice == 0) return;
+            if (choice < 1 || choice > pendingAppointments.size()) {
+                System.out.println("Invalid appointment number.");
+                return;
+            }
+
+            Appointment selectedAppointment = pendingAppointments.get(choice - 1);
+            System.out.print("Accept appointment? (y/n): ");
+            String response = scanner.nextLine().trim().toLowerCase();
+
+            if (response.startsWith("y")) {
+                acceptAppointment(doctor, selectedAppointment);
+            } else {
+                declineAppointment(doctor, selectedAppointment);
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
+    }
+
+    public static void handleRecordOutcome(Doctor doctor) {
+        List<Appointment> bookedAppointments = getBookedAppointments(doctor);
+
+        if (bookedAppointments.isEmpty()) {
+            System.out.println("No appointments to record outcomes for.");
+            return;
+        }
+
+        displayBookedAppointments(bookedAppointments);
+
+        System.out.print("Enter appointment number (0 to cancel): ");
+        try {
+            int choice = Integer.parseInt(scanner.nextLine());
+            if (choice == 0) return;
+            if (choice < 1 || choice > bookedAppointments.size()) {
+                System.out.println("Invalid appointment number.");
+                return;
+            }
+
+            Appointment selectedAppointment = bookedAppointments.get(choice - 1);
+
+            // Get consultation notes - Modified to handle multi-line input
+            System.out.println("Enter consultation notes (press Enter twice to finish):");
+            StringBuilder notes = new StringBuilder();
+            String line;
+            boolean firstLine = true;
+            while (!(line = scanner.nextLine()).isEmpty()) {
+                if (!firstLine) {
+                    notes.append(" ");  // Use space instead of newline
+                }
+                notes.append(line.trim());
+                firstLine = false;
+            }
+
+            // Get prescription
+            ArrayList<Prescription.MedicineSet> prescribedMedicineList = new ArrayList<>();
+
+            // Display available medicines first
+            System.out.println("\nAvailable Medicines:");
+            for (String medName : Database.inventoryMap.keySet()) {
+                System.out.println("- " + medName);
+            }
+
+            while (true) {
+                System.out.print("\nAdd prescription? (y/n): ");
+                if (!scanner.nextLine().toLowerCase().startsWith("y")) break;
+
+                System.out.print("Enter medication name: ");
+                String medicineName = scanner.nextLine().trim();
+
+                Medicine medicine = Database.inventoryMap.get(medicineName);
+                if (medicine == null) {
+                    System.out.println("Medicine not found in inventory. Please select from the available medicines list.");
+                    continue;
+                }
+
+                System.out.print("Enter quantity: ");
+                try {
+                    int quantity = Integer.parseInt(scanner.nextLine().trim());
+                    if (quantity <= 0) {
+                        System.out.println("Please enter a positive quantity.");
+                        continue;
+                    }
+                    prescribedMedicineList.add(new Prescription.MedicineSet(medicine, quantity));
+                    System.out.println("Medicine added to prescription.");
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid quantity. Please enter a number.");
+                }
+            }
+
+            Prescription prescription = null;
+            if (!prescribedMedicineList.isEmpty()) {
+                prescription = new Prescription(
+                        prescribedMedicineList,
+                        doctor.getID(),
+                        selectedAppointment.getPatient().getID(),
+                        PrescriptionStatus.PENDING
+                );
+            }
+
+            recordOutcome(selectedAppointment, notes.toString(), prescription);
+            System.out.println("Appointment outcome recorded successfully.");
+
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a valid number.");
+        }
+    }
+
     /**
      * Retrieves all available appointment slots for a specific doctor.
      *

@@ -1,8 +1,5 @@
 package hospitalsystem.menus;
 
-import java.util.InputMismatchException;
-import java.util.Scanner;
-
 import hospitalsystem.HMS;
 import hospitalsystem.appointmentcontrol.AdminAppointmentControl;
 import hospitalsystem.inventorycontrol.AdminInventoryControl;
@@ -20,20 +17,13 @@ import hospitalsystem.usercontrol.AdminUserControl;
  *
  */
 public class AdminMenu implements MenuInterface {
-    
-    // Instance variables 
-    private final Scanner sc;
-    private final Administrator admin;
 
     // Constructor
     public AdminMenu(User currentUser) { 
         if (!(currentUser instanceof Administrator)) {
             throw new IllegalArgumentException("User must be a Administrator ");
         }
-        this.admin = (Administrator) currentUser;
-        this.sc = new Scanner(System.in);
     }
-
 
     @Override
     public void displayMenu(){
@@ -50,7 +40,7 @@ public class AdminMenu implements MenuInterface {
                 int choice = Integer.parseInt(sc.nextLine());
                 switch (choice) {
                     case 1:
-                        AdminMenu.manageUserMenu(sc);
+                        AdminMenu.manageUserMenu();
                         break;
                     case 2: 
                         AdminAppointmentControl.viewAllAppointments(); 
@@ -59,7 +49,7 @@ public class AdminMenu implements MenuInterface {
                         AdminMenu.manageInventoryMenu();
                         break;
                     case 4:
-                        AdminInventoryControl.manageRequests(sc);
+                        AdminInventoryControl.manageRequests();
                         break;
                     case 5:
                         HMS.logout();
@@ -80,7 +70,7 @@ public class AdminMenu implements MenuInterface {
     // change Staff Control to User control and let admin crud patient 
 
     // MANAGE STAFF MENU
-    public static void manageUserMenu(Scanner sc) {
+    public static void manageUserMenu() {
         while (true) {            
             System.out.println("=========================================");
             System.out.println("Staff/Patient Management: ");
@@ -94,10 +84,10 @@ public class AdminMenu implements MenuInterface {
             try{
                 int choice = Integer.parseInt(sc.nextLine());
                 switch (choice) {
-                    case 1 -> AdminUserControl.addUser(sc);
-                    case 2 -> AdminUserControl.removeUser(sc);
-                    case 3 -> AdminUserControl.updateStaffDetails(sc);
-                    case 4 -> AdminUserControl.displayStaffList(sc);
+                    case 1 -> AdminUserControl.addUser();
+                    case 2 -> AdminUserControl.removeUser();
+                    case 3 -> AdminUserControl.updateStaffDetails();
+                    case 4 -> AdminUserControl.displayStaffList();
                     case 5 -> {return;}
                     default -> System.out.println("Invalid input! Please enter a number between 1-5 ");
                 }
@@ -113,7 +103,6 @@ public class AdminMenu implements MenuInterface {
 
     public static void manageInventoryMenu() {
         while (true) {
-            Scanner sc = new Scanner(System.in);
 
             System.out.println("=========================================");
             System.out.println("Inventory Management: ");
@@ -127,8 +116,8 @@ public class AdminMenu implements MenuInterface {
                 int choice = Integer.parseInt(sc.nextLine());
                 switch (choice) {
                     case 1 -> AdminInventoryControl.displayInventory();
-                    case 2 -> AdminInventoryControl.manageStock(sc);
-                    case 3 -> AdminInventoryControl.updateLowStockAlert(sc);
+                    case 2 -> AdminInventoryControl.manageStock();
+                    case 3 -> AdminInventoryControl.updateLowStockAlert();
                     case 4 -> {return; }
                     default -> System.out.println("Invalid input! Please enter a number between 1-7.");
                 }
