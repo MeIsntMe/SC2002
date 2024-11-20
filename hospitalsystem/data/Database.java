@@ -1,9 +1,6 @@
 package hospitalsystem.data;
 
-import hospitalsystem.enums.AppointmentStatus;
-import hospitalsystem.enums.BloodType;
-import hospitalsystem.enums.PrescriptionStatus;
-import hospitalsystem.enums.UserType;
+import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
 import hospitalsystem.model.Appointment.AppointmentSlot;
 import java.io.BufferedWriter;
@@ -69,6 +66,8 @@ public class Database {
     private static final String INVENTORY_CSV_HEADER = "Medicine Name,Initial Stock,Low Stock Level Alert,Batches Quantity,Batches Expiry Date";
     private static final String INVENTORY_CSV_PATH = "hospitalsystem/data/Medicine_List.csv";
 
+    private static final String REQUEST_CSV_HEADER = "RequestID,MedicineName,RequestedQuantity,Status";
+    private static final String REQUEST_CSV_PATH = "hospitalsystem/data/Replenishment_Requests.csv";
     // Public interface methods for loading data
     /**
      * Loads all data from CSV files into the system.
@@ -79,6 +78,7 @@ public class Database {
         loadPatientData();
         loadInventoryData();
         loadAppointmentData();
+        loadRequestsFromCSV();
     }
 
     /**
@@ -122,6 +122,7 @@ public class Database {
             savePatientData();
             saveStaffData();
             saveInventoryData();
+            saveRequestsToCSV();
             System.out.println("All data saved successfully!");
         } catch (Exception e) {
             System.out.println("Error saving data: " + e.getMessage());
@@ -298,18 +299,65 @@ public class Database {
         }
     }
 
-    private static List<Medicine.Batch> loadBatchesFromCSVData(Medicine medicine, String batchesQuantity, String batchesDates){
-        List<Medicine.Batch> batches = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        if (!batchesQuantity.equals("")){
-            int[] quantities = Arrays.stream(batchesQuantity.split("\\|")).mapToInt(Integer::parseInt).toArray();
-            LocalDate[] expiryDates = Arrays.stream(batchesDates.split("\\|")).map(dateStr -> LocalDate.parse(dateStr, formatter)).toArray(LocalDate[]::new);
-            int batchSize = quantities.length;
-            for (int i = 0; i < batchSize; i++) {
-                batches.add(medicine.new Batch(quantities[i], expiryDates[i]));
+    /**
+     * Loads replenishment request data from CSV into requestMap.
+     */
+    public static void loadRequestsFromCSV() {
+        requestMap.clear(); // Clear existing requests first
+
+        try (Scanner scanner = new Scanner(new File(REQUEST_CSV_PATH))) {
+            // Debug print
+            System.out.println("Loading requests from: " + REQUEST_CSV_PATH);
+
+            scanner.nextLine(); // Skip header
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] data = line.split(",");
+
+                // Debug print
+                System.out.println("Processing line: " + line);
+
+                try {
+                    int requestID = Integer.parseInt(data[0].trim());
+                    String medicineName = data[1].trim();
+                    int requestedQuantity = Integer.parseInt(data[2].trim());
+                    RequestStatus status = RequestStatus.valueOf(data[3].trim());
+
+                    // Get medicine from inventory
+                    Medicine medicine = inventoryMap.get(medicineName);
+                    if (medicine == null) {
+                        System.out.println("Warning: Medicine " + medicineName + " not found for request " + requestID);
+                        continue;
+                    }
+
+                    // Create and store request
+                    ReplenishmentRequest request = new ReplenishmentRequest(requestID, medicine, requestedQuantity);
+                    request.setStatus(status);
+                    requestMap.put(requestID, request);
+
+                    // Debug print
+                    //System.out.println("Added request: " + request);
+                } catch (Exception e) {
+                    System.out.println("Error processing request line: " + String.join(",", data));
+                    System.out.println("Error details: " + e.getMessage());
+                }
             }
+            System.out.println("Successfully loaded " + requestMap.size() + " replenishment requests");
+
+            // Debug print map contents
+            /*
+            if (!requestMap.isEmpty()) {
+                System.out.println("Current requests in map:");
+                requestMap.forEach((id, req) -> System.out.println(id + ": " + req));
+            }
+            */
+
+        } catch (FileNotFoundException e) {
+            System.out.println("Replenishment requests CSV file not found: " + REQUEST_CSV_PATH);
+        } catch (Exception e) {
+            System.out.println("Error loading replenishment requests: " + e.getMessage());
+            e.printStackTrace();
         }
-        return batches;
     }
 
     /**
@@ -583,36 +631,51 @@ public class Database {
         try (FileWriter fw = new FileWriter(INVENTORY_CSV_PATH);
              BufferedWriter bw = new BufferedWriter(fw)) {
 
-            bw.write("Medicine Name,Initial Stock,Low Stock Level Alert,Batches Quantity,Batches Expiry Date");
+            // Write header
+            bw.write(INVENTORY_CSV_HEADER);
             bw.newLine();
 
+            // Sort medicines by name and write data
             inventoryMap.values().stream()
                     .sorted(Comparator.comparing(Medicine::getMedicineName))
                     .forEach(medicine -> {
                         try {
+                            // Format batch quantities and dates
                             List<Medicine.Batch> batches = medicine.getBatches();
+
+                            // Handle quantities
                             String batchesQuantity = batches.stream()
                                     .map(batch -> String.valueOf(batch.getQuantity()))
                                     .collect(Collectors.joining("|"));
+
+                            // Handle expiry dates
                             String batchesDates = batches.stream()
                                     .map(batch -> batch.getExpirationDate().toString())
                                     .collect(Collectors.joining("|"));
 
+                            // Format the complete line
                             String line = String.format("%s,%d,%d,%s,%s",
                                     escapeCSV(medicine.getMedicineName()),
-                                    medicine.getTotalQuantity(),
-                                    medicine.getMinStockLevel(),
-                                    batchesQuantity,
-                                    batchesDates
+                                    medicine.getTotalQuantity(),       // Initial stock is total quantity
+                                    medicine.getMinStockLevel(),      // Low stock alert level
+                                    batchesQuantity,                  // Batch quantities joined by |
+                                    batchesDates                      // Batch dates joined by |
                             );
+
+                            // Write the line
                             bw.write(line);
                             bw.newLine();
+
                         } catch (IOException e) {
                             System.out.println("Error writing medicine " + medicine.getMedicineName() + ": " + e.getMessage());
                         }
                     });
+
+            System.out.println("Successfully saved " + inventoryMap.size() + " medicines to " + INVENTORY_CSV_PATH);
+
         } catch (IOException e) {
             System.out.println("Error saving inventory to CSV: " + e.getMessage());
+            throw new RuntimeException("Failed to save inventory data", e);
         }
     }
 
@@ -644,6 +707,43 @@ public class Database {
 
         } catch (IOException e) {
             System.out.println("Error saving appointments to CSV: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Saves replenishment request data to CSV file.
+     */
+    public static void saveRequestsToCSV() {
+        try (FileWriter fw = new FileWriter(REQUEST_CSV_PATH);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+
+            // Write header
+            bw.write(REQUEST_CSV_HEADER);
+            bw.newLine();
+
+            // Write requests sorted by ID
+            requestMap.values().stream()
+                    .sorted(Comparator.comparingInt(ReplenishmentRequest::getRequestID))
+                    .forEach(request -> {
+                        try {
+                            String line = String.format("%d,%s,%d,%s",
+                                    request.getRequestID(),
+                                    escapeCSV(request.getMedicine().getMedicineName()),
+                                    request.getRequestedQuantity(),
+                                    request.getStatus()
+                            );
+                            bw.write(line);
+                            bw.newLine();
+                        } catch (IOException e) {
+                            System.out.println("Error writing request " + request.getRequestID() + ": " + e.getMessage());
+                        }
+                    });
+
+            System.out.println("Successfully saved " + requestMap.size() + " replenishment requests to " + REQUEST_CSV_PATH);
+
+        } catch (IOException e) {
+            System.out.println("Error saving replenishment requests to CSV: " + e.getMessage());
+            throw new RuntimeException("Failed to save replenishment request data", e);
         }
     }
 

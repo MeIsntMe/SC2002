@@ -218,6 +218,7 @@ public class HMS {
                 Database.loadPatientData();
                 Database.loadInventoryData();
                 Database.loadAppointmentData();
+                Database.loadRequestsFromCSV();
                 break;
 
             case PHARMACIST:
@@ -225,6 +226,7 @@ public class HMS {
                 Database.loadPatientData();
                 Database.loadInventoryData();
                 Database.loadAppointmentData();
+                Database.loadRequestsFromCSV();
                 break;
 
             case PATIENT:

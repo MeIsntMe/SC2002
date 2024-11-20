@@ -1,0 +1,3 @@
+RequestID,MedicineName,RequestedQuantity,Status
+1,Amoxicillin,100,REJECTED
+2,Amoxicillin,1,APPROVED
