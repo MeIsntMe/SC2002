@@ -594,7 +594,7 @@ public class Database {
                                     escapeCSV(patient.getName()),
                                     patient.getDOB().toString(),
                                     escapeCSV(patient.getGender()),
-                                    patient.getBloodType().toString(),
+                                    patient.getBloodType().name(),
                                     escapeCSV(patient.getPhoneNumber()),
                                     escapeCSV(patient.getEmail()),
                                     escapeCSV(patient.getPassword())
