@@ -164,7 +164,7 @@ public class DoctorAppointmentControl extends AppointmentControl {
             }
 
             // Get prescription
-            ArrayList<Prescription.MedicineSet> prescribedMedicineList = new ArrayList<>();
+            ArrayList<Medicine.MedicineSet> prescribedMedicineList = new ArrayList<>();
 
             // Display available medicines first
             System.out.println("\nAvailable Medicines:");
@@ -192,7 +192,7 @@ public class DoctorAppointmentControl extends AppointmentControl {
                         System.out.println("Please enter a positive quantity.");
                         continue;
                     }
-                    prescribedMedicineList.add(new Prescription.MedicineSet(medicine, quantity));
+                    prescribedMedicineList.add(new Medicine.MedicineSet(medicine, quantity));
                     System.out.println("Medicine added to prescription.");
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid quantity. Please enter a number.");

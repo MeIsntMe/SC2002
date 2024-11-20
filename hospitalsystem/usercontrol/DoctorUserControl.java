@@ -3,8 +3,6 @@ package hospitalsystem.usercontrol;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.*;
 import hospitalsystem.model.*;
-import hospitalsystem.model.Prescription.MedicineSet;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
