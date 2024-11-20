@@ -25,8 +25,9 @@ public class PatientAppointmentControl extends AppointmentControl{
      * @return a list of active appointments sorted by date and time
      */
     public static List<Appointment> getScheduledSlots(Patient patient) {
+        String patientID = patient.getID();
         return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getPatient().getID().equals(patient.getID()))
+                .filter(appointment -> (appointment.getPatient() != null? appointment.getPatient().getID().equals(patientID):false))
                 .filter(apt -> !apt.getIsAvailable() && apt.getStatus() != AppointmentStatus.COMPLETED)
                 .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
                 .toList();

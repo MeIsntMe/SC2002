@@ -252,11 +252,11 @@ public class Appointment implements Comparable<Appointment> {
 
         @Override
         public String toString() {
-            return "Appointment Outcome:\n" +
-                "  - Prescription: " + (prescription != null ? "\n    " + prescription.toString().replace("\n", "\n    ") : "No prescription") + "\n" +
-                "  - Service Type: " + serviceType + "\n" +
-                "  - Recorded Date: " + recordedDate + "\n" +
-                "  - Consultation Notes: " + consultationNotes + "\n";
+            return " Appointment "+appointment.getAppointmentID()+"'s Outcome:\n" +
+                "   - Prescription: " + (prescription != null ? "\n    " + prescription.toString().replace("\n", "\n    ") : "No prescription") + "\n" +
+                "   - Service Type: " + ((!serviceType.equals("")) ? "\n    " + serviceType : "NIL") + "\n" +
+                "   - Recorded Date: " + ((!recordedDate.equals("")) ? "\n    " + recordedDate : "NIL") + "\n" +
+                "   - Consultation Notes: " + ((!consultationNotes.equals("")) ? "\n    " + consultationNotes : "NIL") + "\n";
         }
     }
 }

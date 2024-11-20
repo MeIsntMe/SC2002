@@ -150,4 +150,38 @@ public class Medicine {
             return expirationDate.isBefore(LocalDate.now().plusWeeks(2));
         }
     }
+
+    /**
+     * Represents a set of prescribed medicine and its quantity.
+     */
+    public static class MedicineSet {
+        /**
+         * The prescribed medicine.
+         */
+        final private Medicine medicine;
+
+        /**
+         * The quantity of the prescribed medicine.
+         */
+        final private int quantity;
+
+        /**
+         * Constructs a MedicineSet object with the given medicine and quantity.
+         *
+         * @param medicine The prescribed medicine.
+         * @param quantity The quantity of the prescribed medicine.
+         */
+        public MedicineSet(Medicine medicine, int quantity){
+            this.medicine = medicine;
+            this.quantity = quantity;
+        }
+
+        public Medicine getMedicine() {
+            return medicine;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+    }
 }

@@ -1,8 +1,7 @@
 package hospitalsystem.usercontrol;
-import hospitalsystem.model.*;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.PrescriptionStatus;
-
+import hospitalsystem.model.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

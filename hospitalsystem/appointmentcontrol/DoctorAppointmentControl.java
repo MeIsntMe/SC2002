@@ -558,8 +558,8 @@ public class DoctorAppointmentControl extends AppointmentControl {
      * @param quantity the quantity of medicine to be prescribed
      * @return a new MedicineSet object containing the medicine and quantity
      */
-    public static Prescription.MedicineSet createMedicineSet(Medicine medicine, int quantity) {
-        return new Prescription.MedicineSet(medicine, quantity);
+    public static Medicine.MedicineSet createMedicineSet(Medicine medicine, int quantity) {
+        return new Medicine.MedicineSet(medicine, quantity);
     }
 
     /**

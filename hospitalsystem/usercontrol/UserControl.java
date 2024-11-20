@@ -33,7 +33,7 @@ public class UserControl{
         sb.append("\n  Phone Number: ").append(mr.getPhoneNumber());
         sb.append("\n  Email Address: ").append(mr.getEmail());
         sb.append("\n  Blood Type: ").append(mr.getBloodType());   
-        sb.append("\n}").append(AppointmentControl.getAppointmentOutcomesString(patient, "  "));
+        sb.append("\n").append(AppointmentControl.getAppointmentOutcomesString(patient, "  "));
 
         return sb.toString();
     }

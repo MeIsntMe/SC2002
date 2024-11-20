@@ -139,7 +139,7 @@ public class DoctorUserControl extends UserControl {
         }
 
         // Get prescriptions
-        List<MedicineSet> prescribedMedicineList = new ArrayList<>();
+        List<Medicine.MedicineSet> prescribedMedicineList = new ArrayList<>();
         while (true) {
             System.out.print("Add prescription? (y/n): ");
             if (!sc.nextLine().toLowerCase().startsWith("y")) break;
@@ -157,7 +157,7 @@ public class DoctorUserControl extends UserControl {
                 continue;
             }
 
-            prescribedMedicineList.add(new MedicineSet(medicine, quantity));
+            prescribedMedicineList.add(new Medicine.MedicineSet(medicine, quantity));
         }
 
         // Create new prescription
