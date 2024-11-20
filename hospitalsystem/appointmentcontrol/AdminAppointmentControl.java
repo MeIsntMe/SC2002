@@ -20,6 +20,9 @@ public class AdminAppointmentControl extends AppointmentControl{
      */
     public static void viewAllAppointments(){
         for (Appointment appointment : Database.appointmentMap.values()) {
+            if (appointment.getPatient() == null){
+                continue;
+            }
             System.out.println(appointment);
             if (appointment.getStatus() == AppointmentStatus.COMPLETED) {
                 System.out.println(appointment.getAppointmentOutcome());
