@@ -85,9 +85,9 @@ public class HMS {
         // Get login details 
         UserType role = AdminUserControl.getRoleInput();
         System.out.print("Enter user ID: ");
-        String inputID = sc.nextLine();
+        String inputID = sc.nextLine().trim();
         System.out.print("Enter password: ");
-        String inputPassword = sc.nextLine();
+        String inputPassword = sc.nextLine().trim();
 
         // Retrieve user from database by ID 
         User user = null;

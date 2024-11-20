@@ -1,4 +1,5 @@
 package hospitalsystem.usercontrol;
+import hospitalsystem.appointmentcontrol.PharmacistAppointmentControl;
 import hospitalsystem.data.Database;
 import hospitalsystem.enums.PrescriptionStatus;
 import hospitalsystem.model.*;
@@ -37,6 +38,8 @@ public class PharmacistUserControl extends UserControl{
      *
      */
     public static void viewAppointmentOutcomeRecord() {
+        PharmacistAppointmentControl.viewCompletedAppointments();
+        
         System.out.print("Enter Appointment ID to view prescription details: ");
         String appointmentID = sc.nextLine();
 

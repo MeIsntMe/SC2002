@@ -218,62 +218,6 @@ public class DoctorAppointmentControl extends AppointmentControl {
     }
 
     /**
-     * Retrieves all available appointment slots for a specific doctor.
-     *
-     * @param doctor the doctor whose available slots are to be retrieved
-     * @return a sorted list of available appointments for the specified doctor
-     */
-    public static List<Appointment> getAvailableSlots(Doctor doctor) {
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .filter(Appointment::getIsAvailable)
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-    }
-
-    /**
-     * Retrieves all unavailable appointment slots for a specific doctor.
-     *
-     * @param doctor the doctor whose unavailable slots are to be retrieved
-     * @return a sorted list of unavailable appointments for the specified doctor
-     */
-    public static List<Appointment> getUnavailableSlots(Doctor doctor) {
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .filter(apt -> !apt.getIsAvailable() && apt.getStatus() == AppointmentStatus.UNAVAILABLE)
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-    }
-
-    /**
-     * Retrieves all pending appointments for a specific doctor.
-     *
-     * @param doctor the doctor whose pending appointments are to be retrieved
-     * @return a sorted list of pending appointments for the specified doctor
-     */
-    public static List<Appointment> getPendingAppointments(Doctor doctor) {
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .filter(apt -> apt.getStatus() == AppointmentStatus.PENDING && !apt.getIsAvailable())
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-    }
-
-    /**
-     * Retrieves all booked appointments for a specific doctor.
-     *
-     * @param doctor the doctor whose booked appointments are to be retrieved
-     * @return a sorted list of booked appointments for the specified doctor
-     */
-    public static List<Appointment> getBookedAppointments(Doctor doctor) {
-        return Database.appointmentMap.values().stream()
-                .filter(apt -> apt.getDoctor().getID().equals(doctor.getID()))
-                .filter(apt -> apt.getStatus() == AppointmentStatus.BOOKED)
-                .sorted((a1, a2) -> a1.getSlot().getDateTime().compareTo(a2.getSlot().getDateTime()))
-                .toList();
-    }
-
-    /**
      * Retrieves all upcoming appointments for a specific doctor from the current date/time.
      *
      * @param doctor the doctor whose upcoming appointments are to be retrieved

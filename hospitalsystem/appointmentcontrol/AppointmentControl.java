@@ -116,7 +116,7 @@ public class AppointmentControl {
     /**
      * Retrieves completed appointments for a specific doctor.
      *
-     * @return a sorted list of booked appointments
+     * @return a sorted list of completed appointments
      */
     public static List<Appointment> getCompletedAppointments() {
         return Database.appointmentMap.values().stream()

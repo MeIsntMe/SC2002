@@ -1,5 +1,7 @@
 package hospitalsystem.appointmentcontrol;
 
+import java.util.List;
+
 import hospitalsystem.HMS;
 import hospitalsystem.data.*;
 import hospitalsystem.enums.*;
@@ -13,30 +15,20 @@ import hospitalsystem.model.*;
  * @version 1.0
  * @since 2024-11-19
  */
+
 public class PharmacistAppointmentControl extends AppointmentControl{
-
-    /**
-     * Displays all appointments that have pending prescriptions.
-     * Prints appointment details and outcomes for prescriptions that need to be dispensed.
-     */
-    public static void viewAppointmentsWithPendingPrescription(){
-        
-        boolean foundPendingPrescriptions = false; 
-        System.out.println("Searching for appointments with pending prescriptions...");
-
-        for (Appointment appointment : Database.appointmentMap.values()) {
-            
-            // Display appointments with pending prescriptions 
-            if (appointment.getPrescription().getStatus() == PrescriptionStatus.PENDING){
-                foundPendingPrescriptions = true;
-                System.out.println("-------------------------------------------------");
-                System.out.println(appointment);
-                System.out.println(appointment.getAppointmentOutcome());
+    
+    public static void viewCompletedAppointments(){
+        List<Appointment> completedAppointmentList = AppointmentControl.getCompletedAppointments();
+        for (Appointment appointment : completedAppointmentList) {
+            if (appointment.getPatient() == null){
+                continue;
             }
+            System.out.println(appointment);
+            System.out.println(appointment.getAppointmentOutcome());
         }
-        if (!foundPendingPrescriptions) 
-            System.out.println("No appointments with pending prescriptions found.");
     }
+
 
     public static void updatePrescriptionStatus(){
         while (true) {
